@@ -1,0 +1,22 @@
+import { createHmac, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getClubData, saveClubData, savePhoto } from "../../lib/club-data";
+
+const cookieName = "kpkmm-admin";
+function same(a: string, b: string) { const x = Buffer.from(a); const y = Buffer.from(b); return x.length === y.length && timingSafeEqual(x, y); }
+function signature(value: string) { return createHmac("sha256", process.env.ADMIN_SESSION_SECRET || "missing").update(value).digest("hex"); }
+async function signedIn() { const raw = (await cookies()).get(cookieName)?.value; if (!raw || !process.env.ADMIN_SESSION_SECRET) return false; const [value, sig] = raw.split("."); return !!value && !!sig && Number(value) > Date.now() && same(sig, signature(value)); }
+
+export default async function AdminPage() {
+  const ok = await signedIn();
+  async function login(formData: FormData) { "use server"; const password = String(formData.get("password") || ""); if (!process.env.ADMIN_PASSWORD || !same(password, process.env.ADMIN_PASSWORD)) redirect("/admin?error=1"); const expiry = String(Date.now() + 43200000); (await cookies()).set(cookieName, expiry + "." + signature(expiry), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 43200 }); redirect("/admin"); }
+  async function logout() { "use server"; (await cookies()).delete(cookieName); redirect("/admin"); }
+  async function event(formData: FormData) { "use server"; if (!(await signedIn())) redirect("/admin"); const title = String(formData.get("title") || "").trim(); const date = String(formData.get("date") || "").trim(); const details = String(formData.get("details") || "").trim(); if (!title || !date || !details) return; const data = await getClubData(); data.events.unshift({ id: crypto.randomUUID(), title, date, details }); await saveClubData(data); revalidatePath("/"); revalidatePath("/admin"); }
+  async function notice(formData: FormData) { "use server"; if (!(await signedIn())) redirect("/admin"); const title = String(formData.get("title") || "").trim(); const date = String(formData.get("date") || "").trim(); const details = String(formData.get("details") || "").trim(); if (!title || !date || !details) return; const data = await getClubData(); data.notices.unshift({ id: crypto.randomUUID(), title, date, details }); await saveClubData(data); revalidatePath("/"); revalidatePath("/admin"); }
+  async function photo(formData: FormData) { "use server"; if (!(await signedIn())) redirect("/admin"); const file = formData.get("photo"); const caption = String(formData.get("caption") || "KPKMM shared moment"); if (!(file instanceof File) || !file.type.startsWith("image/") || file.size > 4 * 1024 * 1024) return; const stored = await savePhoto(file); const data = await getClubData(); data.moments.unshift({ id: crypto.randomUUID(), url: stored.url, caption }); await saveClubData(data); revalidatePath("/"); revalidatePath("/admin"); }
+  if (!ok) return <main style={{ padding: 40 }}><a href="/">← KPKMM website</a><h1>KPKMM club admin</h1><p>Sign in to manage the archive, notice board and photo gallery.</p><form action={login}><input name="password" type="password" placeholder="Admin password" required /><button>Sign in</button></form><p><small>Before first use, create ADMIN_PASSWORD and ADMIN_SESSION_SECRET in Vercel Environment Variables.</small></p></main>;
+  const data = await getClubData();
+  return <main style={{ padding: 40 }}><a href="/">← View KPKMM website</a><h1>KPKMM club admin</h1><form action={logout}><button>Sign out</button></form><hr/><section><h2>Add an outing</h2><form action={event}><input name="date" placeholder="Date, e.g. 17 MAY 2026" required /><input name="title" placeholder="Outing title" required /><textarea name="details" placeholder="Story" required /><button>Publish outing</button></form></section><section><h2>Post a notice</h2><form action={notice}><input name="date" placeholder="Date label" required /><input name="title" placeholder="Notice heading" required /><textarea name="details" placeholder="Message" required /><button>Post notice</button></form></section><section><h2>Upload a shared moment</h2><form action={photo}><input name="caption" placeholder="Photo caption" /><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /><button>Upload photo</button></form></section><hr/><p>{data.events.length} outings · {data.notices.length} notices · {data.moments.length} photos</p></main>;
+}
