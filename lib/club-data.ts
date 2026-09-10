@@ -21,6 +21,7 @@ export async function getClubData(strict = false): Promise<ClubData> {
     if (!response.ok) throw new Error("Club data read failed");
     const saved = await response.json() as ClubData;
     if (!Array.isArray(saved.events) || !Array.isArray(saved.notices) || !Array.isArray(saved.moments)) throw new Error("Invalid club data");
+    saved.moments = saved.moments.map(photo => photo.albumId ? photo : { ...photo, albumId: photo.eventId ? "legacy-" + encodeURIComponent(photo.eventId + ":" + photo.caption) : photo.id });
     return saved;
   } catch (error) { if (strict) throw error; return structuredClone(fallbackData); }
 }
