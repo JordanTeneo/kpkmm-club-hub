@@ -28,3 +28,5 @@ Open `http://localhost:3000`.
 3. Keep the default Next.js settings and click **Deploy**.
 
 Vercel will build the site automatically. For the next iteration, connect Vercel Blob (for photo uploads) and a database/auth provider (for event and notice administration).
+
+Deployment trigger: connected to Vercel.
