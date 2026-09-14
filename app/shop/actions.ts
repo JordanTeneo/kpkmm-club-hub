@@ -27,7 +27,7 @@ export async function placeOrder(_: Result, form: FormData): Promise<Result> {
       if (existing.length) { if(existing[0].token_hash!==digest(token)) throw new Error('Please refresh the form.'); return; }
       const rows=await sql`SELECT * FROM shop_products WHERE id=${product} FOR UPDATE`;
       const p=rows[0];
-      if(!p || !p.active || p.stock<quantity) throw new Error('Not enough stock. Refresh the shop. / Stok tidak mencukupi. Muat semula kedai.');
+      if(!p || p.deleted || !p.active || p.stock<quantity) throw new Error('Not enough stock. Refresh the shop. / Stok tidak mencukupi. Muat semula kedai.');
       if(p.price!==price) throw new Error('The price changed. Refresh before ordering. / Harga telah berubah. Muat semula sebelum menempah.');
       await sql`UPDATE shop_products SET stock=stock-${quantity},updated_at=now() WHERE id=${product}`;
       await sql`INSERT INTO shop_orders (id,token_hash,product_id,product_name,quantity,unit_price,customer_name,phone) VALUES (${id},${digest(token)},${product},${p.name},${quantity},${p.price},${name},${phone})`;
@@ -70,12 +70,31 @@ export async function saveProduct(_: Result, form: FormData): Promise<Result> {
     await db().begin(async sql => {
       const rows=await sql`SELECT * FROM shop_products WHERE id=${id} FOR UPDATE`;
       if(rows.length) {
+        if(rows[0].deleted) throw new Error('Restore this product before editing. / Pulihkan produk sebelum mengedit.');
         if(rows[0].updated_at.toISOString()!==text(form,'version')) throw new Error('Stock or product changed. Refresh before saving. / Stok atau produk telah berubah. Muat semula sebelum menyimpan.');
         await sql`UPDATE shop_products SET name=${name},name_ms=${nameMs},description=${description},description_ms=${descriptionMs},price=${price},stock=${stock},active=${active},image=${image||rows[0].image},updated_at=now() WHERE id=${id}`;
       } else await sql`INSERT INTO shop_products(id,name,name_ms,description,description_ms,price,stock,active,image) VALUES(${id},${name},${nameMs},${description},${descriptionMs},${price},${stock},${active},${image})`;
     });
     refresh(); return {success:'Product saved. / Produk disimpan.'};
   } catch(e) { return failure(e); }
+}
+export async function setProductDeleted(_: Result, form: FormData): Promise<Result> {
+  try {
+    if(!(await isAdmin())) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
+    await shopReady();
+    const id=text(form,'id'), operation=text(form,'operation');
+    if(!uuid(id)||!['delete','restore'].includes(operation)) throw new Error('Invalid product. / Produk tidak sah.');
+    const deleted=operation==='delete';
+    await db().begin(async sql => {
+      const [product]=await sql`SELECT deleted,updated_at FROM shop_products WHERE id=${id} FOR UPDATE`;
+      if(!product) throw new Error('Product not found. / Produk tidak ditemui.');
+      if(product.deleted===deleted) return;
+      if(product.updated_at.toISOString()!==text(form,'version')) throw new Error('Product or stock changed. Refresh before trying again. / Produk atau stok berubah. Muat semula dan cuba lagi.');
+      await sql`UPDATE shop_products SET deleted=${deleted},active=false,updated_at=now() WHERE id=${id}`;
+    });
+    refresh();
+    return {success:deleted?'Product deleted. Existing orders are preserved. / Produk dipadam. Tempahan sedia ada dikekalkan.':'Product restored as hidden. Edit it to publish. / Produk dipulihkan sebagai tersembunyi. Edit untuk menerbitkan.'};
+  } catch(e) {return failure(e);}
 }
 export async function updateOrder(_: Result, form: FormData): Promise<Result> {
   try {
