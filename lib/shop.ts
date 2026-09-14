@@ -15,6 +15,7 @@ export async function shopReady() {
     await sql`CREATE TABLE IF NOT EXISTS shop_products (id uuid PRIMARY KEY, name text NOT NULL, name_ms text NOT NULL DEFAULT '', description text NOT NULL DEFAULT '', description_ms text NOT NULL DEFAULT '', price integer NOT NULL CHECK(price > 0), stock integer NOT NULL CHECK(stock >= 0), active boolean NOT NULL DEFAULT false, image text NOT NULL DEFAULT '', updated_at timestamptz NOT NULL DEFAULT now())`;
     await sql`CREATE TABLE IF NOT EXISTS shop_orders (id uuid PRIMARY KEY, token_hash text NOT NULL, product_id uuid NOT NULL REFERENCES shop_products(id), product_name text NOT NULL, quantity integer NOT NULL CHECK(quantity > 0), unit_price integer NOT NULL CHECK(unit_price > 0), customer_name text NOT NULL, phone text NOT NULL, status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','review','paid','cancelled')), receipt bytea, receipt_type text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now())`;
     await sql`CREATE TABLE IF NOT EXISTS shop_limits (key text PRIMARY KEY, count integer NOT NULL, expires_at timestamptz NOT NULL)`;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false`;
   })().catch(e => { ready = undefined; throw e; });
   await ready;
 }
