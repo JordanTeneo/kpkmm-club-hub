@@ -2,6 +2,8 @@ import { getLanguage } from "./language";
 import Image from "next/image";
 import { MomentGallery } from "./album-ui";
 import { getClubData } from "../lib/club-data";
+import { db } from "../lib/shop";
+import { videosReady, type ClubVideo } from "../lib/videos";
 
 const facebook = "https://www.facebook.com/people/Mini-Malaysia-KPKMM/100066226611735/";
 const logo = "/KPKMM-logo-white-band.png";
@@ -13,6 +15,11 @@ export default async function Home() {
   const lang = await getLanguage();
   const t = (en: string, ms: string) => lang === "ms" ? ms : en;
   const data = await getClubData();
+  let videos: ClubVideo[] = [];
+  try {
+    await videosReady();
+    videos = await db()<ClubVideo[]>`SELECT * FROM club_videos WHERE deleted=false ORDER BY updated_at DESC`;
+  } catch { /* Keep the rest of the home page available if video storage is unavailable. */ }
   const gallery = data.moments.length ? data.moments : fallbackPhotos.map((url, index) => ({ id: "sample-" + index, url, caption: ["Fire & wheel", "Club gathering", "On the road"][index] }));
   return <main>
     <nav className="nav"><a className="brand" href="#top"><Image src={logo} alt="KPKMM club logo" width={42} height={42} unoptimized />Kelab Peminat Kereta Mini Malaysia - KPKMM</a><div className="links"><a href="#notices">{t("Notices","Notis")}</a><a href="#events">{t("Archive","Arkib")}</a><a href="#gallery">{t("Gallery","Galeri")}</a><a href="/admin">{t("Admin","Pentadbir")}</a></div><a className="join-small" href={facebook} target="_blank" rel="noreferrer">Facebook ↗</a></nav>
@@ -21,6 +28,7 @@ export default async function Home() {
     <section className="intro"><p className="eyebrow">{t("ONE CLUB, MANY STORIES","SATU KELAB, PELBAGAI KISAH")}</p><h2>{t("A welcoming home for people who believe the best memories begin with a turn of the key.","Tempat untuk semua yang percaya bahawa kenangan terindah bermula dengan satu perjalanan.")}</h2><a href="#gallery" className="arrow-link">{t("See shared moments","Lihat kenangan bersama")} <b>→</b></a></section>
     <section className="events" id="events"><div className="section-heading"><div><p className="eyebrow">{t("ON THE ROAD","DALAM PERJALANAN")}</p><h2>{t("Club archive","Arkib kelab")}</h2></div></div>{data.events.map((event) => { const linkedPhotos = data.moments.filter((moment) => moment.eventId === event.id); return <article className="featured-event" key={event.id}><div className="event-date"><span>{event.date.split(" ")[0]}</span><small>{event.date.split(" ").slice(1).join(" ")}</small></div><div><p className="event-type">{t("CLUB OUTING","AKTIVITI KELAB")}</p><h3>{event.title}</h3><p>{event.details}</p>{linkedPhotos.length > 0 && <p><strong>{linkedPhotos.length} {t(linkedPhotos.length === 1 ? "photo linked to this outing" : "photos linked to this outing", "foto dikaitkan dengan aktiviti ini")}</strong></p>}</div><a href="#gallery" className="round-arrow" aria-label={t("See outing photographs", "Lihat foto aktiviti")}>→</a></article>; })}{data.events.length === 0 && <p>{t("No club archives have been added yet.","Belum ada arkib kelab ditambahkan.")}</p>}<div className="event-strip"><span>{t("More routes. More stories. More friends.","Lebih banyak destinasi. Lebih banyak kisah. Lebih ramai sahabat.")}</span><span>{t("More routes. More stories. More friends.","Lebih banyak destinasi. Lebih banyak kisah. Lebih ramai sahabat.")}</span></div></section>
     <section className="gallery-section" id="gallery"><div className="section-heading"><div><p className="eyebrow">{t("SHARED MOMENTS","KENANGAN BERSAMA")}</p><h2>{t("Outings, captured","Kenangan perjalanan")}</h2></div></div><MomentGallery photos={gallery} events={data.events} lang={lang} /></section>
+    {videos.length > 0 && <section className="gallery-section" id="videos"><div className="section-heading"><div><p className="eyebrow">KPKMM · YOUTUBE</p><h2>{t("Club videos", "Video kelab")}</h2></div></div><div style={{display:"grid",gap:32}}>{videos.map(video => <article key={video.id} style={{minWidth:0}}><h3>{video.title}</h3><iframe src={"https://www.youtube-nocookie.com/embed/" + video.youtube_id} title={video.title} loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{display:"block",width:"100%",aspectRatio:"16 / 9",height:"auto",border:0,borderRadius:16}} /><p style={{whiteSpace:"pre-wrap"}}>{video.description}</p><a className="arrow-link" href={"https://www.youtube.com/watch?v=" + video.youtube_id} target="_blank" rel="noopener noreferrer">{t("Watch on YouTube ↗", "Tonton di YouTube ↗")}</a></article>)}</div></section>}
     <section className="join"><p className="eyebrow">{t("YOUR SEAT IS WAITING","TEMPAT ANDA MENANTI")}</p><h2>{t("Come drive with us.","Jom memandu bersama.")}</h2><p>{t("Interested in joining KPKMM or partnering on an event? Get in touch and be part of the journey.","Berminat untuk menyertai KPKMM atau bekerjasama dalam aktiviti kelab? Hubungi kami dan sertai perjalanan ini.")}</p><p><a className="button" href="mailto:kelabpeminatkeretaminimalaysia@gmail.com">{t("Email us","E-mel kami")} <b>→</b></a> <a className="text-link" href="tel:+60182262000">{t("Call 018-226 2000","Hubungi 018-226 2000")}</a></p></section>
     <footer><a className="brand" href="#top"><Image src={logo} alt="KPKMM club logo" width={42} height={42} unoptimized />Kelab Peminat Kereta Mini Malaysia - KPKMM</a><p>Kelab Peminat Kereta Mini Malaysia</p><a href="/admin">{t("Admin portal →","Portal pentadbir →")}</a></footer>
   </main>;
