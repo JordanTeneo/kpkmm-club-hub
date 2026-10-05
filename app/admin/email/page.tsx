@@ -26,8 +26,19 @@ export default async function EmailSettings({searchParams}:{searchParams:Promise
  else if(!process.env.DATABASE_URL&&!process.env.POSTGRES_URL){storageError='The database connection setting is missing in Production. / Tetapan sambungan pangkalan data tiada dalam Production.';}
  else try{const saved=await connection();if(saved)linked={email:String(saved.email),connected_at:new Date(saved.connected_at)};}catch{storageError='The database could not prepare secure Gmail storage. Check the Neon connection and database permissions. / Pangkalan data tidak dapat menyediakan storan Gmail. Semak sambungan Neon dan kebenaran pangkalan data.';}
  const messages:Record<string,string>={connected:'Gmail connected. / Gmail disambungkan.',settings:'Google credentials are missing. Check Production environment variables.',denied:'Google permission was not granted. Nothing was connected.',expired:'The connection attempt expired or the admin session changed. Please try again.',account:'Please select the club Gmail account and allow the requested email permissions.',failed:'Could not complete the connection. Check Google credentials and the exact redirect URI, then try again.'};
+ Object.assign(messages,{
+  'token-exchange':'Google could not exchange the authorisation code. Check the client credentials and redirect URI. / Google tidak dapat menukar kod kebenaran. Semak kelayakan klien dan URI ubah hala.',
+  'access-missing':'Google did not return an access token. / Google tidak memulangkan token akses.',
+  'refresh-missing':'Google did not grant a lasting connection (refresh token missing). / Google tidak memberikan sambungan berterusan (token pembaharuan tiada).',
+  'scope-unreported':'Google did not report the granted permissions, so the connection was not saved. / Google tidak melaporkan kebenaran yang diberikan, jadi sambungan tidak disimpan.',
+  'send-permission':'The permission to send Gmail was not granted. / Kebenaran menghantar Gmail tidak diberikan.',
+  'identity-check':'Google could not confirm the account identity. / Google tidak dapat mengesahkan identiti akaun.',
+  'wrong-account':'The authorised account does not match the club email shown below. / Akaun yang dibenarkan tidak sepadan dengan e-mel kelab di bawah.',
+  'email-unverified':'Google did not confirm that the email address is verified. / Google tidak mengesahkan alamat e-mel ini.',
+  storage:'Google authorisation passed, but the connection could not be saved securely. / Kebenaran Google berjaya, tetapi sambungan tidak dapat disimpan dengan selamat.'
+ });
  return <main className="shop" style={{maxWidth:800}}><a href="/admin/members">← Membership admin / Pentadbiran keahlian</a><h1>Club email / E-mel kelab</h1>
- {result&&messages[result]&&<p className="shop-note" role="status">{messages[result]}</p>}
+ {result&&messages[result]&&<p className="shop-note" role="status">{messages[result]}{result!=='connected'&&<> <small>Reference / Rujukan: {result}</small></>}</p>}
  <section className="shop-card"><h2>{linked?'Connected / Disambungkan':'Connect Gmail / Sambungkan Gmail'}</h2><p>{CLUB_EMAIL}</p><p>Google settings / Tetapan Google: {configured?'Present / Tersedia':'Missing / Tiada'}</p>{linked&&<p>Authorised on / Dibenarkan pada: {new Date(linked.connected_at).toLocaleDateString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}. This confirms authorisation, not email delivery. / Ini mengesahkan kebenaran, bukan penghantaran e-mel.</p>}
  <p>The website requests permission to send email and confirm your email address. It does not request access to read or delete your inbox. Select only the club account when Google asks.</p><p>Laman web meminta kebenaran menghantar e-mel dan mengesahkan alamat e-mel anda. Ia tidak meminta akses membaca atau memadam peti masuk. Pilih akaun kelab sahaja.</p>
  {storageError&&<p className="shop-error" role="alert">{storageError}</p>}<form action={connect}><button disabled={!configured||!!storageError}>{linked?'Reconnect Gmail / Sambung semula Gmail':'Connect club Gmail / Sambung Gmail kelab'}</button></form></section>
