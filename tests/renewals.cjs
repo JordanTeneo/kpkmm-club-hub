@@ -1,0 +1,35 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
+const crypto=require('node:crypto');
+const env={GMAIL_ENCRYPTION_KEY:'test-only-renewal-secret-not-for-production-123456'};
+function load(path,mocks={},extra={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),process:{env},Buffer,URLSearchParams,AbortSignal,FormData,File,Intl,...extra});return exports;}
+const uuid=v=>/^[0-9a-f-]{36}$/.test(v);
+let tokenFails=false,fetchMode='accepted',sends=0,claimed=false;
+const id=crypto.randomUUID();
+let renewal;
+const details={name:'Test Member',email:'member@example.invalid',phone:'+60123456789',identityType:'passport',identity:'TEST12345',country:'Test Country',address:'Test address only',year:2026};
+const sql=async(parts,...values)=>{const q=parts.join('?');if(q.includes('SELECT token'))return [{token:'encrypted-token'}];if(q.includes("SET mail_status='sending'")){if(claimed)return [];claimed=true;return [{payload:renewal.sealRenewal(JSON.stringify(details)),proof:renewal.sealRenewal('cHJvb2Y='),proof_type:'image/png'}];}return [];};
+renewal=load('lib/renewals.ts',{'./shop':{db:()=>sql,uuid},'./gmail':{CLUB_EMAIL:'kelabpeminatkeretaminimalaysia@gmail.com',gmailReady:async()=>{},decryptToken:()=> 'fake-refresh',tokenRequest:async()=>{if(tokenFails)throw Error('offline');return {access_token:'fake-access'};}}},{fetch:async()=>{sends++;if(fetchMode==='timeout')throw Error('timeout');return {ok:fetchMode==='accepted',status:fetchMode==='500'?500:403,json:async()=>({id:'fake-gmail-id'})};}});
+(async()=>{
+ const sealed=renewal.sealRenewal('private-proof');assert.equal(renewal.openRenewal(sealed),'private-proof');assert.notEqual(renewal.sealRenewal('private-proof'),sealed);
+ const parts=sealed.split('.'),bytes=Buffer.from(parts[2],'base64');bytes[0]^=1;parts[2]=bytes.toString('base64');assert.throws(()=>renewal.openRenewal(parts.join('.')));
+ assert.equal(renewal.renewalHash('x'),renewal.renewalHash('x'));assert.notEqual(renewal.renewalHash('x'),renewal.renewalHash('y'));
+ const raw=renewal.clubMessage(id,'Test 中文\nBcc: attacker@example.invalid',{bytes:Buffer.from('proof'),type:'image/png'}),mime=Buffer.from(raw,'base64url').toString();
+ assert.match(mime,/To: kelabpeminatkeretaminimalaysia@gmail.com/);assert.ok(!mime.includes('\r\nBcc:'));assert.match(mime,/filename="payment-proof.png"/);assert.ok(mime.includes(Buffer.from('proof').toString('base64')));
+ assert.throws(()=>renewal.clubMessage('bad\r\nBcc:x','x',{bytes:Buffer.from('x'),type:'image/png'}));assert.throws(()=>renewal.clubMessage(id,'x',{bytes:Buffer.from('x'),type:'text/html'}));assert.throws(()=>renewal.clubMessage(id,'x',{bytes:Buffer.alloc(701*1024),type:'image/png'}));
+ assert.equal((await renewal.sendClubMessage(raw)).state,'accepted');fetchMode='403';assert.equal((await renewal.sendClubMessage(raw)).state,'failed');fetchMode='500';assert.equal((await renewal.sendClubMessage(raw)).state,'unknown');fetchMode='timeout';assert.equal((await renewal.sendClubMessage(raw)).state,'unknown');
+ tokenFails=true;const before=sends;assert.equal((await renewal.sendClubMessage(raw)).state,'failed');assert.equal(sends,before);tokenFails=false;fetchMode='accepted';
+ const sentBefore=sends;await Promise.all([renewal.deliverRenewal(id),renewal.deliverRenewal(id)]);assert.equal(sends,sentBefore+1);
+ const membership=load('lib/membership.ts',{'./shop':{db:()=>{throw Error('No DB');}}});
+ let saved=0,delivered=0,limits=true,conflict=false;
+ const action=load('app/renew/actions.ts',{'next/headers':{headers:async()=>new Headers()},'next/cache':{revalidatePath:()=>{}},'../../lib/shop':{db:()=>async()=>{saved++;return conflict?[]:[{id}];},readImage:async f=>{if(f.size>700*1024||f.type!=='image/png')throw Error('bad proof');return {bytes:Buffer.from('proof'),type:f.type};}},'../../lib/membership':membership,'../../lib/renewals':{renewalsReady:async()=>{},renewalLimit:async()=>limits,renewalHash:renewal.renewalHash,sealRenewal:renewal.sealRenewal,deliverRenewal:async()=>{delivered++;throw Error('Email unavailable');}}});
+ const form=()=>{const f=new FormData();Object.entries({...details,year:new Date().getFullYear(),consent:'yes'}).forEach(([k,v])=>f.set(k,String(v)));f.set('proof',new File(['proof'],'receipt.png',{type:'image/png'}));return f;};
+ let f=form();f.delete('consent');assert.ok((await action.requestRenewal({},f)).error);assert.equal(saved,0);
+ f=form();f.set('identity','!');assert.ok((await action.requestRenewal({},f)).error);assert.equal(saved,0);
+ f=form();f.set('proof',new File(['bad'],'bad.html',{type:'text/html'}));assert.ok((await action.requestRenewal({},f)).error);assert.equal(saved,0);
+ limits=false;assert.ok((await action.requestRenewal({},form())).error);assert.equal(saved,0);limits=true;
+ const result=await action.requestRenewal({},form());assert.equal(result.reference,id);assert.match(result.success,/saved/);assert.equal(delivered,1);
+ conflict=true;await action.requestRenewal({},form());assert.equal(delivered,1);
+ const proof=load('app/admin/renewals/proof/route.ts',{'../../../../lib/shop':{isAdmin:async()=>false,db:()=>{throw Error('Should not access DB');},uuid},'../../../../lib/renewals':{}},{Response});
+ assert.equal((await proof.GET(new Request('https://example.invalid/proof?id='+id))).status,401);
+ console.log('PASS: encryption/tamper, private fixed-recipient MIME and attachment, header injection, file limits, OAuth failure, send ambiguity, concurrent claim, form consent/validation/rate limits, saved request after email failure, duplicate suppression, unauthorised proof blocked. All mocked; no real mail or member records.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
