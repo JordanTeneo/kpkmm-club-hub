@@ -1,0 +1,9 @@
+import {getLanguage} from '../language';
+import {MembershipCheckForm} from './form';
+import '../shop/shop.css';
+export const dynamic='force-dynamic';
+export const metadata={title:'Check membership status | KPKMM',robots:{index:false,follow:false}};
+export default async function MembershipStatusPage(){
+ const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
+ return <main className="shop" style={{maxWidth:800}}><p className="eyebrow">KPKMM</p><h1>{t('Check your membership','Semak keahlian anda')}</h1><p>{t('Membership runs by calendar year and expires on 31 December, Malaysia time. Only an approved membership or approved renewal for the current year counts as active.','Keahlian mengikut tahun kalendar dan tamat pada 31 Disember, waktu Malaysia. Hanya keahlian atau pembaharuan yang diluluskan untuk tahun semasa dianggap aktif.')}</p><section className="shop-card"><MembershipCheckForm bm={bm}/></section><section className="shop-note"><h2>{t('A private status check','Semakan status sulit')}</h2><p>{t('Use your own registered email and identification details. We match both to the club record and show only status and expiry. Names, addresses, payment receipts and identification numbers are not returned. Checks are limited to protect member privacy.','Gunakan e-mel berdaftar dan maklumat pengenalan anda sendiri. Kedua-duanya dipadankan dengan rekod kelab dan hanya status serta tarikh tamat dipaparkan. Nama, alamat, resit bayaran dan nombor pengenalan tidak dipulangkan. Semakan dihadkan untuk melindungi privasi ahli.')}</p><p>{t('Need help or have an older membership record?','Perlukan bantuan atau mempunyai rekod keahlian lama?')} <a href="mailto:kelabpeminatkeretaminimalaysia@gmail.com">kelabpeminatkeretaminimalaysia@gmail.com</a> / <a href="tel:+60182262000">018-226 2000</a>.</p></section></main>;
+}
