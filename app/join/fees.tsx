@@ -2,14 +2,17 @@ export function MembershipFees({bm}:{bm:boolean}) {
  const t=(en:string,ms:string)=>bm?ms:en;
  return <section className="shop-note" aria-labelledby="membership-fees">
   <h2 id="membership-fees">{t('Membership fees','Yuran keahlian')}</h2>
-  <dl style={{margin:0}}>
-   {[
-    [t('Administrative fee — new members, one time only','Yuran pentadbiran — ahli baharu, sekali sahaja'),'RM100'],
-    [t('Annual membership fee','Yuran keahlian tahunan'),t('RM150 per year','RM150 setahun')],
-    [t('New member: first-year total','Ahli baharu: jumlah tahun pertama'),'RM250'],
-    [t('Subsequent annual renewal','Pembaharuan tahunan seterusnya'),t('RM150 per year','RM150 setahun')],
-   ].map(([label,amount])=><div key={label} style={{display:'flex',flexWrap:'wrap',gap:'0.5rem 1rem',justifyContent:'space-between',padding:'0.75rem 0',borderBottom:'1px solid rgba(80,50,30,0.15)'}}><dt>{label}</dt><dd style={{margin:0,fontWeight:700}}>{amount}</dd></div>)}
-  </dl>
-  <p>{t('The RM100 administrative fee is charged only when joining, not on annual renewal. Submitting this request does not make a payment or confirm membership.','Yuran pentadbiran RM100 dikenakan sekali sahaja semasa menyertai kelab, bukan semasa pembaharuan tahunan. Penghantaran permohonan ini bukan pembayaran atau pengesahan keahlian.')}</p>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',gap:'1rem'}}>
+   <section style={{padding:'1.25rem',border:'1px solid rgba(80,50,30,0.2)',borderRadius:16,background:'rgba(255,255,255,0.4)'}}>
+    <h3 style={{margin:'0 0 0.75rem'}}>{t('New members','Ahli baharu')}</h3>
+    <p style={{margin:'0 0 0.75rem'}}><strong style={{fontSize:'2rem'}}>RM250</strong><br/>{t('for the first year','untuk tahun pertama')}</p>
+    <p style={{margin:0}}>{t('Includes RM100 one-time administrative fee + RM150 annual membership fee.','Termasuk yuran pentadbiran sekali sahaja RM100 + yuran keahlian tahunan RM150.')}</p>
+   </section>
+   <section style={{padding:'1.25rem',border:'1px solid rgba(80,50,30,0.2)',borderRadius:16,background:'rgba(255,255,255,0.4)'}}>
+    <h3 style={{margin:'0 0 0.75rem'}}>{t('Annual renewal','Pembaharuan tahunan')}</h3>
+    <p style={{margin:'0 0 0.75rem'}}><strong style={{fontSize:'2rem'}}>RM150</strong><br/>{t('per year for existing members','setahun untuk ahli sedia ada')}</p>
+    <p style={{margin:0}}>{t('No further administrative fee.','Tiada lagi yuran pentadbiran.')}</p>
+   </section>
+  </div>
  </section>;
 }
