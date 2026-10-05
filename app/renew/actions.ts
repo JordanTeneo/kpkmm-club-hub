@@ -1,0 +1,29 @@
+'use server';
+import {randomUUID} from 'node:crypto';
+import {headers} from 'next/headers';
+import {revalidatePath} from 'next/cache';
+import {db,readImage} from '../../lib/shop';
+import {validateApplicant} from '../../lib/membership';
+import {renewalsReady,renewalLimit,renewalHash,sealRenewal,deliverRenewal} from '../../lib/renewals';
+export type RenewalResult={error?:string;success?:string;reference?:string};
+export async function requestRenewal(_:RenewalResult,form:FormData):Promise<RenewalResult>{
+ if(form.get('consent')!=='yes'||form.get('website'))return {error:'Check the form and consent checkbox. / Semak borang dan persetujuan.'};
+ let details;
+ const currentYear=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
+ const year=Number(form.get('year'));
+ try{details={...validateApplicant(form),year};if(!Number.isInteger(year)||year<currentYear||year>currentYear+1)throw Error('year');}catch{return {error:'Check every field, including your IC/passport number and renewal year. / Semak setiap medan, termasuk nombor KP/pasport dan tahun pembaharuan.'};}
+ let id:string|undefined;
+ try{
+  await renewalsReady();const h=await headers();const ip=h.get('x-vercel-forwarded-for')?.split(',')[0]||h.get('x-forwarded-for')?.split(',')[0]||'unknown';
+  if(!(await renewalLimit('ip:'+ip,5))||!(await renewalLimit('email:'+details.email,3))||!(await renewalLimit('all',30)))return {error:'Too many requests. Please try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.'};
+  const file=form.get('proof');if(!(file instanceof File))return {error:'Attach your payment proof. / Lampirkan bukti bayaran.'};
+  let proof;try{proof=await readImage(file,true);}catch{return {error:'Use a JPG, PNG or PDF payment proof under 700 KB. / Gunakan bukti JPG, PNG atau PDF di bawah 700 KB.'};}
+  const identityHash=renewalHash(details.identityType+':'+details.country.toLowerCase()+':'+details.identity);
+  const rows=await db()`INSERT INTO club_renewals(id,identity_hash,renewal_year,payload,proof,proof_type) VALUES(${randomUUID()},${identityHash},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type}) ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
+  id=rows[0]?.id;
+ }catch{return {error:'We could not save your request. Please try again later or contact the club. / Permohonan tidak dapat disimpan. Cuba lagi nanti atau hubungi kelab.'};}
+ if(!id)return {success:'A request for these membership details and year is already on file. Please contact the club to make changes; do not pay again. / Permohonan untuk maklumat keahlian dan tahun ini sudah direkodkan. Hubungi kelab untuk perubahan; jangan bayar lagi.'};
+ let status='unknown';try{status=await deliverRenewal(id);}catch{}
+ revalidatePath('/admin/renewals');
+ return {reference:id,success:status==='accepted'?'Your renewal and payment proof were saved, and Gmail accepted the email to the club. Membership remains pending verification. / Permohonan dan bukti bayaran disimpan, dan Gmail menerima e-mel kepada kelab. Keahlian masih menunggu pengesahan.':'Your renewal and payment proof were saved for the club to review, but email delivery is not confirmed. Do not submit or pay again. / Permohonan dan bukti bayaran disimpan untuk semakan kelab, tetapi penghantaran e-mel belum disahkan. Jangan hantar atau bayar lagi.'};
+}
