@@ -1,9 +1,9 @@
 'use client';
 import {useActionState,useState} from 'react';
-import {checkMembership} from './actions';
+import {checkMembership,type CheckResult} from './actions';
 export function MembershipCheckForm({bm}:{bm:boolean}){
- const [state,action,pending]=useActionState(checkMembership,{});
  const [kind,setKind]=useState('mykad'),t=(en:string,ms:string)=>bm?ms:en;
+ const [state,action,pending]=useActionState(async(previous:CheckResult,form:FormData)=>{const next=await checkMembership(previous,form);setKind('mykad');return next;},{});
  const result=state.membership;
  const labels={active:t('Active','Aktif'),expired:t('Expired','Tamat tempoh'),pending:t('Pending approval','Menunggu kelulusan'),future:t('Approved for a future year','Diluluskan untuk tahun akan datang'),verification:t('Membership year needs verification','Tahun keahlian perlu disahkan'),inactive:t('No active approved membership','Tiada keahlian aktif yang diluluskan'),unmatched:t('No matching online record','Tiada rekod dalam talian yang sepadan')};
  return <><form action={action} autoComplete="off"><fieldset disabled={pending}>
