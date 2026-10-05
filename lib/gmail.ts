@@ -10,7 +10,7 @@ export function googleConfig(){
  if(!id||!secret)throw Error('Google settings missing');
  return {id,secret};
 }
-function key(){const secret=process.env.ADMIN_SESSION_SECRET;if(!secret||secret.length<24)throw Error('Encryption unavailable');return Buffer.from(hkdfSync('sha256',secret,'kpkmm-gmail-v1','oauth-refresh-token',32));}
+function key(){const secret=process.env.GMAIL_ENCRYPTION_KEY;if(!secret||secret.length<32)throw Error('Encryption unavailable');return Buffer.from(hkdfSync('sha256',secret,'kpkmm-gmail-v1','oauth-refresh-token',32));}
 export function encryptToken(value:string){const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key(),iv);const data=Buffer.concat([cipher.update(value,'utf8'),cipher.final()]);return [iv,cipher.getAuthTag(),data].map(b=>b.toString('base64')).join('.');}
 export function decryptToken(value:string){const [iv,tag,data]=value.split('.').map(v=>Buffer.from(v,'base64'));const cipher=createDecipheriv('aes-256-gcm',key(),iv);cipher.setAuthTag(tag);return Buffer.concat([cipher.update(data),cipher.final()]).toString('utf8');}
 export async function gmailReady(){key();await db()`CREATE TABLE IF NOT EXISTS club_gmail_connection(id integer PRIMARY KEY CHECK(id=1),email text NOT NULL,token text NOT NULL,connected_at timestamptz NOT NULL DEFAULT now())`;}
