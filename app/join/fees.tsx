@@ -12,6 +12,7 @@ export function MembershipFees({bm}:{bm:boolean}) {
     <h3 style={{margin:'0 0 0.75rem'}}>{t('Annual renewal','Pembaharuan tahunan')}</h3>
     <p style={{margin:'0 0 0.75rem'}}><strong style={{fontSize:'2rem'}}>RM150</strong><br/>{t('per year for existing members','setahun untuk ahli sedia ada')}</p>
     <p style={{margin:0}}>{t('No further administrative fee.','Tiada lagi yuran pentadbiran.')}</p>
+    <p><a className="shop-link" href="/renew">{t('Renew membership →','Perbaharui keahlian →')}</a></p>
    </section>
   </div>
  </section>;
