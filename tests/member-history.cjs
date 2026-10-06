@@ -1,0 +1,12 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+let calls=[];const exportsObject={};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/member-history.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:exportsObject,require:()=>({validYear:y=>{if(y<2000||y>2200)throw Error('year');},listMembers:async y=>{calls.push(y);return [];}})});
+const row=(n,active,recordYear)=>({memberNumber:n,active,recordYear});
+const current=[row('B-26-001',true,2026),row('A-20-002',false,2026),row('J-10-003',true,2026),row('K-10-004',false,2026),row('W-10-005',true,2026)];
+const previous=[row('A-20-002',true,2025),row('J-10-003',false,2025),row('K-10-004',false,2024),row('W-10-005',true,2024)];
+const result=exportsObject.attachPreviousYear(current,previous,2026);
+assert.deepEqual(Array.from(result,m=>m.previousActive),[null,true,false,null,true]);
+assert.deepEqual(Array.from(result,m=>m.active),current.map(m=>m.active));
+assert.deepEqual(Array.from(result,m=>m.memberNumber),current.map(m=>m.memberNumber));
+assert.equal(current[0].previousActive,undefined);
+(async()=>{await exportsObject.listMembersWithHistory(2026);assert.deepEqual(calls,[2026,2025]);calls=[];await exportsObject.listMembersWithHistory(2000);assert.deepEqual(calls,[2000]);console.log('PASS: prior-year active/inactive/missing evidence, approved historical activity, permanent IDs, current status unchanged and year boundary.');})().catch(e=>{console.error(e);process.exitCode=1;});
