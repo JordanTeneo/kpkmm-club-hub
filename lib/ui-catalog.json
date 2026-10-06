@@ -1,0 +1,3258 @@
+{
+  "+ Add member / Tambah ahli": [
+    "+ Add member",
+    "Tambah ahli"
+  ],
+  ". This confirms authorisation, not email delivery. / Ini mengesahkan kebenaran, bukan penghantaran e-mel.": [
+    ". This confirms authorisation, not email delivery.",
+    "Ini mengesahkan kebenaran, bukan penghantaran e-mel."
+  ],
+  "A request for these membership details and year is already on file. Please contact the club to make changes; do not pay again. / Permohonan untuk maklumat keahlian dan tahun ini sudah direkodkan. Hubungi kelab untuk perubahan; jangan bayar lagi.": [
+    "A request for these membership details and year is already on file. Please contact the club to make changes; do not pay again.",
+    "Permohonan untuk maklumat keahlian dan tahun ini sudah direkodkan. Hubungi kelab untuk perubahan; jangan bayar lagi."
+  ],
+  "A send is already in progress or completed. Refresh this page. / Penghantaran sedang berjalan atau selesai. Muat semula halaman.": [
+    "A send is already in progress or completed. Refresh this page.",
+    "Penghantaran sedang berjalan atau selesai. Muat semula halaman."
+  ],
+  "Accepted by Gmail / Diterima Gmail": [
+    "Accepted by Gmail",
+    "Diterima Gmail"
+  ],
+  "Action could not be completed. The saved request is retained. / Tindakan tidak berjaya. Permohonan yang disimpan dikekalkan.": [
+    "Action could not be completed. The saved request is retained.",
+    "Tindakan tidak berjaya. Permohonan yang disimpan dikekalkan."
+  ],
+  "Active / Aktif": [
+    "Active",
+    "Aktif"
+  ],
+  "Active membership ends on 31 December of the selected year. No email is sent by this form. / Keahlian aktif tamat pada 31 Disember tahun dipilih.": [
+    "Active membership ends on 31 December of the selected year. No email is sent by this form.",
+    "Keahlian aktif tamat pada 31 Disember tahun dipilih."
+  ],
+  "Add GMAIL_ENCRYPTION_KEY in Vercel Production: a new random secret of at least 32 characters. Keep ADMIN_SESSION_SECRET unchanged. Redeploy after saving. / Tambah GMAIL_ENCRYPTION_KEY dalam Vercel Production: rahsia rawak baharu sekurang-kurangnya 32 aksara. Jangan ubah ADMIN_SESSION_SECRET. Terbitkan semula selepas menyimpan.": [
+    "Add GMAIL_ENCRYPTION_KEY in Vercel Production: a new random secret of at least 32 characters. Keep ADMIN_SESSION_SECRET unchanged. Redeploy after saving.",
+    "Tambah GMAIL_ENCRYPTION_KEY dalam Vercel Production: rahsia rawak baharu sekurang-kurangnya 32 aksara. Jangan ubah ADMIN_SESSION_SECRET. Terbitkan semula selepas menyimpan."
+  ],
+  "Add member / Tambah ahli": [
+    "Add member",
+    "Tambah ahli"
+  ],
+  "Add notice / Tambah notis": [
+    "Add notice",
+    "Tambah notis"
+  ],
+  "Add outing / Tambah aktiviti": [
+    "Add outing",
+    "Tambah aktiviti"
+  ],
+  "Address / Alamat": [
+    "Address",
+    "Alamat"
+  ],
+  "Address / Alamat:": [
+    "Address:",
+    "Alamat:"
+  ],
+  "Address update complete / Kemas kini alamat selesai:": [
+    "Address update complete:",
+    "Kemas kini alamat selesai:"
+  ],
+  "Address update failed. No partial changes saved. / Kemas kini alamat gagal. Tiada perubahan separa disimpan.": [
+    "Address update failed. No partial changes saved.",
+    "Kemas kini alamat gagal. Tiada perubahan separa disimpan."
+  ],
+  "Address-only update / Kemas kini alamat sahaja": [
+    "Address-only update",
+    "Kemas kini alamat sahaja"
+  ],
+  "Addresses have been reviewed / Alamat telah disemak": [
+    "Addresses have been reviewed",
+    "Alamat telah disemak"
+  ],
+  "Admin password / Kata laluan": [
+    "Admin password",
+    "Kata laluan"
+  ],
+  "All / Semua": [
+    "All",
+    "Semua"
+  ],
+  "Another update occurred. Review the refreshed details before saving again. / Rekod telah berubah. Semak maklumat terkini sebelum menyimpan semula.": [
+    "Another update occurred. Review the refreshed details before saving again.",
+    "Rekod telah berubah. Semak maklumat terkini sebelum menyimpan semula."
+  ],
+  "Application status / Status permohonan": [
+    "Application status",
+    "Status permohonan"
+  ],
+  "Approval activates only the selected renewal year, ending 31 December. / Kelulusan mengaktifkan tahun pembaharuan dipilih sahaja, sehingga 31 Disember.": [
+    "Approval activates only the selected renewal year, ending 31 December.",
+    "Kelulusan mengaktifkan tahun pembaharuan dipilih sahaja, sehingga 31 Disember."
+  ],
+  "Approved / Diluluskan": [
+    "Approved",
+    "Diluluskan"
+  ],
+  "Approving a renewal automatically activates the matching member in the member listing, Excel export and membership status check for that renewal year. Their existing membership number is retained. / Kelulusan pembaharuan mengaktifkan ahli yang sepadan secara automatik bagi tahun tersebut. Nombor ahli sedia ada dikekalkan.": [
+    "Approving a renewal automatically activates the matching member in the member listing, Excel export and membership status check for that renewal year. Their existing membership number is retained.",
+    "Kelulusan pembaharuan mengaktifkan ahli yang sepadan secara automatik bagi tahun tersebut. Nombor ahli sedia ada dikekalkan."
+  ],
+  "Archive / Arkib": [
+    "Archive",
+    "Arkib"
+  ],
+  "Attach your payment proof. / Lampirkan bukti bayaran.": [
+    "Attach your payment proof.",
+    "Lampirkan bukti bayaran."
+  ],
+  "Authorised on / Dibenarkan pada:": [
+    "Authorised on:",
+    "Dibenarkan pada:"
+  ],
+  "Bottom / Bawah": [
+    "Bottom",
+    "Bawah"
+  ],
+  "Cannot decrypt this record. Keep the original encryption key. / Rekod tidak dapat dinyahsulit. Kekalkan kunci penyulitan asal.": [
+    "Cannot decrypt this record. Keep the original encryption key.",
+    "Rekod tidak dapat dinyahsulit. Kekalkan kunci penyulitan asal."
+  ],
+  "Centre / Tengah": [
+    "Centre",
+    "Tengah"
+  ],
+  "Change history / Sejarah perubahan": [
+    "Change history",
+    "Sejarah perubahan"
+  ],
+  "Check all fields, including address, postcode, state and country. Malaysian postcodes must have 5 digits. MyKad must have 12 digits; passports need 5–20 letters/numbers. / Semak semua medan termasuk alamat, poskod, negeri dan negara. Poskod Malaysia mesti 5 digit. MyKad mesti 12 digit; pasport 5–20 huruf/nombor.": [
+    "Check all fields, including address, postcode, state and country. Malaysian postcodes must have 5 digits. MyKad must have 12 digits; passports need 5–20 letters/numbers.",
+    "Semak semua medan termasuk alamat, poskod, negeri dan negara. Poskod Malaysia mesti 5 digit. MyKad mesti 12 digit; pasport 5–20 huruf/nombor."
+  ],
+  "Check every field, including your IC/passport number and renewal year. / Semak setiap medan, termasuk nombor KP/pasport dan tahun pembaharuan.": [
+    "Check every field, including your IC/passport number and renewal year.",
+    "Semak setiap medan, termasuk nombor KP/pasport dan tahun pembaharuan."
+  ],
+  "Check product name, price and stock. / Semak nama produk, harga dan stok.": [
+    "Check product name, price and stock.",
+    "Semak nama produk, harga dan stok."
+  ],
+  "Check the form and consent checkbox. / Semak borang dan persetujuan.": [
+    "Check the form and consent checkbox.",
+    "Semak borang dan persetujuan."
+  ],
+  "Check your name, phone number and quantity. / Semak nama, nombor telefon dan kuantiti.": [
+    "Check your name, phone number and quantity.",
+    "Semak nama, nombor telefon dan kuantiti."
+  ],
+  "Choose a file under 700 KB. / Pilih fail di bawah 700 KB.": [
+    "Choose a file under 700 KB.",
+    "Pilih fail di bawah 700 KB."
+  ],
+  "Choose a roster file and tick the verification checkbox. / Pilih fail dan tandakan pengesahan.": [
+    "Choose a roster file and tick the verification checkbox.",
+    "Pilih fail dan tandakan pengesahan."
+  ],
+  "Choose language / Pilih bahasa": [
+    "Choose language",
+    "Pilih bahasa"
+  ],
+  "Choose payment proof. / Pilih bukti bayaran.": [
+    "Choose payment proof.",
+    "Pilih bukti bayaran."
+  ],
+  "Close add form / Tutup borang": [
+    "Close add form",
+    "Tutup borang"
+  ],
+  "Club archive / Arkib kelab": [
+    "Club archive",
+    "Arkib kelab"
+  ],
+  "Club email / E-mel kelab": [
+    "Club email",
+    "E-mel kelab"
+  ],
+  "Confirm deletion / Sahkan padam": [
+    "Confirm deletion",
+    "Sahkan padam"
+  ],
+  "Connect Gmail / Sambungkan Gmail": [
+    "Connect Gmail",
+    "Sambungkan Gmail"
+  ],
+  "Connect club Gmail / Sambung Gmail kelab": [
+    "Connect club Gmail",
+    "Sambung Gmail kelab"
+  ],
+  "Connected / Disambungkan": [
+    "Connected",
+    "Disambungkan"
+  ],
+  "Consent recorded / Persetujuan direkodkan:": [
+    "Consent recorded:",
+    "Persetujuan direkodkan:"
+  ],
+  "Could not save the banner. Please try again. / Gagal menyimpan. Sila cuba lagi.": [
+    "Could not save the banner. Please try again.",
+    "Gagal menyimpan. Sila cuba lagi."
+  ],
+  "Could not save. Check all fields and try again. / Tidak dapat menyimpan. Semak semua medan.": [
+    "Could not save. Check all fields and try again.",
+    "Tidak dapat menyimpan. Semak semua medan."
+  ],
+  "Could not save. Check the fields and reason, then retry. / Tidak dapat menyimpan. Semak maklumat dan sebab.": [
+    "Could not save. Check the fields and reason, then retry.",
+    "Tidak dapat menyimpan. Semak maklumat dan sebab."
+  ],
+  "Could not save. Please retry. / Tidak dapat disimpan. Sila cuba lagi.": [
+    "Could not save. Please retry.",
+    "Tidak dapat disimpan. Sila cuba lagi."
+  ],
+  "Could not send. Saved applications are retained. Check Email Setup. / Tidak dapat menghantar. Permohonan disimpan. Semak Tetapan E-mel.": [
+    "Could not send. Saved applications are retained. Check Email Setup.",
+    "Tidak dapat menghantar. Permohonan disimpan. Semak Tetapan E-mel."
+  ],
+  "Country / Negara": [
+    "Country",
+    "Negara"
+  ],
+  "Country / Negara:": [
+    "Country:",
+    "Negara:"
+  ],
+  "Database import failed. No partial changes were saved. Please retry. / Import pangkalan data gagal. Tiada perubahan separa disimpan.": [
+    "Database import failed. No partial changes were saved. Please retry.",
+    "Import pangkalan data gagal. Tiada perubahan separa disimpan."
+  ],
+  "Date label / Tarikh": [
+    "Date label",
+    "Tarikh"
+  ],
+  "Decision / Keputusan": [
+    "Decision",
+    "Keputusan"
+  ],
+  "Delivery uncertain — check Gmail / Penghantaran tidak pasti — semak Gmail": [
+    "Delivery uncertain — check Gmail",
+    "Penghantaran tidak pasti — semak Gmail"
+  ],
+  "Delivery uncertain. Check the club inbox before retrying. / Penghantaran tidak pasti. Semak peti masuk sebelum mencuba semula.": [
+    "Delivery uncertain. Check the club inbox before retrying.",
+    "Penghantaran tidak pasti. Semak peti masuk sebelum mencuba semula."
+  ],
+  "Details / Butiran": [
+    "Details",
+    "Butiran"
+  ],
+  "Download Excel (.xlsx) / Muat turun Excel": [
+    "Download Excel (.xlsx)",
+    "Muat turun Excel"
+  ],
+  "Download payment proof / Muat turun bukti bayaran": [
+    "Download payment proof",
+    "Muat turun bukti bayaran"
+  ],
+  "Edit / Sunting": [
+    "Edit",
+    "Sunting"
+  ],
+  "Edit / Sunting ＋": [
+    "Edit",
+    "Sunting ＋"
+  ],
+  "Edit member / Sunting ahli": [
+    "Edit member",
+    "Sunting ahli"
+  ],
+  "Email / E-mel": [
+    "Email",
+    "E-mel"
+  ],
+  "Email / E-mel:": [
+    "Email:",
+    "E-mel:"
+  ],
+  "Email failed — request saved / E-mel gagal — permohonan disimpan": [
+    "Email failed — request saved",
+    "E-mel gagal — permohonan disimpan"
+  ],
+  "Enter a valid YouTube link and title. / Masukkan pautan YouTube yang sah dan tajuk.": [
+    "Enter a valid YouTube link and title.",
+    "Masukkan pautan YouTube yang sah dan tajuk."
+  ],
+  "Enter your full registered name. / Masukkan nama penuh berdaftar anda.": [
+    "Enter your full registered name.",
+    "Masukkan nama penuh berdaftar anda."
+  ],
+  "Example: B-26-001. Keep the original joining year and running number unless correcting an error. Address changes do not require a new ID. Old IDs cannot be reused. / Kekalkan tahun menyertai dan nombor turutan kecuali untuk pembetulan.": [
+    "Example: B-26-001. Keep the original joining year and running number unless correcting an error. Address changes do not require a new ID. Old IDs cannot be reused.",
+    "Kekalkan tahun menyertai dan nombor turutan kecuali untuk pembetulan."
+  ],
+  "Excel downloads / Muat turun Excel": [
+    "Excel downloads",
+    "Muat turun Excel"
+  ],
+  "Existing address preserved in its original format. Please separate its postcode, state and country when known. / Alamat asal dikekalkan. Asingkan poskod, negeri dan negara apabila diketahui.": [
+    "Existing address preserved in its original format. Please separate its postcode, state and country when known.",
+    "Alamat asal dikekalkan. Asingkan poskod, negeri dan negara apabila diketahui."
+  ],
+  "Exports include member number, name, annual status, phone, email and registered address. Identification numbers are excluded by default. Keep downloaded files private. / Nombor pengenalan tidak disertakan secara lalai. Simpan fail secara sulit.": [
+    "Exports include member number, name, annual status, phone, email and registered address. Identification numbers are excluded by default. Keep downloaded files private.",
+    "Nombor pengenalan tidak disertakan secara lalai. Simpan fail secara sulit."
+  ],
+  "Failed — request saved / Gagal — permohonan disimpan": [
+    "Failed — request saved",
+    "Gagal — permohonan disimpan"
+  ],
+  "File validation failed. Check the membership numbers, names and format. No records changed. / Pengesahan fail gagal. Tiada rekod diubah.": [
+    "File validation failed. Check the membership numbers, names and format. No records changed.",
+    "Pengesahan fail gagal. Tiada rekod diubah."
+  ],
+  "Full name as on MyKad / passport": [
+    "Full name as on MyKad / passport",
+    "Nama penuh seperti MyKad / pasport"
+  ],
+  "Full name as on identification / Nama penuh": [
+    "Full name as on identification",
+    "Nama penuh"
+  ],
+  "Full registered name / Nama penuh berdaftar": [
+    "Full registered name",
+    "Nama penuh berdaftar"
+  ],
+  "Gmail accepted the email. Verify receipt in the club inbox. / Gmail menerima e-mel. Semak penerimaan dalam peti masuk kelab.": [
+    "Gmail accepted the email. Verify receipt in the club inbox.",
+    "Gmail menerima e-mel. Semak penerimaan dalam peti masuk kelab."
+  ],
+  "Gmail accepted the notification. / Gmail menerima pemberitahuan.": [
+    "Gmail accepted the notification.",
+    "Gmail menerima pemberitahuan."
+  ],
+  "Gmail connected. / Gmail disambungkan.": [
+    "Gmail connected.",
+    "Gmail disambungkan."
+  ],
+  "Gmail delivery is uncertain. Check the inbox before retrying. / Penghantaran tidak pasti. Semak peti masuk sebelum mencuba lagi.": [
+    "Gmail delivery is uncertain. Check the inbox before retrying.",
+    "Penghantaran tidak pasti. Semak peti masuk sebelum mencuba lagi."
+  ],
+  "Google authorisation passed, but the connection could not be saved securely. / Kebenaran Google berjaya, tetapi sambungan tidak dapat disimpan dengan selamat.": [
+    "Google authorisation passed, but the connection could not be saved securely.",
+    "Kebenaran Google berjaya, tetapi sambungan tidak dapat disimpan dengan selamat."
+  ],
+  "Google could not confirm the account identity. / Google tidak dapat mengesahkan identiti akaun.": [
+    "Google could not confirm the account identity.",
+    "Google tidak dapat mengesahkan identiti akaun."
+  ],
+  "Google could not exchange the authorisation code. Check the client credentials and redirect URI. / Google tidak dapat menukar kod kebenaran. Semak kelayakan klien dan URI ubah hala.": [
+    "Google could not exchange the authorisation code. Check the client credentials and redirect URI.",
+    "Google tidak dapat menukar kod kebenaran. Semak kelayakan klien dan URI ubah hala."
+  ],
+  "Google did not confirm that the email address is verified. / Google tidak mengesahkan alamat e-mel ini.": [
+    "Google did not confirm that the email address is verified.",
+    "Google tidak mengesahkan alamat e-mel ini."
+  ],
+  "Google did not grant a lasting connection (refresh token missing). / Google tidak memberikan sambungan berterusan (token pembaharuan tiada).": [
+    "Google did not grant a lasting connection (refresh token missing).",
+    "Google tidak memberikan sambungan berterusan (token pembaharuan tiada)."
+  ],
+  "Google did not report the granted permissions, so the connection was not saved. / Google tidak melaporkan kebenaran yang diberikan, jadi sambungan tidak disimpan.": [
+    "Google did not report the granted permissions, so the connection was not saved.",
+    "Google tidak melaporkan kebenaran yang diberikan, jadi sambungan tidak disimpan."
+  ],
+  "Google did not return an access token. / Google tidak memulangkan token akses.": [
+    "Google did not return an access token.",
+    "Google tidak memulangkan token akses."
+  ],
+  "Google settings / Tetapan Google:": [
+    "Google settings:",
+    "Tetapan Google:"
+  ],
+  "Homepage banner / Sepanduk utama": [
+    "Homepage banner",
+    "Sepanduk utama"
+  ],
+  "I checked the club inbox and Sent folder for this reference and understand retrying may send a duplicate. / Saya telah menyemak peti masuk dan folder Dihantar untuk rujukan ini dan memahami penghantaran semula mungkin menghasilkan salinan.": [
+    "I checked the club inbox and Sent folder for this reference and understand retrying may send a duplicate.",
+    "Saya telah menyemak peti masuk dan folder Dihantar untuk rujukan ini dan memahami penghantaran semula mungkin menghasilkan salinan."
+  ],
+  "I checked the club inbox and Sent folder. Retrying may send a duplicate. / Saya menyemak peti masuk dan folder Dihantar. Penghantaran semula mungkin menghasilkan salinan.": [
+    "I checked the club inbox and Sent folder. Retrying may send a duplicate.",
+    "Saya menyemak peti masuk dan folder Dihantar. Penghantaran semula mungkin menghasilkan salinan."
+  ],
+  "I confirm this is an intentional ID correction across all years (only needed when changing the ID). / Saya mengesahkan pembetulan nombor ahli bagi semua tahun.": [
+    "I confirm this is an intentional ID correction across all years (only needed when changing the ID).",
+    "Saya mengesahkan pembetulan nombor ahli bagi semua tahun."
+  ],
+  "I verified the year and active/inactive payment markers. / Saya telah menyemak tahun dan status bayaran.": [
+    "I verified the year and active/inactive payment markers.",
+    "Saya telah menyemak tahun dan status bayaran."
+  ],
+  "Identification / Pengenalan": [
+    "Identification",
+    "Pengenalan"
+  ],
+  "Identification country / Negara pengenalan:": [
+    "Identification country:",
+    "Negara pengenalan:"
+  ],
+  "Identification details (private) / Maklumat pengenalan (sulit)": [
+    "Identification details (private)",
+    "Maklumat pengenalan (sulit)"
+  ],
+  "Identification issuing country / Negara pengeluar": [
+    "Identification issuing country",
+    "Negara pengeluar"
+  ],
+  "Identification type / Jenis pengenalan": [
+    "Identification type",
+    "Jenis pengenalan"
+  ],
+  "Import roster / Import daftar": [
+    "Import roster",
+    "Import daftar"
+  ],
+  "Import saved successfully. / Import berjaya disimpan.": [
+    "Import saved successfully.",
+    "Import berjaya disimpan."
+  ],
+  "Inactive / Tidak aktif": [
+    "Inactive",
+    "Tidak aktif"
+  ],
+  "Include identification numbers (private) / Sertakan nombor pengenalan (sulit)": [
+    "Include identification numbers (private)",
+    "Sertakan nombor pengenalan (sulit)"
+  ],
+  "Invalid product. / Produk tidak sah.": [
+    "Invalid product.",
+    "Produk tidak sah."
+  ],
+  "Invalid reference or access code. / Rujukan atau kod akses tidak sah.": [
+    "Invalid reference or access code.",
+    "Rujukan atau kod akses tidak sah."
+  ],
+  "Invalid request. / Permintaan tidak sah.": [
+    "Invalid request.",
+    "Permintaan tidak sah."
+  ],
+  "Joining / membership year · Tahun menyertai": [
+    "Joining / membership year",
+    "Tahun menyertai / keahlian"
+  ],
+  "Keep GMAIL_ENCRYPTION_KEY unchanged: it protects both the Gmail connection and private renewal records. / Jangan ubah GMAIL_ENCRYPTION_KEY: ia melindungi sambungan Gmail dan rekod pembaharuan sulit.": [
+    "Keep GMAIL_ENCRYPTION_KEY unchanged: it protects both the Gmail connection and private renewal records.",
+    "Jangan ubah GMAIL_ENCRYPTION_KEY: ia melindungi sambungan Gmail dan rekod pembaharuan sulit."
+  ],
+  "Manage / Urus": [
+    "Manage",
+    "Urus"
+  ],
+  "Manage members and Excel downloads / Urus ahli dan muat turun Excel →": [
+    "Manage members and Excel downloads",
+    "Urus ahli dan muat turun Excel →"
+  ],
+  "Manage renewals and test email / Urus pembaharuan dan uji e-mel →": [
+    "Manage renewals and test email",
+    "Urus pembaharuan dan uji e-mel →"
+  ],
+  "Manage the group photo beside “Small cars. Big spirit.” / Urus foto utama kelab.": [
+    "Manage the group photo beside “Small cars. Big spirit.”",
+    "Urus foto utama kelab."
+  ],
+  "Member ID / No. ahli": [
+    "Member ID",
+    "No. ahli"
+  ],
+  "Member listing / Senarai ahli": [
+    "Member listing",
+    "Senarai ahli"
+  ],
+  "Member roster / Daftar ahli": [
+    "Member roster",
+    "Daftar ahli"
+  ],
+  "Member updated. / Maklumat ahli dikemas kini.": [
+    "Member updated.",
+    "Maklumat ahli dikemas kini."
+  ],
+  "Members to export / Ahli untuk dieksport": [
+    "Members to export",
+    "Ahli untuk dieksport"
+  ],
+  "Membership ID / Nombor ahli": [
+    "Membership ID",
+    "Nombor ahli"
+  ],
+  "Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again. / Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi.": [
+    "Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again.",
+    "Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi."
+  ],
+  "Membership renewals / Pembaharuan keahlian": [
+    "Membership renewals",
+    "Pembaharuan keahlian"
+  ],
+  "Membership status / Status keahlian": [
+    "Membership status",
+    "Status keahlian"
+  ],
+  "Membership storage is unavailable. Please check the database and encryption settings. / Storan keahlian tidak tersedia. Sila semak pangkalan data dan tetapan penyulitan.": [
+    "Membership storage is unavailable. Please check the database and encryption settings.",
+    "Storan keahlian tidak tersedia. Sila semak pangkalan data dan tetapan penyulitan."
+  ],
+  "Membership year / Tahun keahlian": [
+    "Membership year",
+    "Tahun keahlian"
+  ],
+  "Missing / Tiada": [
+    "Missing",
+    "Tiada"
+  ],
+  "Mobile / Telefon": [
+    "Mobile",
+    "Telefon"
+  ],
+  "Mobile / Telefon:": [
+    "Mobile:",
+    "Telefon:"
+  ],
+  "MyKad / IC": [
+    "MyKad / IC",
+    "MyKad / KP"
+  ],
+  "MyKad / IC number (12 digits)": [
+    "MyKad / IC number (12 digits)",
+    "Nombor MyKad / KP (12 digit)"
+  ],
+  "MyKad / IC — Malaysia": [
+    "MyKad / IC — Malaysia",
+    "MyKad / KP — Malaysia"
+  ],
+  "MyKad / Passport": [
+    "MyKad / Passport",
+    "MyKad / Pasport"
+  ],
+  "MyKad / Passport number": [
+    "MyKad / Passport number",
+    "Nombor MyKad / Pasport"
+  ],
+  "Nama penuh seperti MyKad / pasport": [
+    "Full name as on MyKad / passport",
+    "Nama penuh seperti MyKad / pasport"
+  ],
+  "Name / Nama": [
+    "Name",
+    "Nama"
+  ],
+  "Negeri / wilayah": [
+    "State / territory",
+    "Negeri / wilayah"
+  ],
+  "New membership requests / Permohonan keahlian baharu": [
+    "New membership requests",
+    "Permohonan keahlian baharu"
+  ],
+  "Next / Seterusnya →": [
+    "Next",
+    "Seterusnya →"
+  ],
+  "No applications in this category. / Tiada permohonan dalam kategori ini.": [
+    "No applications in this category.",
+    "Tiada permohonan dalam kategori ini."
+  ],
+  "No decision email is sent. Contact the applicant separately. / Tiada e-mel keputusan dihantar. Hubungi pemohon secara berasingan.": [
+    "No decision email is sent. Contact the applicant separately.",
+    "Tiada e-mel keputusan dihantar. Hubungi pemohon secara berasingan."
+  ],
+  "No manual edits yet. / Tiada suntingan manual.": [
+    "No manual edits yet.",
+    "Tiada suntingan manual."
+  ],
+  "No matching members. / Tiada ahli sepadan.": [
+    "No matching members.",
+    "Tiada ahli sepadan."
+  ],
+  "No renewals in this category. / Tiada pembaharuan dalam kategori ini.": [
+    "No renewals in this category.",
+    "Tiada pembaharuan dalam kategori ini."
+  ],
+  "Nombor MyKad / KP (12 digit)": [
+    "MyKad / IC number (12 digits)",
+    "Nombor MyKad / KP (12 digit)"
+  ],
+  "Not approved: identification matches more than one member. Resolve duplicate records before approving. / Belum diluluskan: pengenalan sepadan dengan lebih daripada seorang ahli.": [
+    "Not approved: identification matches more than one member. Resolve duplicate records before approving.",
+    "Belum diluluskan: pengenalan sepadan dengan lebih daripada seorang ahli."
+  ],
+  "Not approved: no matching membership record. Verify the IC/passport in Manage members first; no status was changed. / Belum diluluskan: rekod ahli tidak sepadan. Semak maklumat pengenalan dahulu.": [
+    "Not approved: no matching membership record. Verify the IC/passport in Manage members first; no status was changed.",
+    "Belum diluluskan: rekod ahli tidak sepadan. Semak maklumat pengenalan dahulu."
+  ],
+  "Not enough stock. Refresh the shop. / Stok tidak mencukupi. Muat semula kedai.": [
+    "Not enough stock. Refresh the shop.",
+    "Stok tidak mencukupi. Muat semula kedai."
+  ],
+  "Notice board / Papan kenyataan": [
+    "Notice board",
+    "Papan kenyataan"
+  ],
+  "Notices / Notis": [
+    "Notices",
+    "Notis"
+  ],
+  "Older application — no automatic notification / Permohonan lama — tiada pemberitahuan automatik": [
+    "Older application — no automatic notification",
+    "Permohonan lama — tiada pemberitahuan automatik"
+  ],
+  "Open your order again using its access code. / Buka tempahan menggunakan kod akses.": [
+    "Open your order again using its access code.",
+    "Buka tempahan menggunakan kod akses."
+  ],
+  "Order updated. / Tempahan dikemas kini.": [
+    "Order updated.",
+    "Tempahan dikemas kini."
+  ],
+  "Original unsplit address / Alamat asal belum diasingkan": [
+    "Original unsplit address",
+    "Alamat asal belum diasingkan"
+  ],
+  "Outings / Aktiviti": [
+    "Outings",
+    "Aktiviti"
+  ],
+  "Overview / Utama": [
+    "Overview",
+    "Utama"
+  ],
+  "Passport / Pasport": [
+    "Passport",
+    "Pasport"
+  ],
+  "Passport — Non-Malaysian / Pasport — Bukan warganegara": [
+    "Passport — Non-Malaysian",
+    "Pasport — Bukan warganegara"
+  ],
+  "Payment proof is attached. Verify payment and membership before approving. / Bukti bayaran dilampirkan. Semak bayaran dan keahlian sebelum meluluskan.": [
+    "Payment proof is attached. Verify payment and membership before approving.",
+    "Bukti bayaran dilampirkan. Semak bayaran dan keahlian sebelum meluluskan."
+  ],
+  "Payment proof is required before confirmation. / Bukti bayaran diperlukan sebelum pengesahan.": [
+    "Payment proof is required before confirmation.",
+    "Bukti bayaran diperlukan sebelum pengesahan."
+  ],
+  "Pending / Menunggu": [
+    "Pending",
+    "Menunggu"
+  ],
+  "Personal details and status apply to the selected year. An explicit ID correction updates the number across all recorded years without removing history. / Maklumat dan status terpakai untuk tahun dipilih. Pembetulan nombor ahli meliputi semua rekod tahunan tanpa memadam sejarah.": [
+    "Personal details and status apply to the selected year. An explicit ID correction updates the number across all recorded years without removing history.",
+    "Maklumat dan status terpakai untuk tahun dipilih. Pembetulan nombor ahli meliputi semua rekod tahunan tanpa memadam sejarah."
+  ],
+  "Phone / Telefon": [
+    "Phone",
+    "Telefon"
+  ],
+  "Phone / WhatsApp": [
+    "Phone / WhatsApp",
+    "Telefon / WhatsApp"
+  ],
+  "Photo focus / Fokus foto": [
+    "Photo focus",
+    "Fokus foto"
+  ],
+  "Photos / Foto": [
+    "Photos",
+    "Foto"
+  ],
+  "Please sign in again. / Sila log masuk semula.": [
+    "Please sign in again.",
+    "Sila log masuk semula."
+  ],
+  "Please sign in as admin. / Sila log masuk sebagai pentadbir.": [
+    "Please sign in as admin.",
+    "Sila log masuk sebagai pentadbir."
+  ],
+  "Position / Kedudukan": [
+    "Position",
+    "Kedudukan"
+  ],
+  "Postcode / Poskod": [
+    "Postcode",
+    "Poskod"
+  ],
+  "Postcode / Poskod:": [
+    "Postcode:",
+    "Poskod:"
+  ],
+  "Poster image / Gambar poster": [
+    "Poster image",
+    "Gambar poster"
+  ],
+  "Preparing / Menyediakan…": [
+    "Preparing",
+    "Menyediakan…"
+  ],
+  "Present / Tersedia": [
+    "Present",
+    "Tersedia"
+  ],
+  "Private administrator access. Membership numbers remain permanent. Edit details, maintain annual status or download an Excel list. / Akses pentadbir sahaja. Nombor ahli kekal.": [
+    "Private administrator access. Membership numbers remain permanent. Edit details, maintain annual status or download an Excel list.",
+    "Akses pentadbir sahaja. Nombor ahli kekal."
+  ],
+  "Private identification and mailing details — administrators only. Swipe the table sideways on a small screen. / Maklumat sulit untuk pentadbir sahaja. Leret jadual pada skrin kecil.": [
+    "Private identification and mailing details — administrators only. Swipe the table sideways on a small screen.",
+    "Maklumat sulit untuk pentadbir sahaja. Leret jadual pada skrin kecil."
+  ],
+  "Private record unavailable. Please retry. / Rekod sulit tidak tersedia.": [
+    "Private record unavailable. Please retry.",
+    "Rekod sulit tidak tersedia."
+  ],
+  "Private records are temporarily unavailable. No changes were made. / Rekod sulit tidak tersedia buat sementara waktu.": [
+    "Private records are temporarily unavailable. No changes were made.",
+    "Rekod sulit tidak tersedia buat sementara waktu."
+  ],
+  "Private — authorised administrators only. Verify the bank payment before approving. / Sulit — pentadbir dibenarkan sahaja. Semak bayaran bank sebelum meluluskan.": [
+    "Private — authorised administrators only. Verify the bank payment before approving.",
+    "Sulit — pentadbir dibenarkan sahaja. Semak bayaran bank sebelum meluluskan."
+  ],
+  "Product deleted. Existing orders are preserved. / Produk dipadam. Tempahan sedia ada dikekalkan.": [
+    "Product deleted. Existing orders are preserved.",
+    "Produk dipadam. Tempahan sedia ada dikekalkan."
+  ],
+  "Product not found. / Produk tidak ditemui.": [
+    "Product not found.",
+    "Produk tidak ditemui."
+  ],
+  "Product or stock changed. Refresh before trying again. / Produk atau stok berubah. Muat semula dan cuba lagi.": [
+    "Product or stock changed. Refresh before trying again.",
+    "Produk atau stok berubah. Muat semula dan cuba lagi."
+  ],
+  "Product restored as hidden. Edit it to publish. / Produk dipulihkan sebagai tersembunyi. Edit untuk menerbitkan.": [
+    "Product restored as hidden. Edit it to publish.",
+    "Produk dipulihkan sebagai tersembunyi. Edit untuk menerbitkan."
+  ],
+  "Product saved. / Produk disimpan.": [
+    "Product saved.",
+    "Produk disimpan."
+  ],
+  "Proof submitted for review. / Bukti dihantar untuk semakan.": [
+    "Proof submitted for review.",
+    "Bukti dihantar untuk semakan."
+  ],
+  "Publish notice / Siarkan notis": [
+    "Publish notice",
+    "Siarkan notis"
+  ],
+  "Publish outing / Siarkan aktiviti": [
+    "Publish outing",
+    "Siarkan aktiviti"
+  ],
+  "Reason for update / Sebab kemas kini": [
+    "Reason for update",
+    "Sebab kemas kini"
+  ],
+  "Recent imports / Import terkini": [
+    "Recent imports",
+    "Import terkini"
+  ],
+  "Reconnect Gmail / Sambung semula Gmail": [
+    "Reconnect Gmail",
+    "Sambung semula Gmail"
+  ],
+  "Reference / Rujukan:": [
+    "Reference:",
+    "Rujukan:"
+  ],
+  "Refresh and try again. / Muat semula dan cuba lagi.": [
+    "Refresh and try again.",
+    "Muat semula dan cuba lagi."
+  ],
+  "Rejected / Ditolak": [
+    "Rejected",
+    "Ditolak"
+  ],
+  "Renewal approved. Member is now active for the renewal year, until 31 December. / Pembaharuan diluluskan. Ahli kini aktif untuk tahun pembaharuan sehingga 31 Disember.": [
+    "Renewal approved. Member is now active for the renewal year, until 31 December.",
+    "Pembaharuan diluluskan. Ahli kini aktif untuk tahun pembaharuan sehingga 31 Disember."
+  ],
+  "Renewal emails / E-mel pembaharuan": [
+    "Renewal emails",
+    "E-mel pembaharuan"
+  ],
+  "Renewal status / Status pembaharuan": [
+    "Renewal status",
+    "Status pembaharuan"
+  ],
+  "Renewals / Pembaharuan": [
+    "Renewals",
+    "Pembaharuan"
+  ],
+  "Replace photo / Ganti foto": [
+    "Replace photo",
+    "Ganti foto"
+  ],
+  "Required for approval. Verify membership and payment before approving. Membership expires on 31 December of this year (Malaysia time). / Wajib untuk kelulusan. Sahkan keahlian dan bayaran sebelum meluluskan. Keahlian tamat pada 31 Disember tahun ini (waktu Malaysia).": [
+    "Required for approval. Verify membership and payment before approving. Membership expires on 31 December of this year (Malaysia time).",
+    "Wajib untuk kelulusan. Sahkan keahlian dan bayaran sebelum meluluskan. Keahlian tamat pada 31 Disember tahun ini (waktu Malaysia)."
+  ],
+  "Restore original / Pulihkan asal": [
+    "Restore original",
+    "Pulihkan asal"
+  ],
+  "Restore the original group photo and captions? / Pulihkan foto dan kapsyen asal?": [
+    "Restore the original group photo and captions?",
+    "Pulihkan foto dan kapsyen asal?"
+  ],
+  "Restore this product before editing. / Pulihkan produk sebelum mengedit.": [
+    "Restore this product before editing.",
+    "Pulihkan produk sebelum mengedit."
+  ],
+  "Retry email / Cuba e-mel semula": [
+    "Retry email",
+    "Cuba e-mel semula"
+  ],
+  "Retry notification / Cuba pemberitahuan semula": [
+    "Retry notification",
+    "Cuba pemberitahuan semula"
+  ],
+  "Review / Semak →": [
+    "Review",
+    "Semak →"
+  ],
+  "Review and membership year saved. Membership ends on 31 December of the approved year. Contact the applicant directly; no decision email is sent. / Semakan dan tahun keahlian disimpan. Keahlian tamat pada 31 Disember tahun diluluskan. Hubungi pemohon secara terus; tiada e-mel keputusan dihantar.": [
+    "Review and membership year saved. Membership ends on 31 December of the approved year. Contact the applicant directly; no decision email is sent.",
+    "Semakan dan tahun keahlian disimpan. Keahlian tamat pada 31 Disember tahun diluluskan. Hubungi pemohon secara terus; tiada e-mel keputusan dihantar."
+  ],
+  "Review applications and update their approval status. / Semak permohonan dan kemas kini status kelulusan.": [
+    "Review applications and update their approval status.",
+    "Semak permohonan dan kemas kini status kelulusan."
+  ],
+  "Review saved. / Semakan disimpan.": [
+    "Review saved.",
+    "Semakan disimpan."
+  ],
+  "Review status / Status semakan": [
+    "Review status",
+    "Status semakan"
+  ],
+  "Save banner / Simpan sepanduk": [
+    "Save banner",
+    "Simpan sepanduk"
+  ],
+  "Save changes / Simpan perubahan": [
+    "Save changes",
+    "Simpan perubahan"
+  ],
+  "Save member / Simpan ahli": [
+    "Save member",
+    "Simpan ahli"
+  ],
+  "Save review / Simpan semakan": [
+    "Save review",
+    "Simpan semakan"
+  ],
+  "Saved. / Disimpan.": [
+    "Saved.",
+    "Disimpan."
+  ],
+  "Saving / Menyimpan…": [
+    "Saving",
+    "Menyimpan…"
+  ],
+  "Saving… / Menyimpan…": [
+    "Saving…",
+    "Menyimpan…"
+  ],
+  "Search name or member ID / Cari nama atau nombor ahli": [
+    "Search name or member ID",
+    "Cari nama atau nombor ahli"
+  ],
+  "Secure renewal storage is unavailable. Keep GMAIL_ENCRYPTION_KEY unchanged and check the database connection. / Storan pembaharuan tidak tersedia. Jangan ubah GMAIL_ENCRYPTION_KEY dan semak sambungan pangkalan data.": [
+    "Secure renewal storage is unavailable. Keep GMAIL_ENCRYPTION_KEY unchanged and check the database connection.",
+    "Storan pembaharuan tidak tersedia. Jangan ubah GMAIL_ENCRYPTION_KEY dan semak sambungan pangkalan data."
+  ],
+  "Sending or already completed. Refresh this page. / Sedang menghantar atau sudah selesai. Muat semula halaman.": [
+    "Sending or already completed. Refresh this page.",
+    "Sedang menghantar atau sudah selesai. Muat semula halaman."
+  ],
+  "Sending or interrupted — check Gmail / Menghantar atau terganggu — semak Gmail": [
+    "Sending or interrupted — check Gmail",
+    "Menghantar atau terganggu — semak Gmail"
+  ],
+  "Session expired. Please sign in again. / Sila log masuk semula.": [
+    "Session expired. Please sign in again.",
+    "Sila log masuk semula."
+  ],
+  "Set the verified membership year before approving. / Tetapkan tahun keahlian yang disahkan sebelum meluluskan.": [
+    "Set the verified membership year before approving.",
+    "Tetapkan tahun keahlian yang disahkan sebelum meluluskan."
+  ],
+  "Show full identification number / Paparkan nombor penuh": [
+    "Show full identification number",
+    "Paparkan nombor penuh"
+  ],
+  "Sign in / Log masuk": [
+    "Sign in",
+    "Log masuk"
+  ],
+  "Sign in to manage your club. / Log masuk untuk mengurus kelab.": [
+    "Sign in to manage your club.",
+    "Log masuk untuk mengurus kelab."
+  ],
+  "Sign out / Log keluar": [
+    "Sign out",
+    "Log keluar"
+  ],
+  "State / Negeri": [
+    "State",
+    "Negeri"
+  ],
+  "State / Negeri:": [
+    "State:",
+    "Negeri:"
+  ],
+  "State / territory": [
+    "State / territory",
+    "Negeri / wilayah"
+  ],
+  "Status is temporarily unavailable. This does not mean your membership has expired. Please contact the club. / Status tidak tersedia buat sementara waktu. Ini tidak bermakna keahlian anda tamat. Sila hubungi kelab.": [
+    "Status is temporarily unavailable. This does not mean your membership has expired. Please contact the club.",
+    "Status tidak tersedia buat sementara waktu. Ini tidak bermakna keahlian anda tamat. Sila hubungi kelab."
+  ],
+  "Stock or product changed. Refresh before saving. / Stok atau produk telah berubah. Muat semula sebelum menyimpan.": [
+    "Stock or product changed. Refresh before saving.",
+    "Stok atau produk telah berubah. Muat semula sebelum menyimpan."
+  ],
+  "Telefon / WhatsApp": [
+    "Phone / WhatsApp",
+    "Telefon / WhatsApp"
+  ],
+  "That ID or running number is already in use, or the ID was previously retired. No changes saved. / Nombor telah digunakan atau tidak boleh digunakan semula.": [
+    "That ID or running number is already in use, or the ID was previously retired. No changes saved.",
+    "Nombor telah digunakan atau tidak boleh digunakan semula."
+  ],
+  "The authorised account does not match the club email shown below. / Akaun yang dibenarkan tidak sepadan dengan e-mel kelab di bawah.": [
+    "The authorised account does not match the club email shown below.",
+    "Akaun yang dibenarkan tidak sepadan dengan e-mel kelab di bawah."
+  ],
+  "The club has not configured an ID prefix for this state/country. Contact the committee; do not use an incorrect address. / Awalan nombor ahli bagi negeri/negara ini belum ditetapkan.": [
+    "The club has not configured an ID prefix for this state/country. Contact the committee; do not use an incorrect address.",
+    "Awalan nombor ahli bagi negeri/negara ini belum ditetapkan."
+  ],
+  "The database connection setting is missing in Production. / Tetapan sambungan pangkalan data tiada dalam Production.": [
+    "The database connection setting is missing in Production.",
+    "Tetapan sambungan pangkalan data tiada dalam Production."
+  ],
+  "The database could not prepare secure Gmail storage. Check the Neon connection and database permissions. / Pangkalan data tidak dapat menyediakan storan Gmail. Semak sambungan Neon dan kebenaran pangkalan data.": [
+    "The database could not prepare secure Gmail storage. Check the Neon connection and database permissions.",
+    "Pangkalan data tidak dapat menyediakan storan Gmail. Semak sambungan Neon dan kebenaran pangkalan data."
+  ],
+  "The membership number is assigned automatically using the registered state, joining year and next club-wide running number. Dormant and retired numbers are never reused. / Nombor ahli dijana secara automatik.": [
+    "The membership number is assigned automatically using the registered state, joining year and next club-wide running number. Dormant and retired numbers are never reused.",
+    "Nombor ahli dijana secara automatik."
+  ],
+  "The outing no longer exists. / Aktiviti tidak lagi tersedia.": [
+    "The outing no longer exists.",
+    "Aktiviti tidak lagi tersedia."
+  ],
+  "The permission to send Gmail was not granted. / Kebenaran menghantar Gmail tidak diberikan.": [
+    "The permission to send Gmail was not granted.",
+    "Kebenaran menghantar Gmail tidak diberikan."
+  ],
+  "The price changed. Refresh before ordering. / Harga telah berubah. Muat semula sebelum menempah.": [
+    "The price changed. Refresh before ordering.",
+    "Harga telah berubah. Muat semula sebelum menempah."
+  ],
+  "This exact import is already saved. No duplicate records were created. / Import ini telah disimpan.": [
+    "This exact import is already saved. No duplicate records were created.",
+    "Import ini telah disimpan."
+  ],
+  "This identification number already belongs to a member. Edit or reinstate the existing member instead. / Nombor pengenalan ini telah didaftarkan.": [
+    "This identification number already belongs to a member. Edit or reinstate the existing member instead.",
+    "Nombor pengenalan ini telah didaftarkan."
+  ],
+  "This is a KPKMM new-membership notification test. No application was created. / Ini ujian pemberitahuan keahlian baharu KPKMM. Tiada permohonan dicipta.": [
+    "This is a KPKMM new-membership notification test. No application was created.",
+    "Ini ujian pemberitahuan keahlian baharu KPKMM. Tiada permohonan dicipta."
+  ],
+  "This order is already finalised. / Tempahan ini telah dimuktamadkan.": [
+    "This order is already finalised.",
+    "Tempahan ini telah dimuktamadkan."
+  ],
+  "This order is already paid or cancelled. / Tempahan telah dibayar atau dibatalkan.": [
+    "This order is already paid or cancelled.",
+    "Tempahan telah dibayar atau dibatalkan."
+  ],
+  "Tick the ID correction confirmation before changing the number. / Sahkan pembetulan nombor ahli.": [
+    "Tick the ID correction confirmation before changing the number.",
+    "Sahkan pembetulan nombor ahli."
+  ],
+  "Title / Tajuk": [
+    "Title",
+    "Tajuk"
+  ],
+  "Too many attempts. Please try again in an hour. / Terlalu banyak percubaan. Cuba lagi dalam sejam.": [
+    "Too many attempts. Please try again in an hour.",
+    "Terlalu banyak percubaan. Cuba lagi dalam sejam."
+  ],
+  "Too many attempts. Try again in an hour. / Terlalu banyak percubaan. Cuba lagi dalam sejam.": [
+    "Too many attempts. Try again in an hour.",
+    "Terlalu banyak percubaan. Cuba lagi dalam sejam."
+  ],
+  "Too many checks. Try again in an hour or contact the club. / Terlalu banyak semakan. Cuba lagi dalam sejam atau hubungi kelab.": [
+    "Too many checks. Try again in an hour or contact the club.",
+    "Terlalu banyak semakan. Cuba lagi dalam sejam atau hubungi kelab."
+  ],
+  "Too many requests. Please try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.": [
+    "Too many requests. Please try again in an hour.",
+    "Terlalu banyak permintaan. Cuba lagi dalam sejam."
+  ],
+  "Too many requests. Try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.": [
+    "Too many requests. Try again in an hour.",
+    "Terlalu banyak permintaan. Cuba lagi dalam sejam."
+  ],
+  "Top / Atas": [
+    "Top",
+    "Atas"
+  ],
+  "Unable to check. / Tidak dapat menyemak.": [
+    "Unable to check.",
+    "Tidak dapat menyemak."
+  ],
+  "Update addresses only / Kemas kini alamat sahaja": [
+    "Update addresses only",
+    "Kemas kini alamat sahaja"
+  ],
+  "Upload / replace poster": [
+    "Upload / replace poster",
+    "Muat naik / ganti poster"
+  ],
+  "Upload verified roster / Muat naik daftar disahkan": [
+    "Upload verified roster",
+    "Muat naik daftar disahkan"
+  ],
+  "Use a JPG, PNG or PDF payment proof under 700 KB. / Gunakan bukti JPG, PNG atau PDF di bawah 700 KB.": [
+    "Use a JPG, PNG or PDF payment proof under 700 KB.",
+    "Gunakan bukti JPG, PNG atau PDF di bawah 700 KB."
+  ],
+  "Use a valid state prefix, two-digit joining year and running number, e.g. B-26-001. / Gunakan format B-26-001.": [
+    "Use a valid state prefix, two-digit joining year and running number, e.g. B-26-001.",
+    "Gunakan format B-26-001."
+  ],
+  "Verified membership year / Tahun keahlian disahkan": [
+    "Verified membership year",
+    "Tahun keahlian disahkan"
+  ],
+  "Video changed. Refresh and try again. / Video berubah. Muat semula dan cuba lagi.": [
+    "Video changed. Refresh and try again.",
+    "Video berubah. Muat semula dan cuba lagi."
+  ],
+  "View private details / Lihat maklumat sulit": [
+    "View private details",
+    "Lihat maklumat sulit"
+  ],
+  "View year / Lihat tahun": [
+    "View year",
+    "Lihat tahun"
+  ],
+  "Waiting / Menunggu": [
+    "Waiting",
+    "Menunggu"
+  ],
+  "Waiting to send / Menunggu penghantaran": [
+    "Waiting to send",
+    "Menunggu penghantaran"
+  ],
+  "We could not save your request. Please try again later or contact the club. / Permohonan tidak dapat disimpan. Cuba lagi nanti atau hubungi kelab.": [
+    "We could not save your request. Please try again later or contact the club.",
+    "Permohonan tidak dapat disimpan. Cuba lagi nanti atau hubungi kelab."
+  ],
+  "We could not submit your request. Please try again later. / Permohonan tidak dapat dihantar. Sila cuba lagi nanti.": [
+    "We could not submit your request. Please try again later.",
+    "Permohonan tidak dapat dihantar. Sila cuba lagi nanti."
+  ],
+  "While Google OAuth is in Testing, this connection normally expires after 7 days. Complete production readiness before relying on unattended emails. Requests are saved even if email fails; reconnect Gmail and retry from renewal administration. / Semasa OAuth Google dalam mod Testing, sambungan biasanya tamat selepas 7 hari. Lengkapkan persediaan Production sebelum bergantung pada e-mel tanpa pengawasan. Permohonan tetap disimpan jika e-mel gagal; sambung semula Gmail dan cuba lagi dalam pentadbiran pembaharuan.": [
+    "While Google OAuth is in Testing, this connection normally expires after 7 days. Complete production readiness before relying on unattended emails. Requests are saved even if email fails; reconnect Gmail and retry from renewal administration.",
+    "Semasa OAuth Google dalam mod Testing, sambungan biasanya tamat selepas 7 hari. Lengkapkan persediaan Production sebelum bergantung pada e-mel tanpa pengawasan. Permohonan tetap disimpan jika e-mel gagal; sambung semula Gmail dan cuba lagi dalam pentadbiran pembaharuan."
+  ],
+  "Year / Tahun": [
+    "Year",
+    "Tahun"
+  ],
+  "Your last active year could not be verified. Contact the committee to update your record before renewing or paying. / Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar.": [
+    "Your last active year could not be verified. Contact the committee to update your record before renewing or paying.",
+    "Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar."
+  ],
+  "Your renewal and payment proof were saved for the club to review, but email delivery is not confirmed. Do not submit or pay again. / Permohonan dan bukti bayaran disimpan untuk semakan kelab, tetapi penghantaran e-mel belum disahkan. Jangan hantar atau bayar lagi.": [
+    "Your renewal and payment proof were saved for the club to review, but email delivery is not confirmed. Do not submit or pay again.",
+    "Permohonan dan bukti bayaran disimpan untuk semakan kelab, tetapi penghantaran e-mel belum disahkan. Jangan hantar atau bayar lagi."
+  ],
+  "Your renewal and payment proof were saved, and Gmail accepted the email to the club. Membership remains pending verification. / Permohonan dan bukti bayaran disimpan, dan Gmail menerima e-mel kepada kelab. Keahlian masih menunggu pengesahan.": [
+    "Your renewal and payment proof were saved, and Gmail accepted the email to the club. Membership remains pending verification.",
+    "Permohonan dan bukti bayaran disimpan, dan Gmail menerima e-mel kepada kelab. Keahlian masih menunggu pengesahan."
+  ],
+  "Your request has been saved for review. The team is notified by email when delivery is available. If you already applied, your existing request is kept. This is not confirmation of membership. / Permohonan disimpan untuk semakan. Pasukan dimaklumkan melalui e-mel apabila penghantaran tersedia. Jika anda pernah memohon, permohonan asal dikekalkan. Ini bukan pengesahan keahlian.": [
+    "Your request has been saved for review. The team is notified by email when delivery is available. If you already applied, your existing request is kept. This is not confirmation of membership.",
+    "Permohonan disimpan untuk semakan. Pasukan dimaklumkan melalui e-mel apabila penghantaran tersedia. Jika anda pernah memohon, permohonan asal dikekalkan. Ini bukan pengesahan keahlian."
+  ],
+  "active / aktif ·": [
+    "active",
+    "aktif ·"
+  ],
+  "and takes precedence over earlier online approvals for this member. Active status ends on 31 December. / Status disimpan ialah keputusan jawatankuasa untuk tahun dipilih.": [
+    "and takes precedence over earlier online approvals for this member. Active status ends on 31 December.",
+    "Status disimpan ialah keputusan jawatankuasa untuk tahun dipilih."
+  ],
+  "inactive / tidak aktif": [
+    "inactive",
+    "tidak aktif"
+  ],
+  "matching members / ahli sepadan": [
+    "matching members",
+    "ahli sepadan"
+  ],
+  "total / jumlah ·": [
+    "total",
+    "jumlah ·"
+  ],
+  "— Admin update / Kemas kini pentadbir": [
+    "— Admin update",
+    "Kemas kini pentadbir"
+  ],
+  "← Applications / Permohonan": [
+    "← Applications",
+    "Permohonan"
+  ],
+  "← Dashboard / Pentadbiran kelab": [
+    "← Dashboard",
+    "Pentadbiran kelab"
+  ],
+  "← Dashboard / Utama": [
+    "← Dashboard",
+    "Utama"
+  ],
+  "← Member listing / Senarai ahli": [
+    "← Member listing",
+    "Senarai ahli"
+  ],
+  "← Membership admin / Pentadbiran keahlian": [
+    "← Membership admin",
+    "Pentadbiran keahlian"
+  ],
+  "← Membership administration / Pentadbiran keahlian": [
+    "← Membership administration",
+    "Pentadbiran keahlian"
+  ],
+  "← Previous / Sebelumnya": [
+    "← Previous",
+    "Sebelumnya"
+  ],
+  "← Requests / Permohonan": [
+    "← Requests",
+    "Permohonan"
+  ],
+  "↑ Move up / Naik": [
+    "↑ Move up",
+    "Naik"
+  ],
+  "↓ Move down / Turun": [
+    "↓ Move down",
+    "Turun"
+  ],
+  "/ Padam": [
+    "",
+    ""
+  ],
+  "/ Pentadbiran kelab": [
+    "",
+    ""
+  ],
+  "MyKad / IC — Malaysian / Warganegara Malaysia": [
+    "MyKad / IC — Malaysian",
+    "MyKad / KP — Warganegara Malaysia"
+  ],
+  "Reason / payment reference · Sebab / rujukan bayaran": [
+    "Reason / payment reference",
+    "Sebab / rujukan bayaran"
+  ],
+  "Active / Aktif — payment verified / bayaran disahkan": [
+    "Active — payment verified",
+    "Aktif — bayaran disahkan"
+  ],
+  "Add photos to this moment": [
+    "Add photos to this moment",
+    "Tambah foto pada kenangan ini"
+  ],
+  "Banner storage is temporarily unavailable. Please try again.": [
+    "Banner storage is temporarily unavailable. Please try again.",
+    "Storan sepanduk tidak tersedia buat sementara waktu. Sila cuba lagi."
+  ],
+  "COMMITTEE ACCESS": [
+    "COMMITTEE ACCESS",
+    "AKSES JAWATANKUASA"
+  ],
+  "Cannot decrypt this application. Check the server encryption key; do not overwrite the application.": [
+    "Cannot decrypt this application. Check the server encryption key; do not overwrite the application.",
+    "Permohonan tidak dapat dinyahsulit. Semak kunci penyulitan pelayan; jangan tindih permohonan."
+  ],
+  "Choose moment": [
+    "Choose moment",
+    "Pilih kenangan"
+  ],
+  "Club archive outing": [
+    "Club archive outing",
+    "Aktiviti dalam arkib kelab"
+  ],
+  "Club dashboard": [
+    "Club dashboard",
+    "Pentadbiran kelab"
+  ],
+  "Create a moment": [
+    "Create a moment",
+    "Cipta kenangan"
+  ],
+  "Delete": [
+    "Delete",
+    "Padam"
+  ],
+  "Delete entire moment": [
+    "Delete entire moment",
+    "Padam seluruh kenangan"
+  ],
+  "Email:": [
+    "Email:",
+    "E-mel:"
+  ],
+  "English caption": [
+    "English caption",
+    "Kapsyen bahasa Inggeris"
+  ],
+  "Kapsyen Bahasa Malaysia": [
+    "Bahasa Malaysia caption",
+    "Kapsyen Bahasa Malaysia"
+  ],
+  "Everything you need to keep the club running, in one place.": [
+    "Everything you need to keep the club running, in one place.",
+    "Semua keperluan pengurusan kelab di satu tempat."
+  ],
+  "I confirm I want to delete this item.": [
+    "I confirm I want to delete this item.",
+    "Saya mengesahkan bahawa saya mahu memadam item ini."
+  ],
+  "Incorrect password. Please try again.": [
+    "Incorrect password. Please try again.",
+    "Kata laluan salah. Sila cuba lagi."
+  ],
+  "JPG, PNG or WebP · Maximum 4 MB": [
+    "JPG, PNG or WebP · Maximum 4 MB",
+    "JPG, PNG atau WebP · Maksimum 4 MB"
+  ],
+  "KPKMM administration · Changes become visible on the website after saving.": [
+    "KPKMM administration · Changes become visible on the website after saving.",
+    "Pentadbiran KPKMM · Perubahan dipaparkan pada laman web selepas disimpan."
+  ],
+  "KPKMM · COMMITTEE WORKSPACE": [
+    "KPKMM · COMMITTEE WORKSPACE",
+    "KPKMM · RUANG KERJA JAWATANKUASA"
+  ],
+  "Leave empty to keep the current photo. Photos are compressed automatically.": [
+    "Leave empty to keep the current photo. Photos are compressed automatically.",
+    "Biarkan kosong untuk mengekalkan foto semasa. Foto dimampatkan secara automatik."
+  ],
+  "Manage photos →": [
+    "Manage photos →",
+    "Urus foto →"
+  ],
+  "Member roster": [
+    "Member roster",
+    "Daftar ahli"
+  ],
+  "Moment title": [
+    "Moment title",
+    "Tajuk kenangan"
+  ],
+  "Move photo": [
+    "Move photo",
+    "Pindahkan foto"
+  ],
+  "Move to moment": [
+    "Move to moment",
+    "Pindah ke kenangan"
+  ],
+  "Next →": [
+    "Next →",
+    "Seterusnya →"
+  ],
+  "No linked outing": [
+    "No linked outing",
+    "Tiada aktiviti dipautkan"
+  ],
+  "No moments yet. Upload your first set of photos above.": [
+    "No moments yet. Upload your first set of photos above.",
+    "Belum ada kenangan. Muat naik foto pertama anda di atas."
+  ],
+  "Nothing here yet. Use the add button above to get started.": [
+    "Nothing here yet. Use the add button above to get started.",
+    "Belum ada rekod. Gunakan butang tambah di atas untuk bermula."
+  ],
+  "One box per moment. Choose a cover, arrange photos, or move them to another moment. Photos are compressed automatically before uploading.": [
+    "One box per moment. Choose a cover, arrange photos, or move them to another moment. Photos are compressed automatically before uploading.",
+    "Satu kotak bagi setiap kenangan. Pilih foto utama, susun foto atau pindahkan ke kenangan lain. Foto dimampatkan secara automatik sebelum dimuat naik."
+  ],
+  "Private address plan": [
+    "Private address plan",
+    "Fail kemas kini alamat sulit"
+  ],
+  "Private roster file": [
+    "Private roster file",
+    "Fail daftar ahli sulit"
+  ],
+  "Private administrator import. Membership numbers are retained, including dormant members. Records not present in the import are unchanged. No emails are sent.": [
+    "Private administrator import. Membership numbers are retained, including dormant members. Records not present in the import are unchanged. No emails are sent.",
+    "Import pentadbir sulit. Nombor ahli dikekalkan termasuk ahli tidak aktif. Rekod yang tiada dalam import tidak berubah. Tiada e-mel dihantar."
+  ],
+  "Private storage is unavailable. No import can be verified. Please contact the administrator.": [
+    "Private storage is unavailable. No import can be verified. Please contact the administrator.",
+    "Storan sulit tidak tersedia. Import tidak dapat disahkan. Sila hubungi pentadbir."
+  ],
+  "Save moment details": [
+    "Save moment details",
+    "Simpan butiran kenangan"
+  ],
+  "Shared moments": [
+    "Shared moments",
+    "Kenangan bersama"
+  ],
+  "The saved status is the committee’s decision for": [
+    "The saved status is the committee’s decision for",
+    "Status disimpan ialah keputusan jawatankuasa bagi"
+  ],
+  "This removes the item from the website.": [
+    "This removes the item from the website.",
+    "Ini memadam item daripada laman web."
+  ],
+  "Upload a reviewed address plan. Updates only unseparated addresses that still match the original member name and address. Newer edits are skipped. Membership numbers, payments, status and other personal details stay unchanged. Previous addresses are retained in the private audit history. Do not upload private files to GitHub.": [
+    "Upload a reviewed address plan. Updates only unseparated addresses that still match the original member name and address. Newer edits are skipped. Membership numbers, payments, status and other personal details stay unchanged. Previous addresses are retained in the private audit history. Do not upload private files to GitHub.",
+    "Muat naik fail alamat yang telah disemak. Hanya alamat yang belum diasingkan dan masih sepadan dengan nama serta alamat asal dikemas kini. Suntingan baharu dilangkau. Nombor ahli, bayaran, status dan maklumat peribadi lain tidak berubah. Alamat asal disimpan dalam sejarah audit sulit. Jangan muat naik fail sulit ke GitHub."
+  ],
+  "Upload photos": [
+    "Upload photos",
+    "Muat naik foto"
+  ],
+  "Use a prepared JSON file containing year, source and members. Each member must include memberNumber, name, active, identity, phone, email, address and sourceRow. Blank personal details are allowed. Never upload this file to GitHub.": [
+    "Use a prepared JSON file containing year, source and members. Each member must include memberNumber, name, active, identity, phone, email, address and sourceRow. Blank personal details are allowed. Never upload this file to GitHub.",
+    "Gunakan fail JSON yang mengandungi year, source dan members. Setiap ahli mesti mempunyai memberNumber, name, active, identity, phone, email, address dan sourceRow. Butiran peribadi kosong dibenarkan. Jangan muat naik fail ini ke GitHub."
+  ],
+  "View website ↗": [
+    "View website ↗",
+    "Lihat laman web ↗"
+  ],
+  "Website": [
+    "Website",
+    "Laman web"
+  ],
+  "Welcome back": [
+    "Welcome back",
+    "Selamat kembali"
+  ],
+  "active ·": [
+    "active ·",
+    "aktif ·"
+  ],
+  "active.": [
+    "active.",
+    "aktif."
+  ],
+  "inactive": [
+    "inactive",
+    "tidak aktif"
+  ],
+  "active": [
+    "active",
+    "aktif"
+  ],
+  "linked photos ·": [
+    "linked photos ·",
+    "foto dipautkan ·"
+  ],
+  "members ·": [
+    "members ·",
+    "ahli ·"
+  ],
+  "members,": [
+    "members,",
+    "ahli,"
+  ],
+  "membership": [
+    "membership",
+    "keahlian"
+  ],
+  "membership roster": [
+    "membership roster",
+    "daftar ahli"
+  ],
+  "photo": [
+    "photo",
+    "foto"
+  ],
+  "photos": [
+    "photos",
+    "foto"
+  ],
+  "skipped. Membership IDs, payments and status were not changed.": [
+    "skipped. Membership IDs, payments and status were not changed.",
+    "dilangkau. Nombor ahli, bayaran dan status tidak berubah."
+  ],
+  "updated,": [
+    "updated,",
+    "dikemas kini,"
+  ],
+  "· First photo is the cover": [
+    "· First photo is the cover",
+    "· Foto pertama ialah foto utama"
+  ],
+  "← Admin": [
+    "← Admin",
+    "← Pentadbir"
+  ],
+  "← KPKMM website": [
+    "← KPKMM website",
+    "← Laman web KPKMM"
+  ],
+  "← Previous": [
+    "← Previous",
+    "← Sebelumnya"
+  ],
+  "Membership": [
+    "Membership",
+    "Keahlian"
+  ],
+  "Shop & settings": [
+    "Shop & settings",
+    "Kedai & tetapan"
+  ],
+  "Member listing & Excel": [
+    "Member listing & Excel",
+    "Senarai ahli & Excel"
+  ],
+  "New applications": [
+    "New applications",
+    "Permohonan baharu"
+  ],
+  "Membership renewals": [
+    "Membership renewals",
+    "Pembaharuan keahlian"
+  ],
+  "Notice board": [
+    "Notice board",
+    "Papan kenyataan"
+  ],
+  "Club archive": [
+    "Club archive",
+    "Arkib kelab"
+  ],
+  "Homepage banner": [
+    "Homepage banner",
+    "Sepanduk utama"
+  ],
+  "Videos": [
+    "Videos",
+    "Video"
+  ],
+  "Marketplace": [
+    "Marketplace",
+    "Kedai"
+  ],
+  "Club email": [
+    "Club email",
+    "E-mel kelab"
+  ],
+  "Senarai ahli · Edit records, status and exports": [
+    "Edit member records, status and exports",
+    "Sunting rekod ahli, status dan eksport"
+  ],
+  "Permohonan baharu · Review requests to join": [
+    "Review requests to join",
+    "Semak permohonan menyertai kelab"
+  ],
+  "Pembaharuan · Review payments and renewals": [
+    "Review payments and renewals",
+    "Semak bayaran dan pembaharuan"
+  ],
+  "Papan kenyataan · Publish messages and posters": [
+    "Publish messages and posters",
+    "Siarkan mesej dan poster"
+  ],
+  "Arkib kelab · Edit outings and arrange their order": [
+    "Edit outings and arrange their order",
+    "Sunting aktiviti dan susun urutannya"
+  ],
+  "Momen bersama · Add and organize photo albums": [
+    "Add and organize photo albums",
+    "Tambah dan susun album foto"
+  ],
+  "Sepanduk utama · Change the featured photo": [
+    "Change the featured photo",
+    "Tukar foto utama"
+  ],
+  "Video · Manage YouTube links": [
+    "Manage YouTube links",
+    "Urus pautan YouTube"
+  ],
+  "Kedai · Manage products, stock and orders": [
+    "Manage products, stock and orders",
+    "Urus produk, stok dan tempahan"
+  ],
+  "E-mel kelab · Manage notification connection": [
+    "Manage notification connection",
+    "Urus sambungan pemberitahuan"
+  ],
+  "Open a notice to edit its message or poster.": [
+    "Open a notice to edit its message or poster.",
+    "Buka notis untuk menyunting mesej atau posternya."
+  ],
+  "Open an outing to edit it. Use the arrows to change the public display order.": [
+    "Open an outing to edit it. Use the arrows to change the public display order.",
+    "Buka aktiviti untuk menyuntingnya. Gunakan anak panah untuk menukar susunan paparan awam."
+  ],
+  "After publishing, open the notice below to attach its poster.": [
+    "After publishing, open the notice below to attach its poster.",
+    "Selepas disiarkan, buka notis di bawah untuk melampirkan poster."
+  ],
+  "Link photos to this outing in the Photos tab.": [
+    "Link photos to this outing in the Photos tab.",
+    "Pautkan foto kepada aktiviti ini dalam tab Foto."
+  ],
+  " Linked photos remain in Shared moments.": [
+    " Linked photos remain in Shared moments.",
+    " Foto yang dipautkan kekal dalam Kenangan bersama."
+  ],
+  "notice": [
+    "notice",
+    "notis"
+  ],
+  "outing": [
+    "outing",
+    "aktiviti"
+  ],
+  "Add more photos": [
+    "Add more photos",
+    "Tambah lagi foto"
+  ],
+  "Choose photos": [
+    "Choose photos",
+    "Pilih foto"
+  ],
+  "★ Cover photo": [
+    "★ Cover photo",
+    "★ Foto utama"
+  ],
+  "Set cover": [
+    "Set cover",
+    "Jadikan foto utama"
+  ],
+  "← Earlier": [
+    "← Earlier",
+    "← Lebih awal"
+  ],
+  "Later →": [
+    "Later →",
+    "Kemudian →"
+  ],
+  "s": [
+    "s",
+    ""
+  ],
+  "Delete this moment and all its photos from the website?": [
+    "Delete this moment and all its photos from the website?",
+    "Padam kenangan ini dan semua fotonya daripada laman web?"
+  ],
+  "Delete this photo from the moment?": [
+    "Delete this photo from the moment?",
+    "Padam foto ini daripada kenangan?"
+  ],
+  "All photos published.": [
+    "All photos published.",
+    "Semua foto disiarkan."
+  ],
+  "Changes saved.": [
+    "Changes saved.",
+    "Perubahan disimpan."
+  ],
+  "Choose at least one photo.": [
+    "Choose at least one photo.",
+    "Pilih sekurang-kurangnya satu foto."
+  ],
+  "The change could not be saved.": [
+    "The change could not be saved.",
+    "Perubahan tidak dapat disimpan."
+  ],
+  "Please choose JPG, PNG or WebP photos.": [
+    "Please choose JPG, PNG or WebP photos.",
+    "Sila pilih foto JPG, PNG atau WebP."
+  ],
+  "Your browser could not prepare this photo.": [
+    "Your browser could not prepare this photo.",
+    "Pelayar anda tidak dapat menyediakan foto ini."
+  ],
+  "Choose a JPG, PNG or WebP under 40 MB.": [
+    "Choose a JPG, PNG or WebP under 40 MB.",
+    "Pilih JPG, PNG atau WebP di bawah 40 MB."
+  ],
+  "Cannot prepare image.": [
+    "Cannot prepare image.",
+    "Imej tidak dapat disediakan."
+  ],
+  "Please choose a smaller image.": [
+    "Please choose a smaller image.",
+    "Sila pilih imej yang lebih kecil."
+  ],
+  "Unable to save. Please try again.": [
+    "Unable to save. Please try again.",
+    "Tidak dapat menyimpan. Sila cuba lagi."
+  ],
+  "Current homepage banner": [
+    "Current homepage banner",
+    "Sepanduk utama semasa"
+  ],
+  "Shared moment photos": [
+    "Shared moment photos",
+    "Foto kenangan bersama"
+  ],
+  "e.g. Sunday drive to Port Dickson": [
+    "e.g. Sunday drive to Port Dickson",
+    "cth. Konvoi Ahad ke Port Dickson"
+  ],
+  "pending": [
+    "pending",
+    "menunggu"
+  ],
+  "approved": [
+    "approved",
+    "diluluskan"
+  ],
+  "rejected": [
+    "rejected",
+    "ditolak"
+  ],
+  "paid": [
+    "paid",
+    "dibayar"
+  ],
+  "cancelled": [
+    "cancelled",
+    "dibatalkan"
+  ],
+  "review": [
+    "review",
+    "semakan"
+  ],
+  "passport": [
+    "passport",
+    "pasport"
+  ],
+  "The website requests permission to send email and confirm your email address. It does not request access to read or delete your inbox. Select only the club account when Google asks.": [
+    "The website requests permission to send email and confirm your email address. It does not request access to read or delete your inbox. Select only the club account when Google asks.",
+    "Laman web meminta kebenaran menghantar e-mel dan mengesahkan alamat e-mel anda. Ia tidak meminta akses membaca atau memadam peti masuk. Pilih akaun kelab sahaja."
+  ],
+  "Address (house, street and town)": [
+    "Address (house, street and town)",
+    "Alamat (rumah, jalan dan bandar)"
+  ],
+  "Alamat (rumah, jalan dan bandar)": [
+    "Address (house, street and town)",
+    "Alamat (rumah, jalan dan bandar)"
+  ],
+  "Postcode": [
+    "Postcode",
+    "Poskod"
+  ],
+  "Poskod": [
+    "Postcode",
+    "Poskod"
+  ],
+  "Country (mailing address)": [
+    "Country (mailing address)",
+    "Negara (alamat surat-menyurat)"
+  ],
+  "Negara (alamat surat-menyurat)": [
+    "Country (mailing address)",
+    "Negara (alamat surat-menyurat)"
+  ],
+  "Product name (English)": [
+    "Product name (English)",
+    "Nama produk (Bahasa Inggeris)"
+  ],
+  "Nama produk (Bahasa Inggeris)": [
+    "Product name (English)",
+    "Nama produk (Bahasa Inggeris)"
+  ],
+  "Product name (Bahasa Malaysia)": [
+    "Product name (Bahasa Malaysia)",
+    "Nama produk (Bahasa Malaysia)"
+  ],
+  "Nama produk (Bahasa Malaysia)": [
+    "Product name (Bahasa Malaysia)",
+    "Nama produk (Bahasa Malaysia)"
+  ],
+  "Description (English)": [
+    "Description (English)",
+    "Penerangan (Bahasa Inggeris)"
+  ],
+  "Penerangan (Bahasa Inggeris)": [
+    "Description (English)",
+    "Penerangan (Bahasa Inggeris)"
+  ],
+  "Description (Bahasa Malaysia)": [
+    "Description (Bahasa Malaysia)",
+    "Penerangan (Bahasa Malaysia)"
+  ],
+  "Penerangan (Bahasa Malaysia)": [
+    "Description (Bahasa Malaysia)",
+    "Penerangan (Bahasa Malaysia)"
+  ],
+  "Price (RM)": [
+    "Price (RM)",
+    "Harga (RM)"
+  ],
+  "Harga (RM)": [
+    "Price (RM)",
+    "Harga (RM)"
+  ],
+  "Available quantity (excluding reserved orders)": [
+    "Available quantity (excluding reserved orders)",
+    "Kuantiti tersedia (tidak termasuk tempahan)"
+  ],
+  "Kuantiti tersedia (tidak termasuk tempahan)": [
+    "Available quantity (excluding reserved orders)",
+    "Kuantiti tersedia (tidak termasuk tempahan)"
+  ],
+  "Product photo: JPG/PNG, max 700 KB": [
+    "Product photo: JPG/PNG, max 700 KB",
+    "Foto produk: JPG/PNG, maks 700 KB"
+  ],
+  "Foto produk: JPG/PNG, maks 700 KB": [
+    "Product photo: JPG/PNG, max 700 KB",
+    "Foto produk: JPG/PNG, maks 700 KB"
+  ],
+  "Leave blank to keep the current photo. Create a separate product for each size or colour with its own stock.": [
+    "Leave blank to keep the current photo. Create a separate product for each size or colour with its own stock.",
+    "Biarkan kosong untuk mengekalkan foto semasa. Cipta produk berasingan bagi setiap saiz atau warna dengan stok tersendiri."
+  ],
+  "Biarkan kosong untuk mengekalkan foto semasa. Cipta produk berasingan bagi setiap saiz atau warna dengan stok tersendiri.": [
+    "Leave blank to keep the current photo. Create a separate product for each size or colour with its own stock.",
+    "Biarkan kosong untuk mengekalkan foto semasa. Cipta produk berasingan bagi setiap saiz atau warna dengan stok tersendiri."
+  ],
+  "Published in marketplace": [
+    "Published in marketplace",
+    "Diterbitkan di kedai"
+  ],
+  "Diterbitkan di kedai": [
+    "Published in marketplace",
+    "Diterbitkan di kedai"
+  ],
+  "Club admin": [
+    "Club admin",
+    "Pentadbir kelab"
+  ],
+  "Pentadbir kelab": [
+    "Club admin",
+    "Pentadbir kelab"
+  ],
+  "View marketplace →": [
+    "View marketplace →",
+    "Lihat kedai →"
+  ],
+  "Lihat kedai →": [
+    "View marketplace →",
+    "Lihat kedai →"
+  ],
+  "Manage marketplace": [
+    "Manage marketplace",
+    "Urus kedai"
+  ],
+  "Urus kedai": [
+    "Manage marketplace",
+    "Urus kedai"
+  ],
+  "Manage products, prices, available stock and payment verification. Hidden products and old orders are retained.": [
+    "Manage products, prices, available stock and payment verification. Hidden products and old orders are retained.",
+    "Urus produk, harga, stok tersedia dan pengesahan bayaran. Produk tersembunyi dan tempahan lama dikekalkan."
+  ],
+  "Urus produk, harga, stok tersedia dan pengesahan bayaran. Produk tersembunyi dan tempahan lama dikekalkan.": [
+    "Manage products, prices, available stock and payment verification. Hidden products and old orders are retained.",
+    "Urus produk, harga, stok tersedia dan pengesahan bayaran. Produk tersembunyi dan tempahan lama dikekalkan."
+  ],
+  "Add product": [
+    "Add product",
+    "Tambah produk"
+  ],
+  "Tambah produk": [
+    "Add product",
+    "Tambah produk"
+  ],
+  "Save product": [
+    "Save product",
+    "Simpan produk"
+  ],
+  "Simpan produk": [
+    "Save product",
+    "Simpan produk"
+  ],
+  "Products": [
+    "Products",
+    "Produk"
+  ],
+  "Produk": [
+    "Products",
+    "Produk"
+  ],
+  "available": [
+    "available",
+    "tersedia"
+  ],
+  "tersedia": [
+    "available",
+    "tersedia"
+  ],
+  "Published": [
+    "Published",
+    "Diterbitkan"
+  ],
+  "Diterbitkan": [
+    "Published",
+    "Diterbitkan"
+  ],
+  "Hidden": [
+    "Hidden",
+    "Tersembunyi"
+  ],
+  "Tersembunyi": [
+    "Hidden",
+    "Tersembunyi"
+  ],
+  "Edit product": [
+    "Edit product",
+    "Edit produk"
+  ],
+  "Edit produk": [
+    "Edit product",
+    "Edit produk"
+  ],
+  "Save changes": [
+    "Save changes",
+    "Simpan perubahan"
+  ],
+  "Simpan perubahan": [
+    "Save changes",
+    "Simpan perubahan"
+  ],
+  "Delete product": [
+    "Delete product",
+    "Padam produk"
+  ],
+  "Padam produk": [
+    "Delete product",
+    "Padam produk"
+  ],
+  "Remove this product from the marketplace? Existing orders will remain. You can restore it under Deleted products.": [
+    "Remove this product from the marketplace? Existing orders will remain. You can restore it under Deleted products.",
+    "Padam produk daripada kedai? Tempahan sedia ada kekal. Anda boleh memulihkannya di Produk dipadam."
+  ],
+  "Padam produk daripada kedai? Tempahan sedia ada kekal. Anda boleh memulihkannya di Produk dipadam.": [
+    "Remove this product from the marketplace? Existing orders will remain. You can restore it under Deleted products.",
+    "Padam produk daripada kedai? Tempahan sedia ada kekal. Anda boleh memulihkannya di Produk dipadam."
+  ],
+  "Deleted products": [
+    "Deleted products",
+    "Produk dipadam"
+  ],
+  "Produk dipadam": [
+    "Deleted products",
+    "Produk dipadam"
+  ],
+  "Restore product": [
+    "Restore product",
+    "Pulihkan produk"
+  ],
+  "Pulihkan produk": [
+    "Restore product",
+    "Pulihkan produk"
+  ],
+  "Orders": [
+    "Orders",
+    "Tempahan"
+  ],
+  "Tempahan": [
+    "Orders",
+    "Tempahan"
+  ],
+  "Confirm payment only after checking your Maybank account. Cancelling restores reserved stock. Paid and cancelled orders cannot be changed here; arrange any refund directly with the customer.": [
+    "Confirm payment only after checking your Maybank account. Cancelling restores reserved stock. Paid and cancelled orders cannot be changed here; arrange any refund directly with the customer.",
+    "Sahkan bayaran hanya selepas menyemak akaun Maybank. Pembatalan memulihkan stok ditempah. Tempahan dibayar dan dibatalkan tidak boleh diubah di sini; urus bayaran balik terus dengan pelanggan."
+  ],
+  "Sahkan bayaran hanya selepas menyemak akaun Maybank. Pembatalan memulihkan stok ditempah. Tempahan dibayar dan dibatalkan tidak boleh diubah di sini; urus bayaran balik terus dengan pelanggan.": [
+    "Confirm payment only after checking your Maybank account. Cancelling restores reserved stock. Paid and cancelled orders cannot be changed here; arrange any refund directly with the customer.",
+    "Sahkan bayaran hanya selepas menyemak akaun Maybank. Pembatalan memulihkan stok ditempah. Tempahan dibayar dan dibatalkan tidak boleh diubah di sini; urus bayaran balik terus dengan pelanggan."
+  ],
+  "No orders yet.": [
+    "No orders yet.",
+    "Belum ada tempahan."
+  ],
+  "Belum ada tempahan.": [
+    "No orders yet.",
+    "Belum ada tempahan."
+  ],
+  "Awaiting proof": [
+    "Awaiting proof",
+    "Menunggu bukti"
+  ],
+  "Menunggu bukti": [
+    "Awaiting proof",
+    "Menunggu bukti"
+  ],
+  "Review proof": [
+    "Review proof",
+    "Semak bukti"
+  ],
+  "Semak bukti": [
+    "Review proof",
+    "Semak bukti"
+  ],
+  "Payment verified": [
+    "Payment verified",
+    "Bayaran disahkan"
+  ],
+  "Bayaran disahkan": [
+    "Payment verified",
+    "Bayaran disahkan"
+  ],
+  "Cancelled": [
+    "Cancelled",
+    "Dibatalkan"
+  ],
+  "Dibatalkan": [
+    "Cancelled",
+    "Dibatalkan"
+  ],
+  "Download payment proof": [
+    "Download payment proof",
+    "Muat turun bukti bayaran"
+  ],
+  "Muat turun bukti bayaran": [
+    "Download payment proof",
+    "Muat turun bukti bayaran"
+  ],
+  "Update order": [
+    "Update order",
+    "Kemas kini tempahan"
+  ],
+  "Kemas kini tempahan": [
+    "Update order",
+    "Kemas kini tempahan"
+  ],
+  "Confirm this order change? Payment must be checked against the bank account before marking paid.": [
+    "Confirm this order change? Payment must be checked against the bank account before marking paid.",
+    "Sahkan perubahan tempahan? Semak akaun bank sebelum mengesahkan bayaran."
+  ],
+  "Sahkan perubahan tempahan? Semak akaun bank sebelum mengesahkan bayaran.": [
+    "Confirm this order change? Payment must be checked against the bank account before marking paid.",
+    "Sahkan perubahan tempahan? Semak akaun bank sebelum mengesahkan bayaran."
+  ],
+  "Action": [
+    "Action",
+    "Tindakan"
+  ],
+  "Tindakan": [
+    "Action",
+    "Tindakan"
+  ],
+  "Choose an action": [
+    "Choose an action",
+    "Pilih tindakan"
+  ],
+  "Pilih tindakan": [
+    "Choose an action",
+    "Pilih tindakan"
+  ],
+  "Confirm payment received": [
+    "Confirm payment received",
+    "Sahkan bayaran diterima"
+  ],
+  "Sahkan bayaran diterima": [
+    "Confirm payment received",
+    "Sahkan bayaran diterima"
+  ],
+  "Request new payment proof": [
+    "Request new payment proof",
+    "Minta bukti bayaran baharu"
+  ],
+  "Minta bukti bayaran baharu": [
+    "Request new payment proof",
+    "Minta bukti bayaran baharu"
+  ],
+  "Cancel order and restore stock": [
+    "Cancel order and restore stock",
+    "Batalkan tempahan dan pulihkan stok"
+  ],
+  "Batalkan tempahan dan pulihkan stok": [
+    "Cancel order and restore stock",
+    "Batalkan tempahan dan pulihkan stok"
+  ],
+  "Previous": [
+    "Previous",
+    "Sebelumnya"
+  ],
+  "Sebelumnya": [
+    "Previous",
+    "Sebelumnya"
+  ],
+  "Next": [
+    "Next",
+    "Seterusnya"
+  ],
+  "Seterusnya": [
+    "Next",
+    "Seterusnya"
+  ],
+  "YouTube link": [
+    "YouTube link",
+    "Pautan YouTube"
+  ],
+  "Pautan YouTube": [
+    "YouTube link",
+    "Pautan YouTube"
+  ],
+  "Title": [
+    "Title",
+    "Tajuk"
+  ],
+  "Tajuk": [
+    "Title",
+    "Tajuk"
+  ],
+  "Description": [
+    "Description",
+    "Penerangan"
+  ],
+  "Penerangan": [
+    "Description",
+    "Penerangan"
+  ],
+  "Linked outing": [
+    "Linked outing",
+    "Aktiviti berkaitan"
+  ],
+  "Aktiviti berkaitan": [
+    "Linked outing",
+    "Aktiviti berkaitan"
+  ],
+  "Tiada aktiviti berkaitan": [
+    "No linked outing",
+    "Tiada aktiviti berkaitan"
+  ],
+  "Manage videos": [
+    "Manage videos",
+    "Urus video"
+  ],
+  "Urus video": [
+    "Manage videos",
+    "Urus video"
+  ],
+  "View videos →": [
+    "View videos →",
+    "Lihat video →"
+  ],
+  "Lihat video →": [
+    "View videos →",
+    "Lihat video →"
+  ],
+  "Add YouTube video": [
+    "Add YouTube video",
+    "Tambah video YouTube"
+  ],
+  "Tambah video YouTube": [
+    "Add YouTube video",
+    "Tambah video YouTube"
+  ],
+  "Publish video": [
+    "Publish video",
+    "Terbitkan video"
+  ],
+  "Terbitkan video": [
+    "Publish video",
+    "Terbitkan video"
+  ],
+  "Delete video": [
+    "Delete video",
+    "Padam video"
+  ],
+  "Padam video": [
+    "Delete video",
+    "Padam video"
+  ],
+  "Remove this video from the website? It can be restored below.": [
+    "Remove this video from the website? It can be restored below.",
+    "Padam video daripada laman web? Video boleh dipulihkan di bawah."
+  ],
+  "Padam video daripada laman web? Video boleh dipulihkan di bawah.": [
+    "Remove this video from the website? It can be restored below.",
+    "Padam video daripada laman web? Video boleh dipulihkan di bawah."
+  ],
+  "Deleted videos": [
+    "Deleted videos",
+    "Video dipadam"
+  ],
+  "Video dipadam": [
+    "Deleted videos",
+    "Video dipadam"
+  ],
+  "Restore video": [
+    "Restore video",
+    "Pulihkan video"
+  ],
+  "Pulihkan video": [
+    "Restore video",
+    "Pulihkan video"
+  ],
+  "Open": [
+    "Open ",
+    "Buka "
+  ],
+  "Buka": [
+    "Open ",
+    "Buka "
+  ],
+  "foto": [
+    " photos",
+    " foto"
+  ],
+  "View moment": [
+    "View moment",
+    "Lihat kenangan"
+  ],
+  "Lihat kenangan": [
+    "View moment",
+    "Lihat kenangan"
+  ],
+  "Close": [
+    "Close",
+    "Tutup"
+  ],
+  "Tutup": [
+    "Close",
+    "Tutup"
+  ],
+  "View photo": [
+    "View photo ",
+    "Lihat foto "
+  ],
+  "Lihat foto": [
+    "View photo ",
+    "Lihat foto "
+  ],
+  "Membership fees": [
+    "Membership fees",
+    "Yuran keahlian"
+  ],
+  "Yuran keahlian": [
+    "Membership fees",
+    "Yuran keahlian"
+  ],
+  "New members": [
+    "New members",
+    "Ahli baharu"
+  ],
+  "Ahli baharu": [
+    "New members",
+    "Ahli baharu"
+  ],
+  "for the first year": [
+    "for the first year",
+    "untuk tahun pertama"
+  ],
+  "untuk tahun pertama": [
+    "for the first year",
+    "untuk tahun pertama"
+  ],
+  "Includes RM100 one-time administrative fee + RM150 annual membership fee.": [
+    "Includes RM100 one-time administrative fee + RM150 annual membership fee.",
+    "Termasuk yuran pentadbiran sekali sahaja RM100 + yuran keahlian tahunan RM150."
+  ],
+  "Termasuk yuran pentadbiran sekali sahaja RM100 + yuran keahlian tahunan RM150.": [
+    "Includes RM100 one-time administrative fee + RM150 annual membership fee.",
+    "Termasuk yuran pentadbiran sekali sahaja RM100 + yuran keahlian tahunan RM150."
+  ],
+  "Annual renewal": [
+    "Annual renewal",
+    "Pembaharuan tahunan"
+  ],
+  "Pembaharuan tahunan": [
+    "Annual renewal",
+    "Pembaharuan tahunan"
+  ],
+  "per year for existing members": [
+    "per year for existing members",
+    "setahun untuk ahli sedia ada"
+  ],
+  "setahun untuk ahli sedia ada": [
+    "per year for existing members",
+    "setahun untuk ahli sedia ada"
+  ],
+  "No further administrative fee.": [
+    "No further administrative fee.",
+    "Tiada lagi yuran pentadbiran."
+  ],
+  "Tiada lagi yuran pentadbiran.": [
+    "No further administrative fee.",
+    "Tiada lagi yuran pentadbiran."
+  ],
+  "Renew membership →": [
+    "Renew membership →",
+    "Perbaharui keahlian →"
+  ],
+  "Perbaharui keahlian →": [
+    "Renew membership →",
+    "Perbaharui keahlian →"
+  ],
+  "Request received": [
+    "Request received",
+    "Permohonan diterima"
+  ],
+  "Permohonan diterima": [
+    "Request received",
+    "Permohonan diterima"
+  ],
+  "Back to home": [
+    "Back to home",
+    "Kembali ke laman utama"
+  ],
+  "Kembali ke laman utama": [
+    "Back to home",
+    "Kembali ke laman utama"
+  ],
+  "Identification type": [
+    "Identification type",
+    "Jenis pengenalan"
+  ],
+  "Jenis pengenalan": [
+    "Identification type",
+    "Jenis pengenalan"
+  ],
+  "Passport number": [
+    "Passport number",
+    "Nombor pasport"
+  ],
+  "Nombor pasport": [
+    "Passport number",
+    "Nombor pasport"
+  ],
+  "Passport issuing country": [
+    "Passport issuing country",
+    "Negara pengeluar pasport"
+  ],
+  "Negara pengeluar pasport": [
+    "Passport issuing country",
+    "Negara pengeluar pasport"
+  ],
+  "Email address": [
+    "Email address",
+    "Alamat e-mel"
+  ],
+  "Alamat e-mel": [
+    "Email address",
+    "Alamat e-mel"
+  ],
+  "Mobile number (include country code)": [
+    "Mobile number (include country code)",
+    "Nombor telefon bimbit (sertakan kod negara)"
+  ],
+  "Nombor telefon bimbit (sertakan kod negara)": [
+    "Mobile number (include country code)",
+    "Nombor telefon bimbit (sertakan kod negara)"
+  ],
+  "I have read the notice below and consent to KPKMM using these details to review my membership request and contact me. I confirm the information is accurate.": [
+    "I have read the notice below and consent to KPKMM using these details to review my membership request and contact me. I confirm the information is accurate.",
+    "Saya telah membaca notis di bawah dan bersetuju KPKMM menggunakan maklumat ini untuk menyemak permohonan dan menghubungi saya. Saya mengesahkan maklumat ini adalah tepat."
+  ],
+  "Saya telah membaca notis di bawah dan bersetuju KPKMM menggunakan maklumat ini untuk menyemak permohonan dan menghubungi saya. Saya mengesahkan maklumat ini adalah tepat.": [
+    "I have read the notice below and consent to KPKMM using these details to review my membership request and contact me. I confirm the information is accurate.",
+    "Saya telah membaca notis di bawah dan bersetuju KPKMM menggunakan maklumat ini untuk menyemak permohonan dan menghubungi saya. Saya mengesahkan maklumat ini adalah tepat."
+  ],
+  "Submitting…": [
+    "Submitting…",
+    "Menghantar…"
+  ],
+  "Menghantar…": [
+    "Submitting…",
+    "Menghantar…"
+  ],
+  "Request to join": [
+    "Request to join",
+    "Hantar permohonan"
+  ],
+  "Hantar permohonan": [
+    "Request to join",
+    "Hantar permohonan"
+  ],
+  "Request to join the club": [
+    "Request to join the club",
+    "Permohonan menyertai kelab"
+  ],
+  "Permohonan menyertai kelab": [
+    "Request to join the club",
+    "Permohonan menyertai kelab"
+  ],
+  "Complete this form to request membership. Every application is pending until reviewed by KPKMM. This form does not collect payment or create a member account automatically.": [
+    "Complete this form to request membership. Every application is pending until reviewed by KPKMM. This form does not collect payment or create a member account automatically.",
+    "Lengkapkan borang untuk memohon keahlian. Semua permohonan menunggu semakan KPKMM. Borang ini tidak menerima bayaran atau mewujudkan akaun ahli secara automatik."
+  ],
+  "Lengkapkan borang untuk memohon keahlian. Semua permohonan menunggu semakan KPKMM. Borang ini tidak menerima bayaran atau mewujudkan akaun ahli secara automatik.": [
+    "Complete this form to request membership. Every application is pending until reviewed by KPKMM. This form does not collect payment or create a member account automatically.",
+    "Lengkapkan borang untuk memohon keahlian. Semua permohonan menunggu semakan KPKMM. Borang ini tidak menerima bayaran atau mewujudkan akaun ahli secara automatik."
+  ],
+  "How your information is used": [
+    "How your information is used",
+    "Penggunaan maklumat anda"
+  ],
+  "Penggunaan maklumat anda": [
+    "How your information is used",
+    "Penggunaan maklumat anda"
+  ],
+  "KPKMM collects your identification, contact and mailing details to identify you, review your application and contact you about membership. These details are not displayed publicly and are accessible to authorised club administrators. A notification containing only an application reference and a private review link is sent through Gmail to the club team. Please do not upload a copy of your identification document.": [
+    "KPKMM collects your identification, contact and mailing details to identify you, review your application and contact you about membership. These details are not displayed publicly and are accessible to authorised club administrators. A notification containing only an application reference and a private review link is sent through Gmail to the club team. Please do not upload a copy of your identification document.",
+    "KPKMM mengumpul maklumat pengenalan, hubungan dan alamat anda untuk mengenal pasti pemohon, menyemak permohonan dan menghubungi anda tentang keahlian. Maklumat tidak dipaparkan kepada umum dan hanya boleh diakses oleh pentadbir kelab yang dibenarkan. Pemberitahuan yang mengandungi rujukan permohonan dan pautan semakan sulit sahaja dihantar melalui Gmail kepada pasukan kelab. Jangan muat naik salinan dokumen pengenalan."
+  ],
+  "KPKMM mengumpul maklumat pengenalan, hubungan dan alamat anda untuk mengenal pasti pemohon, menyemak permohonan dan menghubungi anda tentang keahlian. Maklumat tidak dipaparkan kepada umum dan hanya boleh diakses oleh pentadbir kelab yang dibenarkan. Pemberitahuan yang mengandungi rujukan permohonan dan pautan semakan sulit sahaja dihantar melalui Gmail kepada pasukan kelab. Jangan muat naik salinan dokumen pengenalan.": [
+    "KPKMM collects your identification, contact and mailing details to identify you, review your application and contact you about membership. These details are not displayed publicly and are accessible to authorised club administrators. A notification containing only an application reference and a private review link is sent through Gmail to the club team. Please do not upload a copy of your identification document.",
+    "KPKMM mengumpul maklumat pengenalan, hubungan dan alamat anda untuk mengenal pasti pemohon, menyemak permohonan dan menghubungi anda tentang keahlian. Maklumat tidak dipaparkan kepada umum dan hanya boleh diakses oleh pentadbir kelab yang dibenarkan. Pemberitahuan yang mengandungi rujukan permohonan dan pautan semakan sulit sahaja dihantar melalui Gmail kepada pasukan kelab. Jangan muat naik salinan dokumen pengenalan."
+  ],
+  "Providing these details is voluntary, but all fields are needed to process this request. For questions, corrections or withdrawal of your request, contact": [
+    "Providing these details is voluntary, but all fields are needed to process this request. For questions, corrections or withdrawal of your request, contact",
+    "Maklumat diberikan secara sukarela, tetapi semua medan diperlukan untuk memproses permohonan. Untuk pertanyaan, pembetulan atau penarikan permohonan, hubungi"
+  ],
+  "Maklumat diberikan secara sukarela, tetapi semua medan diperlukan untuk memproses permohonan. Untuk pertanyaan, pembetulan atau penarikan permohonan, hubungi": [
+    "Providing these details is voluntary, but all fields are needed to process this request. For questions, corrections or withdrawal of your request, contact",
+    "Maklumat diberikan secara sukarela, tetapi semua medan diperlukan untuk memproses permohonan. Untuk pertanyaan, pembetulan atau penarikan permohonan, hubungi"
+  ],
+  "Full registered name": [
+    "Full registered name",
+    "Nama penuh berdaftar"
+  ],
+  "Nama penuh berdaftar": [
+    "Full registered name",
+    "Nama penuh berdaftar"
+  ],
+  "Name as registered with KPKMM": [
+    "Name as registered with KPKMM",
+    "Nama seperti didaftarkan dengan KPKMM"
+  ],
+  "Nama seperti didaftarkan dengan KPKMM": [
+    "Name as registered with KPKMM",
+    "Nama seperti didaftarkan dengan KPKMM"
+  ],
+  "Checking…": [
+    "Checking…",
+    "Menyemak…"
+  ],
+  "Menyemak…": [
+    "Checking…",
+    "Menyemak…"
+  ],
+  "Check my membership": [
+    "Check my membership",
+    "Semak keahlian saya"
+  ],
+  "Semak keahlian saya": [
+    "Check my membership",
+    "Semak keahlian saya"
+  ],
+  "Please contact the club": [
+    "Please contact the club",
+    "Sila hubungi kelab"
+  ],
+  "Sila hubungi kelab": [
+    "Please contact the club",
+    "Sila hubungi kelab"
+  ],
+  "Active": [
+    "Active",
+    "Aktif"
+  ],
+  "Aktif": [
+    "Active",
+    "Aktif"
+  ],
+  "Inactive": [
+    "Inactive",
+    "Tidak aktif"
+  ],
+  "Tidak aktif": [
+    "Inactive",
+    "Tidak aktif"
+  ],
+  "Membership year": [
+    "Membership year",
+    "Tahun keahlian"
+  ],
+  "Tahun keahlian": [
+    "Membership year",
+    "Tahun keahlian"
+  ],
+  "Valid until": [
+    "Valid until",
+    "Sah sehingga"
+  ],
+  "Sah sehingga": [
+    "Valid until",
+    "Sah sehingga"
+  ],
+  "December": [
+    "December",
+    "Disember"
+  ],
+  "Disember": [
+    "December",
+    "Disember"
+  ],
+  "Malaysia time": [
+    "Malaysia time",
+    "waktu Malaysia"
+  ],
+  "waktu Malaysia": [
+    "Malaysia time",
+    "waktu Malaysia"
+  ],
+  "More than one member has this name. Contact the committee to verify your status privately.": [
+    "More than one member has this name. Contact the committee to verify your status privately.",
+    "Lebih daripada seorang ahli mempunyai nama ini. Hubungi jawatankuasa untuk semakan sulit."
+  ],
+  "Lebih daripada seorang ahli mempunyai nama ini. Hubungi jawatankuasa untuk semakan sulit.": [
+    "More than one member has this name. Contact the committee to verify your status privately.",
+    "Lebih daripada seorang ahli mempunyai nama ini. Hubungi jawatankuasa untuk semakan sulit."
+  ],
+  "No active membership was found under this exact name for the current year. Check the spelling, including any registered title. If you have paid, contact the club before paying again. Your membership number is retained while inactive. A lapse of more than one year requires committee reinstatement.": [
+    "No active membership was found under this exact name for the current year. Check the spelling, including any registered title. If you have paid, contact the club before paying again. Your membership number is retained while inactive. A lapse of more than one year requires committee reinstatement.",
+    "Tiada keahlian aktif dijumpai dengan nama tepat ini untuk tahun semasa. Semak ejaan, termasuk gelaran berdaftar. Jika sudah membayar, hubungi kelab sebelum membayar lagi. Nombor ahli dikekalkan semasa tidak aktif. Tempoh tidak aktif melebihi setahun memerlukan pengaktifan semula oleh jawatankuasa."
+  ],
+  "Tiada keahlian aktif dijumpai dengan nama tepat ini untuk tahun semasa. Semak ejaan, termasuk gelaran berdaftar. Jika sudah membayar, hubungi kelab sebelum membayar lagi. Nombor ahli dikekalkan semasa tidak aktif. Tempoh tidak aktif melebihi setahun memerlukan pengaktifan semula oleh jawatankuasa.": [
+    "No active membership was found under this exact name for the current year. Check the spelling, including any registered title. If you have paid, contact the club before paying again. Your membership number is retained while inactive. A lapse of more than one year requires committee reinstatement.",
+    "Tiada keahlian aktif dijumpai dengan nama tepat ini untuk tahun semasa. Semak ejaan, termasuk gelaran berdaftar. Jika sudah membayar, hubungi kelab sebelum membayar lagi. Nombor ahli dikekalkan semasa tidak aktif. Tempoh tidak aktif melebihi setahun memerlukan pengaktifan semula oleh jawatankuasa."
+  ],
+  "Check your membership": [
+    "Check your membership",
+    "Semak keahlian anda"
+  ],
+  "Semak keahlian anda": [
+    "Check your membership",
+    "Semak keahlian anda"
+  ],
+  "Enter your full name exactly as registered with KPKMM, including any title. Capitalisation and extra spaces do not matter. Active membership is valid until 31 December of the current year, Malaysia time.": [
+    "Enter your full name exactly as registered with KPKMM, including any title. Capitalisation and extra spaces do not matter. Active membership is valid until 31 December of the current year, Malaysia time.",
+    "Masukkan nama penuh tepat seperti didaftarkan dengan KPKMM, termasuk gelaran. Huruf besar/kecil dan ruang tambahan tidak menjejaskan semakan. Keahlian aktif sah sehingga 31 Disember tahun semasa, waktu Malaysia."
+  ],
+  "Masukkan nama penuh tepat seperti didaftarkan dengan KPKMM, termasuk gelaran. Huruf besar/kecil dan ruang tambahan tidak menjejaskan semakan. Keahlian aktif sah sehingga 31 Disember tahun semasa, waktu Malaysia.": [
+    "Enter your full name exactly as registered with KPKMM, including any title. Capitalisation and extra spaces do not matter. Active membership is valid until 31 December of the current year, Malaysia time.",
+    "Masukkan nama penuh tepat seperti didaftarkan dengan KPKMM, termasuk gelaran. Huruf besar/kecil dan ruang tambahan tidak menjejaskan semakan. Keahlian aktif sah sehingga 31 Disember tahun semasa, waktu Malaysia."
+  ],
+  "Status only": [
+    "Status only",
+    "Status sahaja"
+  ],
+  "Status sahaja": [
+    "Status only",
+    "Status sahaja"
+  ],
+  "Use your own registered name. Only status is shown: no member directory, contact details, identification numbers or payment receipts are revealed. Searches are limited to protect privacy.": [
+    "Use your own registered name. Only status is shown: no member directory, contact details, identification numbers or payment receipts are revealed. Searches are limited to protect privacy.",
+    "Gunakan nama berdaftar anda sendiri. Hanya status dipaparkan: tiada senarai ahli, maklumat hubungan, nombor pengenalan atau resit bayaran didedahkan. Semakan dihadkan untuk melindungi privasi."
+  ],
+  "Gunakan nama berdaftar anda sendiri. Hanya status dipaparkan: tiada senarai ahli, maklumat hubungan, nombor pengenalan atau resit bayaran didedahkan. Semakan dihadkan untuk melindungi privasi.": [
+    "Use your own registered name. Only status is shown: no member directory, contact details, identification numbers or payment receipts are revealed. Searches are limited to protect privacy.",
+    "Gunakan nama berdaftar anda sendiri. Hanya status dipaparkan: tiada senarai ahli, maklumat hubungan, nombor pengenalan atau resit bayaran didedahkan. Semakan dihadkan untuk melindungi privasi."
+  ],
+  "Need help?": [
+    "Need help?",
+    "Perlukan bantuan?"
+  ],
+  "Perlukan bantuan?": [
+    "Need help?",
+    "Perlukan bantuan?"
+  ],
+  "Notices": [
+    "Notices",
+    "Notis"
+  ],
+  "Notis": [
+    "Notices",
+    "Notis"
+  ],
+  "Archive": [
+    "Archive",
+    "Arkib"
+  ],
+  "Arkib": [
+    "Archive",
+    "Arkib"
+  ],
+  "Gallery": [
+    "Gallery",
+    "Galeri"
+  ],
+  "Galeri": [
+    "Gallery",
+    "Galeri"
+  ],
+  "Video": [
+    "Videos",
+    "Video"
+  ],
+  "MALAYSIA'S MINI-CAR COMMUNITY": [
+    "MALAYSIA'S MINI-CAR COMMUNITY",
+    "KOMUNITI PEMINAT MINI MALAYSIA"
+  ],
+  "KOMUNITI PEMINAT MINI MALAYSIA": [
+    "MALAYSIA'S MINI-CAR COMMUNITY",
+    "KOMUNITI PEMINAT MINI MALAYSIA"
+  ],
+  "Small cars.": [
+    "Small cars.",
+    "Kereta kecil."
+  ],
+  "Kereta kecil.": [
+    "Small cars.",
+    "Kereta kecil."
+  ],
+  "Big spirit.": [
+    "Big spirit.",
+    "Semangat besar."
+  ],
+  "Semangat besar.": [
+    "Big spirit.",
+    "Semangat besar."
+  ],
+  "Kelab Peminat Kereta Mini Malaysia brings together people who love every compact curve, clever detail and memorable drive.": [
+    "Kelab Peminat Kereta Mini Malaysia brings together people who love every compact curve, clever detail and memorable drive.",
+    "Kelab Peminat Kereta Mini Malaysia menyatukan peminat yang menghargai setiap keunikan Mini dan kenangan indah dalam setiap perjalanan."
+  ],
+  "Kelab Peminat Kereta Mini Malaysia menyatukan peminat yang menghargai setiap keunikan Mini dan kenangan indah dalam setiap perjalanan.": [
+    "Kelab Peminat Kereta Mini Malaysia brings together people who love every compact curve, clever detail and memorable drive.",
+    "Kelab Peminat Kereta Mini Malaysia menyatukan peminat yang menghargai setiap keunikan Mini dan kenangan indah dalam setiap perjalanan."
+  ],
+  "Arkib kelab": [
+    "Club archive",
+    "Arkib kelab"
+  ],
+  "STAY IN THE LOOP": [
+    "STAY IN THE LOOP",
+    "IKUTI PERKEMBANGAN"
+  ],
+  "IKUTI PERKEMBANGAN": [
+    "STAY IN THE LOOP",
+    "IKUTI PERKEMBANGAN"
+  ],
+  "Papan notis": [
+    "Notice board",
+    "Papan notis"
+  ],
+  "Open full-size poster:": [
+    "Open full-size poster: ",
+    "Buka poster saiz penuh: "
+  ],
+  "Buka poster saiz penuh:": [
+    "Open full-size poster: ",
+    "Buka poster saiz penuh: "
+  ],
+  "View full-size poster ↗": [
+    "View full-size poster ↗",
+    "Lihat poster saiz penuh ↗"
+  ],
+  "Lihat poster saiz penuh ↗": [
+    "View full-size poster ↗",
+    "Lihat poster saiz penuh ↗"
+  ],
+  "ONE CLUB, MANY STORIES": [
+    "ONE CLUB, MANY STORIES",
+    "SATU KELAB, PELBAGAI KISAH"
+  ],
+  "SATU KELAB, PELBAGAI KISAH": [
+    "ONE CLUB, MANY STORIES",
+    "SATU KELAB, PELBAGAI KISAH"
+  ],
+  "A welcoming home for people who believe the best memories begin with a turn of the key.": [
+    "A welcoming home for people who believe the best memories begin with a turn of the key.",
+    "Tempat untuk semua yang percaya bahawa kenangan terindah bermula dengan satu perjalanan."
+  ],
+  "Tempat untuk semua yang percaya bahawa kenangan terindah bermula dengan satu perjalanan.": [
+    "A welcoming home for people who believe the best memories begin with a turn of the key.",
+    "Tempat untuk semua yang percaya bahawa kenangan terindah bermula dengan satu perjalanan."
+  ],
+  "See shared moments": [
+    "See shared moments",
+    "Lihat kenangan bersama"
+  ],
+  "Lihat kenangan bersama": [
+    "See shared moments",
+    "Lihat kenangan bersama"
+  ],
+  "ON THE ROAD": [
+    "ON THE ROAD",
+    "DALAM PERJALANAN"
+  ],
+  "DALAM PERJALANAN": [
+    "ON THE ROAD",
+    "DALAM PERJALANAN"
+  ],
+  "CLUB OUTING": [
+    "CLUB OUTING",
+    "AKTIVITI KELAB"
+  ],
+  "AKTIVITI KELAB": [
+    "CLUB OUTING",
+    "AKTIVITI KELAB"
+  ],
+  "See outing photographs": [
+    "See outing photographs",
+    "Lihat foto aktiviti"
+  ],
+  "Lihat foto aktiviti": [
+    "See outing photographs",
+    "Lihat foto aktiviti"
+  ],
+  "No club archives have been added yet.": [
+    "No club archives have been added yet.",
+    "Belum ada arkib kelab ditambahkan."
+  ],
+  "Belum ada arkib kelab ditambahkan.": [
+    "No club archives have been added yet.",
+    "Belum ada arkib kelab ditambahkan."
+  ],
+  "More routes. More stories. More friends.": [
+    "More routes. More stories. More friends.",
+    "Lebih banyak destinasi. Lebih banyak kisah. Lebih ramai sahabat."
+  ],
+  "Lebih banyak destinasi. Lebih banyak kisah. Lebih ramai sahabat.": [
+    "More routes. More stories. More friends.",
+    "Lebih banyak destinasi. Lebih banyak kisah. Lebih ramai sahabat."
+  ],
+  "SHARED MOMENTS": [
+    "SHARED MOMENTS",
+    "KENANGAN BERSAMA"
+  ],
+  "KENANGAN BERSAMA": [
+    "SHARED MOMENTS",
+    "KENANGAN BERSAMA"
+  ],
+  "Outings, captured": [
+    "Outings, captured",
+    "Kenangan perjalanan"
+  ],
+  "Kenangan perjalanan": [
+    "Outings, captured",
+    "Kenangan perjalanan"
+  ],
+  "Club videos": [
+    "Club videos",
+    "Video kelab"
+  ],
+  "Video kelab": [
+    "Club videos",
+    "Video kelab"
+  ],
+  "Watch on YouTube ↗": [
+    "Watch on YouTube ↗",
+    "Tonton di YouTube ↗"
+  ],
+  "Tonton di YouTube ↗": [
+    "Watch on YouTube ↗",
+    "Tonton di YouTube ↗"
+  ],
+  "YOUR SEAT IS WAITING": [
+    "YOUR SEAT IS WAITING",
+    "TEMPAT ANDA MENANTI"
+  ],
+  "TEMPAT ANDA MENANTI": [
+    "YOUR SEAT IS WAITING",
+    "TEMPAT ANDA MENANTI"
+  ],
+  "Come drive with us.": [
+    "Come drive with us.",
+    "Jom memandu bersama."
+  ],
+  "Jom memandu bersama.": [
+    "Come drive with us.",
+    "Jom memandu bersama."
+  ],
+  "Interested in joining KPKMM or partnering on an event? Get in touch and be part of the journey.": [
+    "Interested in joining KPKMM or partnering on an event? Get in touch and be part of the journey.",
+    "Berminat untuk menyertai KPKMM atau bekerjasama dalam aktiviti kelab? Hubungi kami dan sertai perjalanan ini."
+  ],
+  "Berminat untuk menyertai KPKMM atau bekerjasama dalam aktiviti kelab? Hubungi kami dan sertai perjalanan ini.": [
+    "Interested in joining KPKMM or partnering on an event? Get in touch and be part of the journey.",
+    "Berminat untuk menyertai KPKMM atau bekerjasama dalam aktiviti kelab? Hubungi kami dan sertai perjalanan ini."
+  ],
+  "Email us": [
+    "Email us",
+    "E-mel kami"
+  ],
+  "E-mel kami": [
+    "Email us",
+    "E-mel kami"
+  ],
+  "Call 018-226 2000": [
+    "Call 018-226 2000",
+    "Hubungi 018-226 2000"
+  ],
+  "Hubungi 018-226 2000": [
+    "Call 018-226 2000",
+    "Hubungi 018-226 2000"
+  ],
+  "Admin portal →": [
+    "Admin portal →",
+    "Portal pentadbir →"
+  ],
+  "Portal pentadbir →": [
+    "Admin portal →",
+    "Portal pentadbir →"
+  ],
+  "Request recorded": [
+    "Request recorded",
+    "Permohonan direkodkan"
+  ],
+  "Permohonan direkodkan": [
+    "Request recorded",
+    "Permohonan direkodkan"
+  ],
+  "Keep your reference": [
+    "Keep your reference",
+    "Simpan rujukan anda"
+  ],
+  "Simpan rujukan anda": [
+    "Keep your reference",
+    "Simpan rujukan anda"
+  ],
+  "Renewal year": [
+    "Renewal year",
+    "Tahun pembaharuan"
+  ],
+  "Tahun pembaharuan": [
+    "Renewal year",
+    "Tahun pembaharuan"
+  ],
+  "Passport — Non-Malaysian": [
+    "Passport — Non-Malaysian",
+    "Pasport — Bukan warganegara"
+  ],
+  "Pasport — Bukan warganegara": [
+    "Passport — Non-Malaysian",
+    "Pasport — Bukan warganegara"
+  ],
+  "Payment proof — JPG, PNG or PDF, up to 700 KB": [
+    "Payment proof — JPG, PNG or PDF, up to 700 KB",
+    "Bukti bayaran — JPG, PNG atau PDF, sehingga 700 KB"
+  ],
+  "Bukti bayaran — JPG, PNG atau PDF, sehingga 700 KB": [
+    "Payment proof — JPG, PNG or PDF, up to 700 KB",
+    "Bukti bayaran — JPG, PNG atau PDF, sehingga 700 KB"
+  ],
+  "Please choose a file under 700 KB.": [
+    "Please choose a file under 700 KB.",
+    "Sila pilih fail di bawah 700 KB."
+  ],
+  "Sila pilih fail di bawah 700 KB.": [
+    "Please choose a file under 700 KB.",
+    "Sila pilih fail di bawah 700 KB."
+  ],
+  "Upload the transfer receipt, not your IC/passport. Hide unrelated bank balances and transactions.": [
+    "Upload the transfer receipt, not your IC/passport. Hide unrelated bank balances and transactions.",
+    "Muat naik resit pindahan, bukan KP/pasport. Sembunyikan baki bank dan transaksi yang tidak berkaitan."
+  ],
+  "Muat naik resit pindahan, bukan KP/pasport. Sembunyikan baki bank dan transaksi yang tidak berkaitan.": [
+    "Upload the transfer receipt, not your IC/passport. Hide unrelated bank balances and transactions.",
+    "Muat naik resit pindahan, bukan KP/pasport. Sembunyikan baki bank dan transaksi yang tidak berkaitan."
+  ],
+  "I confirm these details are accurate and consent to KPKMM storing my details and payment proof privately and sending them to the club Gmail for renewal review, as described below.": [
+    "I confirm these details are accurate and consent to KPKMM storing my details and payment proof privately and sending them to the club Gmail for renewal review, as described below.",
+    "Saya mengesahkan maklumat ini tepat dan bersetuju KPKMM menyimpan maklumat serta bukti bayaran secara sulit dan menghantarnya ke Gmail kelab untuk semakan pembaharuan seperti diterangkan di bawah."
+  ],
+  "Saya mengesahkan maklumat ini tepat dan bersetuju KPKMM menyimpan maklumat serta bukti bayaran secara sulit dan menghantarnya ke Gmail kelab untuk semakan pembaharuan seperti diterangkan di bawah.": [
+    "I confirm these details are accurate and consent to KPKMM storing my details and payment proof privately and sending them to the club Gmail for renewal review, as described below.",
+    "Saya mengesahkan maklumat ini tepat dan bersetuju KPKMM menyimpan maklumat serta bukti bayaran secara sulit dan menghantarnya ke Gmail kelab untuk semakan pembaharuan seperti diterangkan di bawah."
+  ],
+  "Saving and sending…": [
+    "Saving and sending…",
+    "Menyimpan dan menghantar…"
+  ],
+  "Menyimpan dan menghantar…": [
+    "Saving and sending…",
+    "Menyimpan dan menghantar…"
+  ],
+  "Submit renewal request": [
+    "Submit renewal request",
+    "Hantar permohonan pembaharuan"
+  ],
+  "Hantar permohonan pembaharuan": [
+    "Submit renewal request",
+    "Hantar permohonan pembaharuan"
+  ],
+  "Renew your membership": [
+    "Renew your membership",
+    "Perbaharui keahlian anda"
+  ],
+  "Perbaharui keahlian anda": [
+    "Renew your membership",
+    "Perbaharui keahlian anda"
+  ],
+  "For existing members. Submit your updated details and transfer receipt for club verification.": [
+    "For existing members. Submit your updated details and transfer receipt for club verification.",
+    "Untuk ahli sedia ada. Hantar maklumat terkini dan resit pindahan untuk pengesahan kelab."
+  ],
+  "Untuk ahli sedia ada. Hantar maklumat terkini dan resit pindahan untuk pengesahan kelab.": [
+    "For existing members. Submit your updated details and transfer receipt for club verification.",
+    "Untuk ahli sedia ada. Hantar maklumat terkini dan resit pindahan untuk pengesahan kelab."
+  ],
+  "Before you pay": [
+    "Before you pay",
+    "Sebelum membayar"
+  ],
+  "Sebelum membayar": [
+    "Before you pay",
+    "Sebelum membayar"
+  ],
+  "Your membership number is permanent, even while inactive. If your last active year is more than one year ago, you must contact the committee for manual reinstatement. If your identity details or last active year are missing from our records, contact the club before paying.": [
+    "Your membership number is permanent, even while inactive. If your last active year is more than one year ago, you must contact the committee for manual reinstatement. If your identity details or last active year are missing from our records, contact the club before paying.",
+    "Nombor ahli anda kekal walaupun tidak aktif. Jika tahun aktif terakhir melebihi setahun lalu, hubungi jawatankuasa untuk pengaktifan semula secara manual. Jika maklumat pengenalan atau tahun aktif terakhir tiada dalam rekod, hubungi kelab sebelum membayar."
+  ],
+  "Nombor ahli anda kekal walaupun tidak aktif. Jika tahun aktif terakhir melebihi setahun lalu, hubungi jawatankuasa untuk pengaktifan semula secara manual. Jika maklumat pengenalan atau tahun aktif terakhir tiada dalam rekod, hubungi kelab sebelum membayar.": [
+    "Your membership number is permanent, even while inactive. If your last active year is more than one year ago, you must contact the committee for manual reinstatement. If your identity details or last active year are missing from our records, contact the club before paying.",
+    "Nombor ahli anda kekal walaupun tidak aktif. Jika tahun aktif terakhir melebihi setahun lalu, hubungi jawatankuasa untuk pengaktifan semula secara manual. Jika maklumat pengenalan atau tahun aktif terakhir tiada dalam rekod, hubungi kelab sebelum membayar."
+  ],
+  "No additional administrative fee. New members: RM250 for the first year.": [
+    "No additional administrative fee. New members: RM250 for the first year.",
+    "Tiada yuran pentadbiran tambahan. Ahli baharu: RM250 untuk tahun pertama."
+  ],
+  "Tiada yuran pentadbiran tambahan. Ahli baharu: RM250 untuk tahun pertama.": [
+    "No additional administrative fee. New members: RM250 for the first year.",
+    "Tiada yuran pentadbiran tambahan. Ahli baharu: RM250 untuk tahun pertama."
+  ],
+  "New member application →": [
+    "New member application →",
+    "Permohonan ahli baharu →"
+  ],
+  "Permohonan ahli baharu →": [
+    "New member application →",
+    "Permohonan ahli baharu →"
+  ],
+  "Transfer RM150 to the club account, then attach your payment proof below. Submission is not approval or confirmation of payment.": [
+    "Transfer RM150 to the club account, then attach your payment proof below. Submission is not approval or confirmation of payment.",
+    "Pindahkan RM150 ke akaun kelab, kemudian lampirkan bukti bayaran di bawah. Penghantaran bukan kelulusan atau pengesahan bayaran."
+  ],
+  "Pindahkan RM150 ke akaun kelab, kemudian lampirkan bukti bayaran di bawah. Penghantaran bukan kelulusan atau pengesahan bayaran.": [
+    "Transfer RM150 to the club account, then attach your payment proof below. Submission is not approval or confirmation of payment.",
+    "Pindahkan RM150 ke akaun kelab, kemudian lampirkan bukti bayaran di bawah. Penghantaran bukan kelulusan atau pengesahan bayaran."
+  ],
+  "Your renewal details": [
+    "Your renewal details",
+    "Maklumat pembaharuan anda"
+  ],
+  "Maklumat pembaharuan anda": [
+    "Your renewal details",
+    "Maklumat pembaharuan anda"
+  ],
+  "Privacy and review": [
+    "Privacy and review",
+    "Privasi dan semakan"
+  ],
+  "Privasi dan semakan": [
+    "Privacy and review",
+    "Privasi dan semakan"
+  ],
+  "Your identification number, contact details, mailing address and payment proof are stored privately for authorised KPKMM administrators and emailed through Google Gmail to kelabpeminatkeretaminimalaysia@gmail.com to verify your renewal. They are not published on this website. Do not include another person’s information.": [
+    "Your identification number, contact details, mailing address and payment proof are stored privately for authorised KPKMM administrators and emailed through Google Gmail to kelabpeminatkeretaminimalaysia@gmail.com to verify your renewal. They are not published on this website. Do not include another person’s information.",
+    "Nombor pengenalan, maklumat hubungan, alamat surat-menyurat dan bukti bayaran disimpan secara sulit untuk pentadbir KPKMM yang dibenarkan dan dihantar melalui Google Gmail ke kelabpeminatkeretaminimalaysia@gmail.com bagi pengesahan pembaharuan. Maklumat tidak diterbitkan di laman ini. Jangan sertakan maklumat orang lain."
+  ],
+  "Nombor pengenalan, maklumat hubungan, alamat surat-menyurat dan bukti bayaran disimpan secara sulit untuk pentadbir KPKMM yang dibenarkan dan dihantar melalui Google Gmail ke kelabpeminatkeretaminimalaysia@gmail.com bagi pengesahan pembaharuan. Maklumat tidak diterbitkan di laman ini. Jangan sertakan maklumat orang lain.": [
+    "Your identification number, contact details, mailing address and payment proof are stored privately for authorised KPKMM administrators and emailed through Google Gmail to kelabpeminatkeretaminimalaysia@gmail.com to verify your renewal. They are not published on this website. Do not include another person’s information.",
+    "Nombor pengenalan, maklumat hubungan, alamat surat-menyurat dan bukti bayaran disimpan secara sulit untuk pentadbir KPKMM yang dibenarkan dan dihantar melalui Google Gmail ke kelabpeminatkeretaminimalaysia@gmail.com bagi pengesahan pembaharuan. Maklumat tidak diterbitkan di laman ini. Jangan sertakan maklumat orang lain."
+  ],
+  "All fields are needed to process your request. For corrections, withdrawal or privacy questions, contact": [
+    "All fields are needed to process your request. For corrections, withdrawal or privacy questions, contact",
+    "Semua medan diperlukan untuk memproses permohonan. Untuk pembetulan, penarikan atau pertanyaan privasi, hubungi"
+  ],
+  "Semua medan diperlukan untuk memproses permohonan. Untuk pembetulan, penarikan atau pertanyaan privasi, hubungi": [
+    "All fields are needed to process your request. For corrections, withdrawal or privacy questions, contact",
+    "Semua medan diperlukan untuk memproses permohonan. Untuk pembetulan, penarikan atau pertanyaan privasi, hubungi"
+  ],
+  "Awaiting payment proof": [
+    "Awaiting payment proof",
+    "Menunggu bukti bayaran"
+  ],
+  "Menunggu bukti bayaran": [
+    "Awaiting payment proof",
+    "Menunggu bukti bayaran"
+  ],
+  "Proof submitted — awaiting review": [
+    "Proof submitted — awaiting review",
+    "Bukti dihantar — menunggu semakan"
+  ],
+  "Bukti dihantar — menunggu semakan": [
+    "Proof submitted — awaiting review",
+    "Bukti dihantar — menunggu semakan"
+  ],
+  "Kedai": [
+    "Marketplace",
+    "Kedai"
+  ],
+  "Your order": [
+    "Your order",
+    "Tempahan anda"
+  ],
+  "Tempahan anda": [
+    "Your order",
+    "Tempahan anda"
+  ],
+  "Total": [
+    "Total",
+    "Jumlah"
+  ],
+  "Jumlah": [
+    "Total",
+    "Jumlah"
+  ],
+  "Order reference": [
+    "Order reference",
+    "Rujukan tempahan"
+  ],
+  "Rujukan tempahan": [
+    "Order reference",
+    "Rujukan tempahan"
+  ],
+  "Save your private access code": [
+    "Save your private access code",
+    "Simpan kod akses peribadi anda"
+  ],
+  "Simpan kod akses peribadi anda": [
+    "Save your private access code",
+    "Simpan kod akses peribadi anda"
+  ],
+  "Keep this reference and code to reopen your order on another device. Do not share them publicly.": [
+    "Keep this reference and code to reopen your order on another device. Do not share them publicly.",
+    "Simpan rujukan dan kod ini untuk membuka tempahan pada peranti lain. Jangan kongsi secara terbuka."
+  ],
+  "Simpan rujukan dan kod ini untuk membuka tempahan pada peranti lain. Jangan kongsi secara terbuka.": [
+    "Keep this reference and code to reopen your order on another device. Do not share them publicly.",
+    "Simpan rujukan dan kod ini untuk membuka tempahan pada peranti lain. Jangan kongsi secara terbuka."
+  ],
+  "Bank transfer": [
+    "Bank transfer",
+    "Pindahan bank"
+  ],
+  "Pindahan bank": [
+    "Bank transfer",
+    "Pindahan bank"
+  ],
+  "Amount": [
+    "Amount",
+    "Amaun"
+  ],
+  "Amaun": [
+    "Amount",
+    "Amaun"
+  ],
+  "Payment reference": [
+    "Payment reference",
+    "Rujukan bayaran"
+  ],
+  "Rujukan bayaran": [
+    "Payment reference",
+    "Rujukan bayaran"
+  ],
+  "Transfer the exact total. Your order is paid only after the club confirms receipt of funds.": [
+    "Transfer the exact total. Your order is paid only after the club confirms receipt of funds.",
+    "Pindahkan jumlah tepat. Tempahan hanya dianggap dibayar selepas kelab mengesahkan penerimaan wang."
+  ],
+  "Pindahkan jumlah tepat. Tempahan hanya dianggap dibayar selepas kelab mengesahkan penerimaan wang.": [
+    "Transfer the exact total. Your order is paid only after the club confirms receipt of funds.",
+    "Pindahkan jumlah tepat. Tempahan hanya dianggap dibayar selepas kelab mengesahkan penerimaan wang."
+  ],
+  "Upload payment proof": [
+    "Upload payment proof",
+    "Muat naik bukti bayaran"
+  ],
+  "Muat naik bukti bayaran": [
+    "Upload payment proof",
+    "Muat naik bukti bayaran"
+  ],
+  "JPG, PNG or PDF, up to 700 KB. Crop or redact unrelated transactions and account balances before uploading. A new upload replaces your previous proof.": [
+    "JPG, PNG or PDF, up to 700 KB. Crop or redact unrelated transactions and account balances before uploading. A new upload replaces your previous proof.",
+    "JPG, PNG atau PDF, maksimum 700 KB. Potong atau padam maklumat transaksi lain dan baki akaun sebelum memuat naik. Muat naik baharu menggantikan bukti terdahulu."
+  ],
+  "JPG, PNG atau PDF, maksimum 700 KB. Potong atau padam maklumat transaksi lain dan baki akaun sebelum memuat naik. Muat naik baharu menggantikan bukti terdahulu.": [
+    "JPG, PNG or PDF, up to 700 KB. Crop or redact unrelated transactions and account balances before uploading. A new upload replaces your previous proof.",
+    "JPG, PNG atau PDF, maksimum 700 KB. Potong atau padam maklumat transaksi lain dan baki akaun sebelum memuat naik. Muat naik baharu menggantikan bukti terdahulu."
+  ],
+  "Submit payment proof": [
+    "Submit payment proof",
+    "Hantar bukti bayaran"
+  ],
+  "Hantar bukti bayaran": [
+    "Submit payment proof",
+    "Hantar bukti bayaran"
+  ],
+  "Receipt file": [
+    "Receipt file",
+    "Fail resit"
+  ],
+  "Fail resit": [
+    "Receipt file",
+    "Fail resit"
+  ],
+  "Download submitted proof": [
+    "Download submitted proof",
+    "Muat turun bukti dihantar"
+  ],
+  "Muat turun bukti dihantar": [
+    "Download submitted proof",
+    "Muat turun bukti dihantar"
+  ],
+  "For order changes or cancellation, contact": [
+    "For order changes or cancellation, contact",
+    "Untuk perubahan atau pembatalan tempahan, hubungi"
+  ],
+  "Untuk perubahan atau pembatalan tempahan, hubungi": [
+    "For order changes or cancellation, contact",
+    "Untuk perubahan atau pembatalan tempahan, hubungi"
+  ],
+  "CLUB ITEMS": [
+    "CLUB ITEMS",
+    "BARANGAN KELAB"
+  ],
+  "BARANGAN KELAB": [
+    "CLUB ITEMS",
+    "BARANGAN KELAB"
+  ],
+  "Club marketplace": [
+    "Club marketplace",
+    "Kedai kelab"
+  ],
+  "Kedai kelab": [
+    "Club marketplace",
+    "Kedai kelab"
+  ],
+  "Choose a club item, place your order and pay by bank transfer. Upload your payment proof for the club to verify.": [
+    "Choose a club item, place your order and pay by bank transfer. Upload your payment proof for the club to verify.",
+    "Pilih barangan kelab, buat tempahan dan bayar melalui pindahan bank. Muat naik bukti bayaran untuk pengesahan kelab."
+  ],
+  "Pilih barangan kelab, buat tempahan dan bayar melalui pindahan bank. Muat naik bukti bayaran untuk pengesahan kelab.": [
+    "Choose a club item, place your order and pay by bank transfer. Upload your payment proof for the club to verify.",
+    "Pilih barangan kelab, buat tempahan dan bayar melalui pindahan bank. Muat naik bukti bayaran untuk pengesahan kelab."
+  ],
+  "No online payment gateway. Orders do not include delivery or collection options. Stock is reserved when you order; contact the club if you need to cancel.": [
+    "No online payment gateway. Orders do not include delivery or collection options. Stock is reserved when you order; contact the club if you need to cancel.",
+    "Tiada gerbang pembayaran dalam talian. Tempahan tidak mempunyai pilihan penghantaran atau pengambilan. Stok ditempah apabila pesanan dibuat; hubungi kelab untuk pembatalan."
+  ],
+  "Tiada gerbang pembayaran dalam talian. Tempahan tidak mempunyai pilihan penghantaran atau pengambilan. Stok ditempah apabila pesanan dibuat; hubungi kelab untuk pembatalan.": [
+    "No online payment gateway. Orders do not include delivery or collection options. Stock is reserved when you order; contact the club if you need to cancel.",
+    "Tiada gerbang pembayaran dalam talian. Tempahan tidak mempunyai pilihan penghantaran atau pengambilan. Stok ditempah apabila pesanan dibuat; hubungi kelab untuk pembatalan."
+  ],
+  "The shop is temporarily unavailable. Please try again later.": [
+    "The shop is temporarily unavailable. Please try again later.",
+    "Kedai tidak tersedia buat sementara waktu. Sila cuba lagi nanti."
+  ],
+  "Kedai tidak tersedia buat sementara waktu. Sila cuba lagi nanti.": [
+    "The shop is temporarily unavailable. Please try again later.",
+    "Kedai tidak tersedia buat sementara waktu. Sila cuba lagi nanti."
+  ],
+  "Club items will appear here when the admin publishes them.": [
+    "Club items will appear here when the admin publishes them.",
+    "Barangan kelab akan dipaparkan selepas diterbitkan oleh pentadbir."
+  ],
+  "Barangan kelab akan dipaparkan selepas diterbitkan oleh pentadbir.": [
+    "Club items will appear here when the admin publishes them.",
+    "Barangan kelab akan dipaparkan selepas diterbitkan oleh pentadbir."
+  ],
+  "Order this item": [
+    "Order this item",
+    "Tempah barangan ini"
+  ],
+  "Tempah barangan ini": [
+    "Order this item",
+    "Tempah barangan ini"
+  ],
+  "Place order": [
+    "Place order",
+    "Buat tempahan"
+  ],
+  "Buat tempahan": [
+    "Place order",
+    "Buat tempahan"
+  ],
+  "Quantity": [
+    "Quantity",
+    "Kuantiti"
+  ],
+  "Kuantiti": [
+    "Quantity",
+    "Kuantiti"
+  ],
+  "Total = unit price × quantity. The exact amount appears on your order before you make the bank transfer.": [
+    "Total = unit price × quantity. The exact amount appears on your order before you make the bank transfer.",
+    "Jumlah = harga seunit × kuantiti. Amaun tepat dipaparkan pada tempahan sebelum pindahan bank."
+  ],
+  "Jumlah = harga seunit × kuantiti. Amaun tepat dipaparkan pada tempahan sebelum pindahan bank.": [
+    "Total = unit price × quantity. The exact amount appears on your order before you make the bank transfer.",
+    "Jumlah = harga seunit × kuantiti. Amaun tepat dipaparkan pada tempahan sebelum pindahan bank."
+  ],
+  "Name": [
+    "Name",
+    "Nama"
+  ],
+  "Nama": [
+    "Name",
+    "Nama"
+  ],
+  "I agree that KPKMM may use my contact details and payment proof to manage this order. Only authorised admins and anyone with my private order code can access it.": [
+    "I agree that KPKMM may use my contact details and payment proof to manage this order. Only authorised admins and anyone with my private order code can access it.",
+    "Saya bersetuju KPKMM menggunakan butiran hubungan dan bukti bayaran untuk mengurus tempahan. Hanya pentadbir yang dibenarkan dan pemegang kod tempahan peribadi boleh mengaksesnya."
+  ],
+  "Saya bersetuju KPKMM menggunakan butiran hubungan dan bukti bayaran untuk mengurus tempahan. Hanya pentadbir yang dibenarkan dan pemegang kod tempahan peribadi boleh mengaksesnya.": [
+    "I agree that KPKMM may use my contact details and payment proof to manage this order. Only authorised admins and anyone with my private order code can access it.",
+    "Saya bersetuju KPKMM menggunakan butiran hubungan dan bukti bayaran untuk mengurus tempahan. Hanya pentadbir yang dibenarkan dan pemegang kod tempahan peribadi boleh mengaksesnya."
+  ],
+  "Sold out": [
+    "Sold out",
+    "Habis stok"
+  ],
+  "Habis stok": [
+    "Sold out",
+    "Habis stok"
+  ],
+  "Already ordered?": [
+    "Already ordered?",
+    "Sudah membuat tempahan?"
+  ],
+  "Sudah membuat tempahan?": [
+    "Already ordered?",
+    "Sudah membuat tempahan?"
+  ],
+  "Open my order": [
+    "Open my order",
+    "Buka tempahan saya"
+  ],
+  "Buka tempahan saya": [
+    "Open my order",
+    "Buka tempahan saya"
+  ],
+  "Private access code": [
+    "Private access code",
+    "Kod akses peribadi"
+  ],
+  "Kod akses peribadi": [
+    "Private access code",
+    "Kod akses peribadi"
+  ],
+  "Admin: manage marketplace →": [
+    "Admin: manage marketplace →",
+    "Pentadbir: urus kedai →"
+  ],
+  "Pentadbir: urus kedai →": [
+    "Admin: manage marketplace →",
+    "Pentadbir: urus kedai →"
+  ],
+  "Club stories and moments, on film.": [
+    "Club stories and moments, on film.",
+    "Kisah dan kenangan kelab dalam video."
+  ],
+  "Kisah dan kenangan kelab dalam video.": [
+    "Club stories and moments, on film.",
+    "Kisah dan kenangan kelab dalam video."
+  ],
+  "Videos are temporarily unavailable. Please try again later.": [
+    "Videos are temporarily unavailable. Please try again later.",
+    "Video tidak tersedia buat sementara waktu. Sila cuba lagi nanti."
+  ],
+  "Video tidak tersedia buat sementara waktu. Sila cuba lagi nanti.": [
+    "Videos are temporarily unavailable. Please try again later.",
+    "Video tidak tersedia buat sementara waktu. Sila cuba lagi nanti."
+  ],
+  "No videos published yet.": [
+    "No videos published yet.",
+    "Belum ada video diterbitkan."
+  ],
+  "Belum ada video diterbitkan.": [
+    "No videos published yet.",
+    "Belum ada video diterbitkan."
+  ],
+  "Club outing": [
+    "Club outing",
+    "Aktiviti kelab"
+  ],
+  "Aktiviti kelab": [
+    "Club outing",
+    "Aktiviti kelab"
+  ],
+  "Preparing and uploading photo": [
+    "Preparing and uploading photo",
+    "Menyediakan dan memuat naik foto"
+  ],
+  "of": [
+    "of",
+    "daripada"
+  ],
+  "Photo": [
+    "Photo",
+    "Foto"
+  ],
+  "Click Upload photos again to retry the remaining photos.": [
+    "Click Upload photos again to retry the remaining photos.",
+    "Klik Muat naik foto sekali lagi untuk mencuba foto yang selebihnya."
+  ],
+  "Please try again.": [
+    "Please try again.",
+    "Sila cuba lagi."
+  ],
+  "Google credentials are missing. Check Production environment variables.": [
+    "Google credentials are missing. Check Production environment variables.",
+    "Kelayakan Google tiada. Semak pemboleh ubah persekitaran Production."
+  ],
+  "Google permission was not granted. Nothing was connected.": [
+    "Google permission was not granted. Nothing was connected.",
+    "Kebenaran Google tidak diberikan. Tiada sambungan dibuat."
+  ],
+  "The connection attempt expired or the admin session changed. Please try again.": [
+    "The connection attempt expired or the admin session changed. Please try again.",
+    "Percubaan sambungan tamat atau sesi pentadbir berubah. Sila cuba lagi."
+  ],
+  "Please select the club Gmail account and allow the requested email permissions.": [
+    "Please select the club Gmail account and allow the requested email permissions.",
+    "Sila pilih akaun Gmail kelab dan benarkan kebenaran e-mel yang diminta."
+  ],
+  "Could not complete the connection. Check Google credentials and the exact redirect URI, then try again.": [
+    "Could not complete the connection. Check Google credentials and the exact redirect URI, then try again.",
+    "Sambungan tidak dapat diselesaikan. Semak kelayakan Google dan URI ubah hala, kemudian cuba lagi."
+  ],
+  "Private member listing": [
+    "Private member listing",
+    "Senarai ahli sulit"
+  ],
+  "Member list pages": [
+    "Member list pages",
+    "Halaman senarai ahli"
+  ],
+  "Admin sections": [
+    "Admin sections",
+    "Bahagian pentadbir"
+  ],
+  "Membership administration": [
+    "Membership administration",
+    "Pentadbiran keahlian"
+  ],
+  "Edit": [
+    "Edit",
+    "Sunting"
+  ]
+}
