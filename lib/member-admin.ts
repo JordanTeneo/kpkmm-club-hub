@@ -30,7 +30,7 @@ export async function listMembers(year:number):Promise<ManagedMember[]>{
  const appHashes=new Set(apps.map(r=>r.identity_hash)),renewHashes=new Set(renewals.map(r=>r.identity_hash));
  return rows.map(r=>{
   const m=JSON.parse(openRenewal(r.payload)) as RosterMember;
-  const key=/^\d{12}$/.test(m.identity)?'mykad:malaysia:'+m.identity:null;
+  const key=m.identityType==='passport'?'passport:'+(m.country||'Malaysia').toLowerCase()+':'+m.identity:/^\d{12}$/.test(m.identity)?'mykad:malaysia:'+m.identity:null;
   const override=r.membership_year===year&&r.status_override;
   const active=override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key))));
   return {...m,memberNumber:r.member_number,active,year,recordYear:r.membership_year,revision:r.revision,override};
@@ -75,9 +75,10 @@ export async function saveMember(form:FormData){
    await sql`UPDATE club_roster_edits SET member_number=${corrected} WHERE member_number=${member.memberNumber}`;
   }
   const updated={...previous,...member,memberNumber:corrected,sourceRow:previous.sourceRow};
+  if(previous.identityType==='passport')updated.identity=String(form.get('identity')||'').trim().toUpperCase();
   const payload=sealRenewal(JSON.stringify(updated));
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${corrected},${year},${sealRenewal(JSON.stringify({...rows[0],memberNumber:member.memberNumber}))},${payload},${sealRenewal(changing?'ID correction '+member.memberNumber+' → '+corrected+': '+reason:reason)})`;
-  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(member.identity)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
+  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(updated.identity,updated.identityType,updated.country)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
   return 'saved';
  });
 }

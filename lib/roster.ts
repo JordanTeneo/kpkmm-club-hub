@@ -3,11 +3,11 @@ import {db} from './shop';
 import {membershipReady,fingerprint,unseal} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
-export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number};
+export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;identityType?:'mykad'|'passport';country?:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number};
 export type RosterImport={year:number;source:string;members:RosterMember[]};
 export function normalizeName(value:string){return value.normalize('NFKC').trim().replace(/\s+/gu,' ').toLocaleUpperCase('en-MY');}
 export function nameKey(value:string){return renewalHash('member-name:'+normalizeName(value));}
-export function identityKey(value:string){return /^\d{12}$/.test(value)?renewalHash('mykad:malaysia:'+value):null;}
+export function identityKey(value:string,type='mykad',country='Malaysia'){return type==='passport'&&/^[A-Z0-9-]{5,20}$/.test(value)?renewalHash('passport:'+country.toLowerCase()+':'+value):type==='mykad'&&/^\d{12}$/.test(value)?renewalHash('mykad:malaysia:'+value):null;}
 export function validateRoster(input:unknown):RosterImport{
  const data=input as RosterImport;
  if(!data||!Number.isInteger(data.year)||data.year<2000||data.year>2200||typeof data.source!=='string'||data.source.length>180||!Array.isArray(data.members)||!data.members.length||data.members.length>2000)throw Error('Invalid roster');
@@ -20,7 +20,9 @@ export function validateRoster(input:unknown):RosterImport{
   const mailing:Partial<RosterMember>={};
   for(const [key,max] of [['addressLine',1500],['postcode',20],['state',100],['mailingCountry',80]] as const){if(row[key]!==undefined){if(typeof row[key]!=='string'||row[key]!.length>max)throw Error('Invalid address');mailing[key]=row[key]!.trim();}}
   if(mailing.mailingCountry?.toLowerCase()==='malaysia'&&mailing.postcode&&!/^\d{5}$/.test(mailing.postcode))throw Error('Invalid postcode');
-  return {...mailing,memberNumber:row.memberNumber,name:row.name.trim(),active:row.active,identity:row.identity.trim().replace(/[- ]/g,''),phone:row.phone,email:row.email,address:row.address,sourceRow:row.sourceRow};
+  if(row.identityType!==undefined&&!['mykad','passport'].includes(row.identityType))throw Error('Invalid identity type');
+  if(row.country!==undefined&&(typeof row.country!=='string'||row.country.length>80))throw Error('Invalid country');
+  return {...mailing,...(row.identityType?{identityType:row.identityType,country:row.country||'Malaysia'}:{}),memberNumber:row.memberNumber,name:row.name.trim(),active:row.active,identity:row.identityType==='passport'?row.identity.trim().toUpperCase():row.identity.trim().replace(/[- ]/g,''),phone:row.phone,email:row.email,address:row.address,sourceRow:row.sourceRow};
  });
  return {year:data.year,source:data.source,members};
 }
@@ -42,7 +44,7 @@ export async function importRoster(input:unknown){
   // The unique import checksum makes repeated submissions safe, including simultaneous requests.
   const receipt=await sql`INSERT INTO club_roster_imports(id,checksum,source,membership_year,total,active,payload) VALUES(${randomUUID()},${checksum},${data.source},${data.year},${data.members.length},${data.members.filter(m=>m.active).length},${sealRenewal(raw)}) ON CONFLICT(checksum) DO NOTHING RETURNING id`;
   if(!receipt.length)return {total:data.members.length,active:data.members.filter(m=>m.active).length,repeated:true};
-  const values=data.members.map(m=>({member_number:m.memberNumber,membership_year:data.year,name_hash:nameKey(m.name),identity_hash:identityKey(m.identity),payload:sealRenewal(JSON.stringify(m)),active:m.active}));
+  const values=data.members.map(m=>({member_number:m.memberNumber,membership_year:data.year,name_hash:nameKey(m.name),identity_hash:identityKey(m.identity,m.identityType,m.country),payload:sealRenewal(JSON.stringify(m)),active:m.active}));
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active) SELECT member_number,membership_year,name_hash,identity_hash,payload,active FROM jsonb_to_recordset(${sql.json(values)}) AS r(member_number text,membership_year integer,name_hash text,identity_hash text,payload text,active boolean) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,updated_at=now()`;
   return {total:data.members.length,active:data.members.filter(m=>m.active).length,repeated:false};
  });
