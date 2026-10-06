@@ -5,6 +5,15 @@ import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
 export type ManagedMember=RosterMember & {year:number;recordYear:number;revision:string;override:boolean};
+export function compareMemberNumbers(a:{memberNumber:string},b:{memberNumber:string}){
+ const aSuffix=a.memberNumber.match(/-(\d+)$/)?.[1],bSuffix=b.memberNumber.match(/-(\d+)$/)?.[1];
+ if(aSuffix!==undefined&&bSuffix!==undefined){
+  const left=BigInt(aSuffix),right=BigInt(bSuffix);
+  if(left!==right)return left<right?-1:1;
+ }else if(aSuffix!==undefined)return -1;
+ else if(bSuffix!==undefined)return 1;
+ return a.memberNumber.localeCompare(b.memberNumber,'en');
+}
 export function validYear(value:unknown){const year=Number(value);if(!Number.isInteger(year)||year<2000||year>2200)throw Error('Invalid year');return year;}
 export async function adminRosterReady(){
  await rosterReady();
@@ -25,7 +34,7 @@ export async function listMembers(year:number):Promise<ManagedMember[]>{
   const override=r.membership_year===year&&r.status_override;
   const active=override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key))));
   return {...m,memberNumber:r.member_number,active,year,recordYear:r.membership_year,revision:r.revision,override};
- });
+ }).sort(compareMemberNumbers);
 }
 export function editedMember(form:FormData){
  const memberNumber=String(form.get('memberNumber')||''),year=validYear(form.get('year')),status=String(form.get('status')||'');
