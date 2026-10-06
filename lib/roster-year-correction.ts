@@ -19,6 +19,7 @@ export function corrected2026Active(originalActive:boolean,currentActive:boolean
 }
 export async function correctRosterYear(input:unknown,apply=false){
  if(!(await isAdmin()))throw Error('Unauthorised');
+ if(apply)throw Error('Superseded correction: 2026 status must be preserved');
  const p=validateYearCorrection(input),checksum=createHash('sha256').update('year-correction-v1:'+JSON.stringify(p)).digest('hex');
  await adminRosterReady();await membershipReady();await renewalsReady();
  return db().begin(async sql=>{
@@ -71,5 +72,41 @@ export async function correctRosterYear(input:unknown,apply=false){
    await sql`INSERT INTO club_roster_imports(id,checksum,source,membership_year,total,active,payload) VALUES(${randomUUID()},${checksum},${'2025 year correction: '+p.source},2025,242,67,${sealRenewal(JSON.stringify(p))})`;
   }
   return {repeated:false,total:242,active2025:67,cleared2026,preserved2026};
+ });
+}
+
+export async function restore2026Statuses(apply=false){
+ if(!(await isAdmin()))throw Error('Unauthorised');
+ await adminRosterReady();
+ return db().begin(async sql=>{
+  await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
+  const marker='restore-2026-after-year-correction-v1';
+  const done=await sql`SELECT id FROM club_roster_imports WHERE checksum=${marker}`;
+  if(done.length)return {repeated:true,restored:0,skipped:0};
+  const edits=await sql`SELECT member_number,before_payload,after_payload,reason,created_at FROM club_roster_edits WHERE membership_year=2026 ORDER BY created_at ASC`;
+  const rows=await sql`SELECT * FROM club_member_roster WHERE membership_year=2026 FOR UPDATE`;
+  const reasonText='Committee confirmed spreadsheet paid/new markers belong to 2025, not 2026. No new payment recorded.';
+  const changes:any[]=[],audits:any[]=[];const seen=new Set<string>();let skipped=0;
+  for(const edit of edits){
+   if(openRenewal(edit.reason)!==reasonText)continue;
+   const before=JSON.parse(openRenewal(edit.before_payload)),after=JSON.parse(openRenewal(edit.after_payload));
+   if(before?.active!==true||after.active!==false)continue;
+   if(seen.has(edit.member_number))throw Error('Duplicate correction audit');seen.add(edit.member_number);
+   const row=rows.find(r=>r.member_number===edit.member_number);if(!row)throw Error('Missing current member');
+   if(row.active){skipped++;continue;}
+   const laterDeactivation=edits.some(e=>e.member_number===edit.member_number&&new Date(e.created_at)>new Date(edit.created_at)&&JSON.parse(openRenewal(e.before_payload))?.active===true&&JSON.parse(openRenewal(e.after_payload)).active===false);
+   if(laterDeactivation){skipped++;continue;}
+   const member=JSON.parse(openRenewal(row.payload));
+   const payload=sealRenewal(JSON.stringify({...member,active:true}));
+   changes.push({member_number:row.member_number,payload,active:true,status_override:!!before.status_override});
+   audits.push({id:randomUUID(),member_number:row.member_number,membership_year:2026,before_payload:sealRenewal(JSON.stringify(row)),after_payload:payload,reason:sealRenewal('Restore 2026 active status removed by historical correction, as requested. Keep 2025 history unchanged.')});
+  }
+  if(!seen.size)throw Error('No correction audit found');
+  if(apply){
+   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) SELECT id,member_number,membership_year,before_payload,after_payload,reason FROM jsonb_to_recordset(${sql.json(audits)}) AS r(id uuid,member_number text,membership_year integer,before_payload text,after_payload text,reason text)`;
+   await sql`UPDATE club_member_roster AS c SET payload=r.payload,active=r.active,status_override=r.status_override,updated_at=now() FROM jsonb_to_recordset(${sql.json(changes)}) AS r(member_number text,payload text,active boolean,status_override boolean) WHERE c.member_number=r.member_number AND c.membership_year=2026`;
+   await sql`INSERT INTO club_roster_imports(id,checksum,source,membership_year,total,active,payload) VALUES(${randomUUID()},${marker},'Restore 2026 status after historical correction',2026,${changes.length},${changes.length},${sealRenewal(JSON.stringify({restored:changes.length,skipped}))})`;
+  }
+  return {repeated:false,restored:changes.length,skipped};
  });
 }
