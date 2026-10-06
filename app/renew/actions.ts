@@ -4,7 +4,7 @@ import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
 import {db,readImage} from '../../lib/shop';
 import {validateApplicant} from '../../lib/membership';
-import {renewalEligibility} from '../../lib/roster';
+import {renewalEligibility,renewalMemberMatches} from '../../lib/roster';
 import {renewalsReady,renewalLimit,renewalHash,sealRenewal,deliverRenewal} from '../../lib/renewals';
 export type RenewalResult={error?:string;success?:string;reference?:string};
 export async function requestRenewal(_:RenewalResult,form:FormData):Promise<RenewalResult>{
@@ -17,7 +17,9 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
  try{
   await renewalsReady();const h=await headers();const ip=h.get('x-vercel-forwarded-for')?.split(',')[0]||h.get('x-forwarded-for')?.split(',')[0]||'unknown';
   if(!(await renewalLimit('ip:'+ip,5))||!(await renewalLimit('email:'+details.email,3))||!(await renewalLimit('all',30)))return {error:'Too many requests. Please try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.'};
-  const eligibility=await renewalEligibility(details.identityType+':'+details.country.toLowerCase()+':'+details.identity,currentYear);
+  const memberKey=details.identityType+':'+details.country.toLowerCase()+':'+details.identity;
+  if(!(await renewalMemberMatches(details.name,memberKey,currentYear)))return {error:'Your name and MyKad/passport details do not match a registered member. Please use your registered full name or contact the committee to correct your record before renewing or paying. / Nama dan maklumat MyKad/pasport tidak sepadan dengan ahli berdaftar. Gunakan nama penuh berdaftar atau hubungi jawatankuasa untuk membetulkan rekod sebelum memperbaharui atau membayar.'};
+  const eligibility=await renewalEligibility(memberKey,currentYear);
   if(eligibility!=='eligible')return {error:eligibility==='reinstate'?'Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again. / Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi.':'Your last active year could not be verified. Contact the committee to update your record before renewing or paying. / Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar.'};
   const file=form.get('proof');if(!(file instanceof File))return {error:'Attach your payment proof. / Lampirkan bukti bayaran.'};
   let proof;try{proof=await readImage(file,true);}catch{return {error:'Use a JPG, PNG or PDF payment proof under 700 KB. / Gunakan bukti JPG, PNG atau PDF di bawah 700 KB.'};}
