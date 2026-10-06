@@ -12,7 +12,7 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
  let details;
  const currentYear=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
  const year=Number(form.get('year'));
- try{details={...validateApplicant(form),year};if(!Number.isInteger(year)||year<currentYear||year>currentYear+1)throw Error('year');}catch{return {error:'Check every field, including your IC/passport number and renewal year. / Semak setiap medan, termasuk nombor KP/pasport dan tahun pembaharuan.'};}
+ try{details={...validateApplicant(form,true),year};if(!Number.isInteger(year)||year<currentYear||year>currentYear+1)throw Error('year');}catch{return {error:'Check every field, including your IC/passport number and renewal year. / Semak setiap medan, termasuk nombor KP/pasport dan tahun pembaharuan.'};}
  let id:string|undefined;
  try{
   await renewalsReady();const h=await headers();const ip=h.get('x-vercel-forwarded-for')?.split(',')[0]||h.get('x-forwarded-for')?.split(',')[0]||'unknown';

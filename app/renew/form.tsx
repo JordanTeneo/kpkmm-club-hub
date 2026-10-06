@@ -1,5 +1,6 @@
 'use client';
 import {useActionState,useState} from 'react';
+import {AddressFields} from '../address-fields';
 import {requestRenewal} from './actions';
 export function RenewalForm({bm,year}:{bm:boolean;year:number}){
  const [state,action,pending]=useActionState(requestRenewal,{});
@@ -14,7 +15,7 @@ export function RenewalForm({bm,year}:{bm:boolean;year:number}){
  {kind==='passport'?<label>{t('Passport issuing country','Negara pengeluar pasport')}<input name="country" required maxLength={80}/></label>:<input type="hidden" name="country" value="Malaysia"/>}
  <label>{t('Email address','Alamat e-mel')}<input type="email" name="email" required maxLength={254} autoComplete="email"/></label>
  <label>{t('Mobile number (include country code)','Nombor telefon bimbit (sertakan kod negara)')}<input type="tel" name="phone" required maxLength={30} autoComplete="tel" placeholder="+60…"/></label>
- <label>{t('Mailing address (including postcode, state and country)','Alamat surat-menyurat (termasuk poskod, negeri dan negara)')}<textarea name="address" required minLength={10} maxLength={1000} rows={4} autoComplete="street-address"/></label>
+ <AddressFields bm={bm}/>
  <label>{t('Payment proof — JPG, PNG or PDF, up to 700 KB','Bukti bayaran — JPG, PNG atau PDF, sehingga 700 KB')}<input type="file" name="proof" required accept="image/jpeg,image/png,application/pdf" onChange={e=>{const f=e.target.files?.[0];e.target.setCustomValidity(f&&f.size>700*1024?t('Please choose a file under 700 KB.','Sila pilih fail di bawah 700 KB.'):'');e.target.reportValidity();}}/></label>
  <p>{t('Upload the transfer receipt, not your IC/passport. Hide unrelated bank balances and transactions.','Muat naik resit pindahan, bukan KP/pasport. Sembunyikan baki bank dan transaksi yang tidak berkaitan.')}</p>
  <div hidden><label>Website<input name="website" tabIndex={-1}/></label></div>
