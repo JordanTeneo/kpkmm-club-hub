@@ -73,6 +73,13 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
  }
  return {status:people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year};
 }
+export async function renewalMemberMatches(name:string,key:string,currentYear:number){
+ await rosterReady();
+ // Match the latest registered details, not an old name or identification number.
+ // Never expose matching member details to the public renewal form.
+ const rows=await db()`SELECT member_number,name_hash FROM (SELECT DISTINCT ON(member_number) member_number,name_hash,identity_hash FROM club_member_roster WHERE membership_year<=${currentYear} ORDER BY member_number,membership_year DESC) AS latest WHERE identity_hash=${renewalHash(key)} LIMIT 2`;
+ return rows.length===1&&rows[0].name_hash===nameKey(name);
+}
 export async function renewalEligibility(key:string,currentYear:number){
  await Promise.all([rosterReady(),membershipReady(),renewalsReady()]);
  const [roster,apps,renewals]=await Promise.all([
