@@ -23,6 +23,7 @@ export function validateRoster(input:unknown):RosterImport{
 }
 export async function rosterReady(){
  await db()`CREATE TABLE IF NOT EXISTS club_member_roster(member_number text NOT NULL,membership_year integer NOT NULL CHECK(membership_year BETWEEN 2000 AND 2200),name_hash text NOT NULL,identity_hash text,payload text NOT NULL,active boolean NOT NULL,updated_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(member_number,membership_year))`;
+ await db()`ALTER TABLE club_member_roster ADD COLUMN IF NOT EXISTS status_override boolean NOT NULL DEFAULT false`;
  await db()`CREATE INDEX IF NOT EXISTS club_roster_name ON club_member_roster(name_hash)`;
  await db()`CREATE INDEX IF NOT EXISTS club_roster_identity ON club_member_roster(identity_hash)`;
  await db()`CREATE TABLE IF NOT EXISTS club_roster_imports(id uuid PRIMARY KEY,checksum text UNIQUE NOT NULL,source text NOT NULL,membership_year integer NOT NULL,total integer NOT NULL,active integer NOT NULL,payload text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
@@ -45,7 +46,7 @@ export async function importRoster(input:unknown){
 export async function lookupName(name:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number}>{
  await Promise.all([rosterReady(),membershipReady(),renewalsReady()]);
  const [roster,apps,renewals]=await Promise.all([
-  db()`SELECT member_number,identity_hash,membership_year,active FROM club_member_roster WHERE name_hash=${nameKey(name)}`,
+  db()`SELECT member_number,identity_hash,membership_year,active,status_override FROM club_member_roster WHERE name_hash=${nameKey(name)}`,
   db()`SELECT payload,status,membership_year FROM club_applications LIMIT 5001`,
   db()`SELECT payload,review_status,renewal_year FROM club_renewals LIMIT 5001`
  ]);
@@ -57,6 +58,7 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
   if(normalizeName(row.details.name)!==expected)continue;
   const hash=renewalHash(row.details.identityType+':'+row.details.country.toLowerCase()+':'+row.details.identity);
   const matches=roster.filter(r=>r.identity_hash===hash);
+  if(matches.some(r=>r.membership_year===year&&r.status_override))continue;
   const key=matches.length?'member:'+matches[0].member_number:'identity:'+hash;
   people.set(key,(people.get(key)||false)||row.active);
  }
