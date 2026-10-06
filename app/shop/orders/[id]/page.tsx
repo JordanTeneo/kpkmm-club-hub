@@ -1,3 +1,6 @@
+
+import {uiText} from '../../../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../../../language';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { db,ownsOrder,money,type Order } from '../../../../lib/shop';
@@ -8,6 +11,8 @@ import '../../shop.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Private order | KPKMM',robots:{index:false,follow:false}};
 export default async function OrderPage({params}:{params:Promise<{id:string}>}) {
+ const ui = uiText(await getUiLanguage());
+
   const {id}=await params; if(!(await ownsOrder(id)))notFound();
   const [order]=await db()<Order[]>`SELECT id,product_id,product_name,quantity,unit_price,customer_name,phone,status,created_at,receipt IS NOT NULL AS has_receipt FROM shop_orders WHERE id=${id}`;
   if(!order)notFound(); const bm=(await getLanguage())==='ms'; const t=(en:string,ms:string)=>bm?ms:en;
