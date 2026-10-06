@@ -40,7 +40,7 @@ export function editedMember(form:FormData){
  const memberNumber=String(form.get('memberNumber')||''),year=validYear(form.get('year')),status=String(form.get('status')||'');
  if(!['active','inactive'].includes(status))throw Error('Invalid status');
  const text=(k:string)=>String(form.get(k)||'').trim();
- const member=validateRoster({year,source:'Admin edit',members:[{memberNumber,name:text('name'),active:status==='active',identity:text('identity'),phone:text('phone'),email:text('email'),address:text('address'),sourceRow:2}]}).members[0];
+ const member=validateRoster({year,source:'Admin edit',members:[{memberNumber,name:text('name'),active:status==='active',identity:text('identity'),phone:text('phone'),email:text('email'),address:[text('address'),[text('postcode'),text('state')].filter(Boolean).join(' '),text('mailingCountry')].filter(Boolean).join('\n'),...(form.has('postcode')?{addressLine:text('address'),postcode:text('postcode'),state:text('state'),mailingCountry:text('mailingCountry')}:{}),sourceRow:2}]}).members[0];
  if(member.email&&!/^\S+@\S+\.\S+$/.test(member.email))throw Error('Invalid email');
  const reason=text('reason');if(reason.length<3||reason.length>500)throw Error('Reason required');
  const revision=text('revision');if(!revision||revision.length>100)throw Error('Invalid revision');
@@ -74,7 +74,7 @@ export async function saveMember(form:FormData){
    await sql`INSERT INTO club_member_id_history(old_number,new_number) VALUES(${member.memberNumber},${corrected})`;
    await sql`UPDATE club_roster_edits SET member_number=${corrected} WHERE member_number=${member.memberNumber}`;
   }
-  const updated={...member,memberNumber:corrected,sourceRow:previous.sourceRow};
+  const updated={...previous,...member,memberNumber:corrected,sourceRow:previous.sourceRow};
   const payload=sealRenewal(JSON.stringify(updated));
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${corrected},${year},${sealRenewal(JSON.stringify({...rows[0],memberNumber:member.memberNumber}))},${payload},${sealRenewal(changing?'ID correction '+member.memberNumber+' → '+corrected+': '+reason:reason)})`;
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(member.identity)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;

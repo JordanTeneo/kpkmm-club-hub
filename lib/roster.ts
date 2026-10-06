@@ -3,7 +3,7 @@ import {db} from './shop';
 import {membershipReady,fingerprint,unseal} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
-export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;phone:string;email:string;address:string;sourceRow:number};
+export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number};
 export type RosterImport={year:number;source:string;members:RosterMember[]};
 export function normalizeName(value:string){return value.normalize('NFKC').trim().replace(/\s+/gu,' ').toLocaleUpperCase('en-MY');}
 export function nameKey(value:string){return renewalHash('member-name:'+normalizeName(value));}
@@ -17,7 +17,10 @@ export function validateRoster(input:unknown):RosterImport{
   ids.add(row.memberNumber);
   if(typeof row.name!=='string'||normalizeName(row.name).length<2||row.name.length>150||typeof row.active!=='boolean'||!Number.isInteger(row.sourceRow)||row.sourceRow<2)throw Error('Invalid member at record '+(i+1));
   for(const key of ['identity','phone','email','address'] as const)if(typeof row[key]!=='string'||row[key].length>(key==='address'?1500:254))throw Error('Invalid details at record '+(i+1));
-  return {memberNumber:row.memberNumber,name:row.name.trim(),active:row.active,identity:row.identity.trim().replace(/[- ]/g,''),phone:row.phone,email:row.email,address:row.address,sourceRow:row.sourceRow};
+  const mailing:Partial<RosterMember>={};
+  for(const [key,max] of [['addressLine',1500],['postcode',20],['state',100],['mailingCountry',80]] as const){if(row[key]!==undefined){if(typeof row[key]!=='string'||row[key]!.length>max)throw Error('Invalid address');mailing[key]=row[key]!.trim();}}
+  if(mailing.mailingCountry?.toLowerCase()==='malaysia'&&mailing.postcode&&!/^\d{5}$/.test(mailing.postcode))throw Error('Invalid postcode');
+  return {...mailing,memberNumber:row.memberNumber,name:row.name.trim(),active:row.active,identity:row.identity.trim().replace(/[- ]/g,''),phone:row.phone,email:row.email,address:row.address,sourceRow:row.sourceRow};
  });
  return {year:data.year,source:data.source,members};
 }
