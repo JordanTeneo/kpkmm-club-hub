@@ -1,3 +1,6 @@
+
+import {uiText} from '../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../language';
 import { randomBytes,randomUUID } from 'node:crypto';
 import Image from 'next/image';
 import { getLanguage } from '../language';
@@ -8,6 +11,8 @@ import './shop.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Marketplace | KPKMM'};
 export default async function Shop() {
+ const ui = uiText(await getUiLanguage());
+
   const bm=(await getLanguage())==='ms'; const t=(en:string,ms:string)=>bm?ms:en;
   let products:Product[]=[]; let unavailable=false;
   try {await shopReady(); products=await db()<Product[]>`SELECT * FROM shop_products WHERE active=true ORDER BY updated_at DESC`;} catch {unavailable=true;}
