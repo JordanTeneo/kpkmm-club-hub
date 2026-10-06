@@ -11,10 +11,16 @@ export async function reviewRenewal(id:string,status:string){
  return db().begin(async sql=>{
   // Same lock order as member edits/imports, protecting IDs and annual records.
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
-  const requests=await sql`SELECT id,identity_hash,renewal_year,review_status FROM club_renewals WHERE id=${id} FOR UPDATE`;
+  const requests=await sql`SELECT id,identity_hash,renewal_year,review_status,payload FROM club_renewals WHERE id=${id} FOR UPDATE`;
   const request=requests[0];if(!request)return 'invalid';
   const year=validYear(request.renewal_year);
-  const matches=await sql`SELECT DISTINCT ON(member_number) member_number,membership_year,name_hash,identity_hash,payload,active,status_override FROM club_member_roster WHERE identity_hash=${request.identity_hash} AND membership_year<=${year} ORDER BY member_number,membership_year DESC`;
+  // New requests link to the member resolved on the server, including legacy records
+  // with no identification number. Older requests keep their identity-based match.
+  const registeredNumber=request.payload?JSON.parse(openRenewal(request.payload)).rosterMemberNumber:undefined;
+  if(registeredNumber!==undefined&&(typeof registeredNumber!=='string'||!/^[A-Za-z0-9-]{1,30}$/.test(registeredNumber)))return 'invalid';
+  const matches=registeredNumber
+   ?await sql`SELECT DISTINCT ON(member_number) member_number,membership_year,name_hash,identity_hash,payload,active,status_override FROM club_member_roster WHERE member_number=${registeredNumber} AND membership_year<=${year} ORDER BY member_number,membership_year DESC`
+   :await sql`SELECT DISTINCT ON(member_number) member_number,membership_year,name_hash,identity_hash,payload,active,status_override FROM club_member_roster WHERE identity_hash=${request.identity_hash} AND membership_year<=${year} ORDER BY member_number,membership_year DESC`;
   if(status==='approved'&&matches.length!==1)return matches.length?'ambiguous':'unmatched';
   const row=matches.length===1?matches[0]:undefined;
   if(row){

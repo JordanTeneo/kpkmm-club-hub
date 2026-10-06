@@ -3,7 +3,7 @@ import {db,uuid} from './shop';
 import {type Applicant} from './membership';
 import {CLUB_EMAIL,decryptToken,gmailReady,tokenRequest} from './gmail';
 
-export type RenewalDetails=Applicant & {year:number};
+export type RenewalDetails=Applicant & {year:number;rosterMemberNumber?:string};
 export type MailState='queued'|'sending'|'accepted'|'failed'|'unknown';
 function key(){
  const secret=process.env.GMAIL_ENCRYPTION_KEY;
