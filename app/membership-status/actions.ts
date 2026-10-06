@@ -5,7 +5,7 @@ import {lookupMembership,validateLookup,type MembershipStatus} from '../../lib/m
 export type CheckResult={error?:string;membership?:MembershipStatus};
 export async function checkMembership(_:CheckResult,form:FormData):Promise<CheckResult>{
  if(form.get('website'))return {error:'Unable to check. / Tidak dapat menyemak.'};
- let input;try{input=validateLookup(form);}catch{return {error:'Enter a valid 12-digit MyKad number. / Masukkan nombor MyKad 12 digit yang sah.'};}
+ let input;try{if(!form.has('name'))throw Error('Name required');input=validateLookup(form);}catch{return {error:'Enter your full registered name. / Masukkan nama penuh berdaftar anda.'};}
  try{
   await membershipReady();const h=await headers(),ip=h.get('x-vercel-forwarded-for')?.split(',')[0]||h.get('x-forwarded-for')?.split(',')[0]||'unknown';
   if(!(await applicationLimit(fingerprint('status-ip:'+ip)))||!(await applicationLimit(fingerprint('status-identity:'+input.identityKey))))return {error:'Too many checks. Try again in an hour or contact the club. / Terlalu banyak semakan. Cuba lagi dalam sejam atau hubungi kelab.'};
