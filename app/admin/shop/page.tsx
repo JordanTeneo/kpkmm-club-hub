@@ -1,3 +1,6 @@
+
+import {uiText} from '../../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../../language';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { db,shopReady,isAdmin,money,type Product,type Order } from '../../../lib/shop';
@@ -8,6 +11,8 @@ import '../../shop/shop.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Manage marketplace | KPKMM',robots:{index:false,follow:false}};
 export default async function ManageShop({searchParams}:{searchParams:Promise<{page?:string}>}) {
+ const ui = uiText(await getUiLanguage());
+
   if(!(await isAdmin()))redirect('/admin');
   const bm=(await getLanguage())==='ms'; const t=(en:string,ms:string)=>bm?ms:en;
   await shopReady();
