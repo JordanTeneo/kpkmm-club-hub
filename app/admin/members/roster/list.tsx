@@ -27,7 +27,7 @@ export function MemberList({members,year}:{members:Member[];year:number}){
  @media(max-width:600px){.member-detail-card{padding:16px}.member-detail-card dl{grid-template-columns:minmax(0,1fr)}}
  `}</style>
  <div className="member-cards" role="region" aria-label={ui("Private member listing")}>{filtered.slice((current-1)*25,current*25).map(m=><article className="member-detail-card" key={m.memberNumber}>
- <header className="member-detail-head"><div><p>{m.memberNumber}</p><h3>{m.name}</h3></div><a className="shop-link" aria-label={t('Edit ','Sunting ')+m.memberNumber} href={'/admin/members/roster/edit?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{ui("Edit / Sunting")}</a></header>
+ <header className="member-detail-head"><div><p>{m.memberNumber}</p><h3>{m.name}</h3></div><a className="shop-link" aria-label={t('Edit ','Sunting ')+m.memberNumber} href={'/admin/members/roster/edit?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{ui("Edit / Sunting")}</a><a className="shop-link" href={'/admin/members/roster/renew?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{t('Renew','Perbaharui')}</a></header>
  <dl><div><dt>{ui('MyKad / Passport')}</dt><dd>{m.identity||'—'}</dd></div><div><dt>{ui('Address / Alamat')}</dt><dd>{m.address||'—'}</dd></div>
  <div><dt>{year} {t('status','status')}</dt><dd>{m.active?ui('Active / Aktif'):ui('Inactive / Tidak aktif')}</dd></div><div><dt>{year-1} {t('status','status')}</dt><dd>{m.previousActive===true?ui('Active / Aktif'):m.previousActive===false?ui('Inactive / Tidak aktif'):t('No record','Tiada rekod')}</dd></div></dl>
  </article>)}</div>
