@@ -23,7 +23,7 @@ async function testNotification(){
  try{await membershipReady();if(await applicationLimit(fingerprint('admin-mail-test'))){result=(await sendClubMessage(membershipMessage(randomUUID(),true))).state;}else result='limited';}catch{}
  redirect('/admin/members?result=test-'+result);
 }
-function Links(){return <nav className="shop-actions" aria-label="Membership administration"><a href="/admin">← Admin</a><a className="shop-link" href="/admin/email">Club Email Setup / Tetapan E-mel Kelab</a><a className="shop-link" href="/admin/renewals">Renewals / Pembaharuan</a></nav>;}
+function Links(){return <nav className="shop-actions" aria-label="Membership administration"><a href="/admin">← Admin</a><a className="shop-link" href="/admin/members/import">Member roster / Daftar ahli</a><a className="shop-link" href="/admin/email">Club Email Setup / Tetapan E-mel Kelab</a><a className="shop-link" href="/admin/renewals">Renewals / Pembaharuan</a></nav>;}
 const labels:Record<string,string>={queued:'Waiting to send / Menunggu penghantaran',sending:'Sending or interrupted — check Gmail / Menghantar atau terganggu — semak Gmail',accepted:'Accepted by Gmail / Diterima Gmail',failed:'Failed — request saved / Gagal — permohonan disimpan',unknown:'Delivery uncertain — check Gmail / Penghantaran tidak pasti — semak Gmail'};
 export default async function Members({searchParams}:{searchParams:Promise<{page?:string;status?:string;result?:string}>}){
  if(!(await isAdmin()))redirect('/admin');
