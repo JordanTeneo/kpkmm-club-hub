@@ -19,6 +19,7 @@ assert.throws(()=>m.validateRoster({...input,members:[{...person,active:'yes'}]}
  roster=[];assert.equal((await m.lookupName('Not Found',2026)).status,'inactive');
  const details={name:'Sample Member',identityType:'mykad',identity:'900101101234',country:'Malaysia'};
  apps=[{payload:JSON.stringify(details),status:'approved',membership_year:2026}];assert.equal((await m.lookupName('sample member',2026)).status,'active');
+ roster=[{member_number:'B-09-001',identity_hash:'mykad:malaysia:900101101234',active:false,membership_year:2026,status_override:true}];assert.equal((await m.lookupName('sample member',2026)).status,'inactive');roster=[];
  apps[0].status='pending';assert.equal((await m.lookupName('sample member',2026)).status,'inactive');apps=[];
  renewals=[{payload:JSON.stringify(details),review_status:'approved',renewal_year:2026}];assert.equal((await m.lookupName('sample member',2026)).status,'active');
  const result=await m.lookupName('sample member',2026);assert.deepEqual(Object.keys(result).sort(),['status','year']);
