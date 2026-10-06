@@ -2,7 +2,7 @@
 import {useUiText,useUiLanguage} from '../../../ui-language';
 
 import {useState} from 'react';
-type Member={memberNumber:string;name:string;active:boolean;previousActive?:boolean|null;identity:string;address:string};
+type Member={memberNumber:string;name:string;active:boolean;previousActive?:boolean|null;identity:string;address:string;email?:string;vehicles?:string[];lifetimeSince?:number;paymentHistory?:{year:number;note:string;status:string}[]};
 export function MemberList({members,year}:{members:Member[];year:number}){
  const ui = useUiText(),bm=useUiLanguage()==='ms',t=(en:string,ms:string)=>bm?ms:en;
 
@@ -29,7 +29,9 @@ export function MemberList({members,year}:{members:Member[];year:number}){
  <div className="member-cards" role="region" aria-label={ui("Private member listing")}>{filtered.slice((current-1)*25,current*25).map(m=><article className="member-detail-card" key={m.memberNumber}>
  <header className="member-detail-head"><div><p>{m.memberNumber}</p><h3>{m.name}</h3></div><a className="shop-link" aria-label={t('Edit ','Sunting ')+m.memberNumber} href={'/admin/members/roster/edit?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{ui("Edit / Sunting")}</a><a className="shop-link" href={'/admin/members/roster/renew?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{t('Renew','Perbaharui')}</a></header>
  <dl><div><dt>{ui('MyKad / Passport')}</dt><dd>{m.identity||'—'}</dd></div><div><dt>{ui('Address / Alamat')}</dt><dd>{m.address||'—'}</dd></div>
- <div><dt>{year} {t('status','status')}</dt><dd>{m.active?ui('Active / Aktif'):ui('Inactive / Tidak aktif')}</dd></div><div><dt>{year-1} {t('status','status')}</dt><dd>{m.previousActive===true?ui('Active / Aktif'):m.previousActive===false?ui('Inactive / Tidak aktif'):t('No record','Tiada rekod')}</dd></div></dl>
+ <div><dt>{t('Email','E-mel')}</dt><dd>{m.email||'—'}</dd></div><div><dt>{t('Vehicle numbers','Nombor kenderaan')}</dt><dd>{m.vehicles?.length?m.vehicles.join('\n'):'—'}</dd></div>
+ <div><dt>{year} {t('status','status')}</dt><dd>{m.lifetimeSince&&m.lifetimeSince<=year?t('Active — lifetime member','Aktif — ahli seumur hidup'):m.active?ui('Active / Aktif'):ui('Inactive / Tidak aktif')}</dd></div><div><dt>{year-1} {t('status','status')}</dt><dd>{m.previousActive===true?ui('Active / Aktif'):m.previousActive===false?ui('Inactive / Tidak aktif'):t('No record','Tiada rekod')}</dd></div></dl>
+ {m.paymentHistory?.length?<details style={{marginTop:20}}><summary>{t('Payment and fee-waiver history','Sejarah bayaran dan pengecualian yuran')}</summary><ul>{m.paymentHistory.map(h=><li key={h.year}><strong>{h.year}</strong>: {({paid:t('Paid','Dibayar'),new:t('New member','Ahli baharu'),sponsored:t('Sponsored — fee waived','Tajaan — yuran dikecualikan'),lifetime:t('Lifetime membership','Keahlian seumur hidup'),inactive:t('No payment recorded','Tiada bayaran direkodkan'),review:t('Needs review','Perlu semakan')} as Record<string,string>)[h.status]||h.status}{h.note?' — '+h.note:''}</li>)}</ul></details>:null}
  </article>)}</div>
  {!filtered.length&&<p>{ui("No matching members. / Tiada ahli sepadan.")}</p>}<nav className="shop-actions" aria-label={ui("Member list pages")}><button disabled={current<=1} onClick={()=>setPage(current-1)}>{ui("← Previous / Sebelumnya")}</button><span>{current} / {pages}</span><button disabled={current>=pages} onClick={()=>setPage(current+1)}>{ui("Next / Seterusnya →")}</button></nav></section></>;
 }
