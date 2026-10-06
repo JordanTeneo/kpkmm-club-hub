@@ -1,0 +1,12 @@
+'use client';
+import {useState} from 'react';
+type Member={memberNumber:string;name:string;active:boolean};
+export function MemberList({members,year}:{members:Member[];year:number}){
+ const [query,setQuery]=useState(''),[status,setStatus]=useState('all'),[page,setPage]=useState(1);
+ const active=members.filter(m=>m.active).length,needle=query.trim().toLocaleLowerCase();
+ const filtered=members.filter(m=>(status==='all'||m.active===(status==='active'))&&(!needle||(m.name+' '+m.memberNumber).toLocaleLowerCase().includes(needle)));
+ const pages=Math.max(1,Math.ceil(filtered.length/25)),current=Math.min(page,pages);
+ return <><section className="shop-note"><h2>{year} membership</h2><p><strong>{members.length}</strong> total / jumlah · <strong>{active}</strong> active / aktif · <strong>{members.length-active}</strong> inactive / tidak aktif</p></section><section className="shop-card"><div className="shop-actions"><label>Search name or member ID / Cari nama atau nombor ahli<input type="search" value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><label>Status<select value={status} onChange={e=>{setStatus(e.target.value);setPage(1);}}><option value="all">All / Semua</option><option value="active">Active / Aktif</option><option value="inactive">Inactive / Tidak aktif</option></select></label></div><p role="status">{filtered.length} matching members / ahli sepadan</p>
+ <div style={{overflowX:'auto'}}><table style={{width:'100%',textAlign:'left',borderCollapse:'collapse'}}><thead><tr>{['Member ID / No. ahli','Name / Nama','Status','Manage / Urus'].map(h=><th key={h} scope="col" style={{padding:12,borderBottom:'2px solid #d9c49b'}}>{h}</th>)}</tr></thead><tbody>{filtered.slice((current-1)*25,current*25).map(m=><tr key={m.memberNumber}><td style={{padding:12,whiteSpace:'nowrap'}}>{m.memberNumber}</td><td style={{padding:12}}>{m.name}</td><td style={{padding:12}}>{m.active?'Active / Aktif':'Inactive / Tidak aktif'}</td><td style={{padding:12}}><a className="shop-link" aria-label={'Edit '+m.memberNumber} href={'/admin/members/roster/edit?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>Edit / Sunting</a></td></tr>)}</tbody></table></div>
+ {!filtered.length&&<p>No matching members. / Tiada ahli sepadan.</p>}<nav className="shop-actions" aria-label="Member list pages"><button disabled={current<=1} onClick={()=>setPage(current-1)}>← Previous / Sebelumnya</button><span>{current} / {pages}</span><button disabled={current>=pages} onClick={()=>setPage(current+1)}>Next / Seterusnya →</button></nav></section></>;
+}
