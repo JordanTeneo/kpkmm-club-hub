@@ -3,6 +3,7 @@ function load(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule
 let roster=[],apps=[],renewals=[],years=[null,null,null],transactions=0,inserted=0,repeated=false;
 const sql=async(p,...v)=>{const q=p.join('?');if(q.includes('max('))return [{year:years[q.includes('club_member_roster')?0:q.includes('club_applications')?1:2]}];if(q.startsWith('SELECT member_number'))return roster;if(q.includes('SELECT payload,status'))return apps;if(q.includes('SELECT payload,review'))return renewals;if(q.includes('INSERT INTO club_roster_imports'))return repeated?[]:[{id:'test'}];if(q.includes('INSERT INTO club_member_roster')){inserted++;assert.equal(JSON.parse(v[0]).length,2);}return [];};
 sql.begin=async fn=>{transactions++;return fn(sql);};
+sql.json=JSON.stringify;
 const m=load('lib/roster.ts',{'./shop':{db:()=>sql},'./membership':{membershipReady:async()=>{},fingerprint:v=>v,unseal:JSON.parse},'./renewals':{renewalsReady:async()=>{},renewalHash:v=>v,sealRenewal:v=>'encrypted:'+v,openRenewal:v=>v}});
 const person={memberNumber:'B-09-001',name:'Sample Member',active:true,identity:'',phone:'',email:'',address:'',sourceRow:2};
 const input={year:2026,source:'test',members:[person,{...person,memberNumber:'B-09-002',name:'Other Member',active:false}]};
