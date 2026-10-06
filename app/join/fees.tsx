@@ -1,4 +1,8 @@
+
+import {uiText} from '../../lib/ui-text';
 export function MembershipFees({bm}:{bm:boolean}) {
+ const ui = uiText(bm?'ms':'en');
+
  const t=(en:string,ms:string)=>bm?ms:en;
  return <section className="shop-note" aria-labelledby="membership-fees">
   <h2 id="membership-fees">{t('Membership fees','Yuran keahlian')}</h2>
