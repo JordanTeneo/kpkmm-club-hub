@@ -19,9 +19,9 @@ const f=new FormData();Object.entries({memberNumber:'B-09-001',name:'Sample Memb
  let captured;
  const route=load('app/admin/members/roster/export/route.ts',{'../../../../../lib/shop':{isAdmin:async()=>authorised},'../../../../../lib/member-admin':{validYear:m.validYear,listMembers:async()=>[{memberNumber:'001',name:'Sample',active:true,phone:'0123',email:'',address:'',identity:'private'},{memberNumber:'002',name:'Other',active:false,phone:'',email:'',address:'',identity:''}]},'../../../../../lib/member-excel':{memberWorkbook:(r,s)=>{captured=r;return excel.memberWorkbook(r,s);}}});
  authorised=false;assert.equal((await route.GET(new Request('https://example.invalid?year=2026&status=all'))).status,401);authorised=true;
- let response=await route.GET(new Request('https://example.invalid?year=2026&status=active'));assert.equal(response.status,200);assert.match(response.headers.get('Cache-Control'),/no-store/);assert.equal(captured.length,2);assert.equal(captured[1].length,7);assert.ok(!captured.flat().includes('private'));
+ let response=await route.GET(new Request('https://example.invalid?year=2026&status=active'));assert.equal(response.status,200);assert.match(response.headers.get('Cache-Control'),/no-store/);assert.equal(captured.length,2);assert.equal(captured[1].length,10);assert.ok(!captured.flat().includes('private'));
  response=await route.GET(new Request('https://example.invalid?year=2026&status=inactive'));assert.equal(captured[1][0],'002');
- await route.GET(new Request('https://example.invalid?year=2026&status=all&identity=yes'));assert.equal(captured.length,3);assert.equal(captured[1][7],'private');
+ await route.GET(new Request('https://example.invalid?year=2026&status=all&identity=yes'));assert.equal(captured.length,3);assert.equal(captured[1][10],'private');
  assert.equal((await route.GET(new Request('https://example.invalid?year=oops&status=all'))).status,400);
  console.log('PASS: admin-only editing/export, stale-edit protection, audit transaction, year handling, filtered XLSX, private headers, optional identity columns, literal cells/formula-injection protection.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
