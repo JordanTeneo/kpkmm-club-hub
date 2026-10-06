@@ -1,3 +1,6 @@
+
+import {uiText} from '../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../language';
 import {getLanguage} from '../language';
 import {db} from '../../lib/shop';
 import {videosReady,type ClubVideo} from '../../lib/videos';
@@ -6,6 +9,8 @@ import '../shop/shop.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Videos | KPKMM'};
 export default async function Videos(){
+ const ui = uiText(await getUiLanguage());
+
   const bm=(await getLanguage())==='ms';const t=(en:string,ms:string)=>bm?ms:en;
   let videos:ClubVideo[]=[];let failed=false;
   try{await videosReady();videos=await db()<ClubVideo[]>`SELECT * FROM club_videos WHERE deleted=false ORDER BY updated_at DESC`;}catch{failed=true;}
