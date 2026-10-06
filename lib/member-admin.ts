@@ -48,17 +48,36 @@ export function editedMember(form:FormData){
 }
 export async function saveMember(form:FormData){
  if(!(await isAdmin()))throw Error('Unauthorised');
- const {member,year,reason,revision}=editedMember(form);await adminRosterReady();
+ const {member,year,reason,revision}=editedMember(form);
+ const corrected=String(form.get('correctedMemberNumber')||member.memberNumber).trim().toUpperCase();
+ const changing=corrected!==member.memberNumber;
+ if(changing && (!/^[ABJKDMNCPRTWFL]-\d{2}-\d{3,10}$/.test(corrected)||/^-?0+$/.test(corrected.split('-')[2])))return 'invalid-id';
+ if(changing && form.get('confirmIdCorrection')!=='yes')return 'confirm-id';
+ await adminRosterReady();
  return db().begin(async sql=>{
+  // Serialize corrections, regular edits and imports so an ID cannot split across years.
+  await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
   await sql`SELECT pg_advisory_xact_lock(hashtext(${member.memberNumber}))`;
   const rows=await sql`SELECT payload,active,membership_year,status_override,updated_at::text AS revision FROM club_member_roster WHERE member_number=${member.memberNumber} AND membership_year<=${year} ORDER BY membership_year DESC LIMIT 1 FOR UPDATE`;
   if(!rows[0]||rows[0].revision!==revision)return 'conflict';
   const previous=JSON.parse(openRenewal(rows[0].payload));
-  // Number is a lookup key, never regenerated when address or status changes.
-  const updated={...member,sourceRow:previous.sourceRow};
+  if(changing){
+   const suffix=corrected.split('-')[2].replace(/^0+/,'');
+   const duplicate=await sql`SELECT member_number FROM club_member_roster WHERE member_number<>${member.memberNumber} AND (upper(member_number)=${corrected} OR ltrim(substring(member_number from '-([0-9]+)$'),'0')=${suffix}) LIMIT 1`;
+   const retired=await sql`SELECT old_number FROM club_member_id_history WHERE upper(old_number)=${corrected} LIMIT 1`;
+   if(duplicate.length||retired.length)return 'duplicate-id';
+   const allYears=await sql`SELECT membership_year,payload FROM club_member_roster WHERE member_number=${member.memberNumber} FOR UPDATE`;
+   for(const record of allYears){
+    const correctedPayload=sealRenewal(JSON.stringify({...JSON.parse(openRenewal(record.payload)),memberNumber:corrected}));
+    await sql`UPDATE club_member_roster SET member_number=${corrected},payload=${correctedPayload},updated_at=now() WHERE member_number=${member.memberNumber} AND membership_year=${record.membership_year}`;
+   }
+   await sql`INSERT INTO club_member_id_history(old_number,new_number) VALUES(${member.memberNumber},${corrected})`;
+   await sql`UPDATE club_roster_edits SET member_number=${corrected} WHERE member_number=${member.memberNumber}`;
+  }
+  const updated={...member,memberNumber:corrected,sourceRow:previous.sourceRow};
   const payload=sealRenewal(JSON.stringify(updated));
-  await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${member.memberNumber},${year},${sealRenewal(JSON.stringify(rows[0]))},${payload},${sealRenewal(reason)})`;
-  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${member.memberNumber},${year},${nameKey(member.name)},${identityKey(member.identity)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
+  await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${corrected},${year},${sealRenewal(JSON.stringify({...rows[0],memberNumber:member.memberNumber}))},${payload},${sealRenewal(changing?'ID correction '+member.memberNumber+' → '+corrected+': '+reason:reason)})`;
+  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(member.identity)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
   return 'saved';
  });
 }

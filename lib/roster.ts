@@ -22,6 +22,7 @@ export function validateRoster(input:unknown):RosterImport{
  return {year:data.year,source:data.source,members};
 }
 export async function rosterReady(){
+ await db()`CREATE TABLE IF NOT EXISTS club_member_id_history(old_number text PRIMARY KEY,new_number text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
  await db()`CREATE TABLE IF NOT EXISTS club_member_roster(member_number text NOT NULL,membership_year integer NOT NULL CHECK(membership_year BETWEEN 2000 AND 2200),name_hash text NOT NULL,identity_hash text,payload text NOT NULL,active boolean NOT NULL,updated_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(member_number,membership_year))`;
  await db()`ALTER TABLE club_member_roster ADD COLUMN IF NOT EXISTS status_override boolean NOT NULL DEFAULT false`;
  await db()`CREATE INDEX IF NOT EXISTS club_roster_name ON club_member_roster(name_hash)`;
@@ -32,6 +33,9 @@ export async function importRoster(input:unknown){
  const data=validateRoster(input),raw=JSON.stringify(data),checksum=createHash('sha256').update(raw).digest('hex');
  await rosterReady();
  return db().begin(async sql=>{
+  await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
+  const retired=await sql`SELECT old_number FROM club_member_id_history`;
+  if(data.members.some(m=>retired.some(r=>r.old_number.toUpperCase()===m.memberNumber.toUpperCase())))throw Error('Import includes a corrected membership ID. Update the source to the current ID before importing.');
   // The unique import checksum makes repeated submissions safe, including simultaneous requests.
   const receipt=await sql`INSERT INTO club_roster_imports(id,checksum,source,membership_year,total,active,payload) VALUES(${randomUUID()},${checksum},${data.source},${data.year},${data.members.length},${data.members.filter(m=>m.active).length},${sealRenewal(raw)}) ON CONFLICT(checksum) DO NOTHING RETURNING id`;
   if(!receipt.length)return {total:data.members.length,active:data.members.filter(m=>m.active).length,repeated:true};
