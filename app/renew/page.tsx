@@ -1,9 +1,14 @@
+
+import {uiText} from '../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../language';
 import {getLanguage} from '../language';
 import {RenewalForm} from './form';
 import '../shop/shop.css';
 export const metadata={title:'Renew membership | KPKMM'};
 export const dynamic='force-dynamic';
 export default async function Renew(){
+ const ui = uiText(await getUiLanguage());
+
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
  const year=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
  return <main className="shop" style={{maxWidth:800}}><p className="eyebrow">KPKMM</p><h1>{t('Renew your membership','Perbaharui keahlian anda')}</h1><p>{t('For existing members. Submit your updated details and transfer receipt for club verification.','Untuk ahli sedia ada. Hantar maklumat terkini dan resit pindahan untuk pengesahan kelab.')}</p>
