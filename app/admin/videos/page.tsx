@@ -1,3 +1,6 @@
+
+import {uiText} from '../../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../../language';
 import {randomUUID} from 'node:crypto';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
@@ -34,6 +37,8 @@ async function save(_:Result,form:FormData):Promise<Result>{
   }catch{return {error:'Could not save. Please retry. / Tidak dapat disimpan. Sila cuba lagi.'};}
 }
 export default async function ManageVideos(){
+ const ui = uiText(await getUiLanguage());
+
   if(!(await isAdmin()))redirect('/admin');
   await videosReady();const videos=await db()<ClubVideo[]>`SELECT * FROM club_videos ORDER BY updated_at DESC`;const {events}=await getClubData();
   const bm=(await getLanguage())==='ms';const t=(en:string,ms:string)=>bm?ms:en;
