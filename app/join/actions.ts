@@ -20,10 +20,6 @@ export async function requestMembership(_:ApplicationResult,form:FormData):Promi
  revalidatePath('/admin/members');return {success:'Your request has been saved for review. The team is notified by email when delivery is available. If you already applied, your existing request is kept. This is not confirmation of membership. / Permohonan disimpan untuk semakan. Pasukan dimaklumkan melalui e-mel apabila penghantaran tersedia. Jika anda pernah memohon, permohonan asal dikekalkan. Ini bukan pengesahan keahlian.'};
 }
 export async function reviewMembership(_:ApplicationResult,form:FormData):Promise<ApplicationResult>{
- if(!(await isAdmin()))return {error:'Please sign in again. / Sila log masuk semula.'};
- const id=String(form.get('id')||''),status=String(form.get('status')||''),previous=String(form.get('previous')||'');
- if(!uuid(id)||!['pending','approved','rejected'].includes(status)||!['pending','approved','rejected'].includes(previous))return {error:'Invalid request.'};
- const rawYear=String(form.get('membershipYear')||''),year=rawYear?Number(rawYear):null;
- if((year!==null&&(!Number.isInteger(year)||year<2000||year>2200))||(status==='approved'&&year===null))return {error:'Set the verified membership year before approving. / Tetapkan tahun keahlian yang disahkan sebelum meluluskan.'};
- try{await membershipReady();const result=await db()`UPDATE club_applications SET status=${status},membership_year=${year},updated_at=now() WHERE id=${id} AND status=${previous} RETURNING id`;if(!result.length)return {error:'This request changed. Refresh and try again.'};revalidatePath('/admin/members');revalidatePath('/admin/members/'+id);return {success:'Review and membership year saved. Membership ends on 31 December of the approved year. Contact the applicant directly; no decision email is sent. / Semakan dan tahun keahlian disimpan. Keahlian tamat pada 31 Disember tahun diluluskan. Hubungi pemohon secara terus; tiada e-mel keputusan dihantar.'};}catch{return {error:'Unable to save. Please try again.'};}
+ // Older browser tabs must not bypass the new payment-verification stage.
+ return {error:'Refresh this page to use the new application and payment review steps. / Muat semula untuk menggunakan langkah semakan permohonan dan bayaran baharu.'};
 }
