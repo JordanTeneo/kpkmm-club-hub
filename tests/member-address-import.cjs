@@ -1,0 +1,27 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+let authorised=false,queries=[],records=[],changes=[];
+const sql=async(p,...v)=>{const q=p.join('?');queries.push(q);if(q.startsWith('SELECT member_number'))return records;if(q.startsWith('UPDATE'))changes=v[0];return [];};
+sql.json=x=>x;sql.begin=async f=>f(sql);
+const exportsObject={};
+const mocks={'./shop':{db:()=>sql,isAdmin:async()=>authorised},'./member-admin':{adminRosterReady:async()=>{},validYear:y=>{if(y!==2026)throw Error('year');return y;}},'./roster':{normalizeName:s=>s.trim().toUpperCase()},'./renewals':{sealRenewal:s=>s,openRenewal:s=>s}};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/member-address-import.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:exportsObject,require:n=>mocks[n]||require(n)});
+const {validateAddressPlan,addressPatch,importAddresses}=exportsObject;
+const row={memberNumber:'B-26-001',name:'Sample',expectedAddress:'Original street 01000 Perlis',addressLine:'Original street',postcode:'01000',state:'Perlis',mailingCountry:'Malaysia'};
+const before={name:'Sample',address:row.expectedAddress,active:true,identity:'unchanged',phone:'unchanged',sourceRow:20};
+(async()=>{
+ assert.throws(()=>validateAddressPlan({year:2026,members:[row,row]}));
+ assert.throws(()=>validateAddressPlan({year:2026,members:[{...row,postcode:'1000'}]}));
+ const plan=validateAddressPlan({year:2026,members:[{...row,active:false}]});assert.equal(plan.members[0].active,undefined);
+ assert.equal(addressPatch({...before,address:'New address'},row),null);
+ assert.equal(addressPatch({...before,name:'Other person'},row),null);
+ assert.equal(addressPatch({...before,postcode:'99999'},row),null);
+ const next=addressPatch(before,row);assert.equal(next.active,true);assert.equal(next.identity,before.identity);assert.equal(next.sourceRow,20);assert.equal(next.postcode,'01000');
+ await assert.rejects(()=>importAddresses(plan));assert.equal(queries.length,0);authorised=true;
+ records=[{member_number:row.memberNumber,payload:JSON.stringify(before),active:true,status_override:false}];
+ assert.equal((await importAddresses(plan)).updated,1);
+ assert.ok(queries.some(q=>q.startsWith('LOCK TABLE')));assert.ok(queries.some(q=>q.startsWith('INSERT INTO club_roster_edits')));
+ const update=queries.find(q=>q.startsWith('UPDATE'));assert.ok(!update.includes('SET active'));assert.ok(!update.includes('status_override='));
+ assert.equal(JSON.parse(changes[0].payload).active,true);
+ records[0].payload=changes[0].payload;assert.equal((await importAddresses(plan)).skipped,1);
+ console.log('PASS: address allowlist, leading zeros, auth, unchanged-status preservation, stale address/name guard, structured-address guard, audit transaction and repeat safety');
+})().catch(e=>{console.error(e);process.exitCode=1;});
