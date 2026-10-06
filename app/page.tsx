@@ -1,3 +1,6 @@
+
+import {uiText} from '../lib/ui-text';
+import {getLanguage as getUiLanguage} from './language';
 import { getBanner } from "../lib/banner";
 import { getLanguage } from "./language";
 import Image from "next/image";
@@ -13,6 +16,8 @@ const fallbackPhotos = ["https://images.unsplash.com/photo-1492144534655-ae79c96
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+ const ui = uiText(await getUiLanguage());
+
   const lang = await getLanguage();
   const homeBanner = await getBanner();
   const t = (en: string, ms: string) => lang === "ms" ? ms : en;
