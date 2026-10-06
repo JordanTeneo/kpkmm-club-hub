@@ -27,7 +27,7 @@ export default async function Roster({searchParams}:{searchParams:Promise<{year?
  if(!(await isAdmin()))redirect('/admin');
  const q=await searchParams;let year=malaysiaYear();try{if(q.year)year=validYear(q.year);}catch{}
  let members;try{members=await listMembersWithHistory(year);}catch{return <main className="shop"><a href="/admin/members">{ui("← Admin")}</a><h1>{ui("Member listing / Senarai ahli")}</h1><p>{ui("Private records are temporarily unavailable. No changes were made. / Rekod sulit tidak tersedia buat sementara waktu.")}</p></main>;}
- return <main className="shop"><nav className="shop-actions"><a href="/admin/members">{ui("← Applications / Permohonan")}</a><a href="/admin/renewals">{ui("Renewals / Pembaharuan")}</a><a href="/admin/members/import">{ui("Import roster / Import daftar")}</a></nav><h1>{ui("Member listing / Senarai ahli")}</h1><p>{ui("Private administrator access. Membership numbers remain permanent. Edit details, maintain annual status or download an Excel list. / Akses pentadbir sahaja. Nombor ahli kekal.")}</p>
+ return <main className="shop"><h1>{ui("Member listing / Senarai ahli")}</h1><p>{ui("Private administrator access. Membership numbers remain permanent. Edit details, maintain annual status or download an Excel list. / Akses pentadbir sahaja. Nombor ahli kekal.")}</p>
  <form className="shop-actions"><label>{ui("Membership year / Tahun keahlian")}<input name="year" type="number" min="2000" max="2200" defaultValue={year} required/></label><button>{ui("View year / Lihat tahun")}</button></form>
  <p><a className="shop-link" href={'?year='+year+(q.add?'':'&add=1')}>{q.add?ui('Close add form / Tutup borang'):ui('+ Add member / Tambah ahli')}</a></p>
  {q.add&&<AddMemberForm year={year} action={add}/>}
