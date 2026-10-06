@@ -1,3 +1,6 @@
+
+import {uiText} from '../../../lib/ui-text';
+import {getLanguage as getUiLanguage} from '../../language';
 import {randomBytes} from 'node:crypto';
 import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
@@ -18,6 +21,8 @@ async function connect(){
  redirect('https://accounts.google.com/o/oauth2/v2/auth?'+query);
 }
 export default async function EmailSettings({searchParams}:{searchParams:Promise<{result?:string}>}){
+ const language = await getUiLanguage(), ui = uiText(language);
+
  if(!(await isAdmin()))redirect('/admin');
  const {result}=await searchParams;
  let configured=false,linked:null|{email:string;connected_at:Date}=null,storageError='';
@@ -37,10 +42,10 @@ export default async function EmailSettings({searchParams}:{searchParams:Promise
   'email-unverified':'Google did not confirm that the email address is verified. / Google tidak mengesahkan alamat e-mel ini.',
   storage:'Google authorisation passed, but the connection could not be saved securely. / Kebenaran Google berjaya, tetapi sambungan tidak dapat disimpan dengan selamat.'
  });
- return <main className="shop" style={{maxWidth:800}}><a href="/admin/members">← Membership admin / Pentadbiran keahlian</a><h1>Club email / E-mel kelab</h1>
- {result&&messages[result]&&<p className="shop-note" role="status">{messages[result]}{result!=='connected'&&<> <small>Reference / Rujukan: {result}</small></>}</p>}
- <section className="shop-card"><h2>{linked?'Connected / Disambungkan':'Connect Gmail / Sambungkan Gmail'}</h2><p>{CLUB_EMAIL}</p><p>Google settings / Tetapan Google: {configured?'Present / Tersedia':'Missing / Tiada'}</p>{linked&&<p>Authorised on / Dibenarkan pada: {new Date(linked.connected_at).toLocaleDateString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}. This confirms authorisation, not email delivery. / Ini mengesahkan kebenaran, bukan penghantaran e-mel.</p>}
- <p>The website requests permission to send email and confirm your email address. It does not request access to read or delete your inbox. Select only the club account when Google asks.</p><p>Laman web meminta kebenaran menghantar e-mel dan mengesahkan alamat e-mel anda. Ia tidak meminta akses membaca atau memadam peti masuk. Pilih akaun kelab sahaja.</p>
- {storageError&&<p className="shop-error" role="alert">{storageError}</p>}<form action={connect}><button disabled={!configured||!!storageError}>{linked?'Reconnect Gmail / Sambung semula Gmail':'Connect club Gmail / Sambung Gmail kelab'}</button></form></section>
- <section className="shop-note"><h2>Renewal emails / E-mel pembaharuan</h2><p>While Google OAuth is in Testing, this connection normally expires after 7 days. Complete production readiness before relying on unattended emails. Requests are saved even if email fails; reconnect Gmail and retry from renewal administration. / Semasa OAuth Google dalam mod Testing, sambungan biasanya tamat selepas 7 hari. Lengkapkan persediaan Production sebelum bergantung pada e-mel tanpa pengawasan. Permohonan tetap disimpan jika e-mel gagal; sambung semula Gmail dan cuba lagi dalam pentadbiran pembaharuan.</p><p>Keep GMAIL_ENCRYPTION_KEY unchanged: it protects both the Gmail connection and private renewal records. / Jangan ubah GMAIL_ENCRYPTION_KEY: ia melindungi sambungan Gmail dan rekod pembaharuan sulit.</p><a className="shop-link" href="/admin/renewals">Manage renewals and test email / Urus pembaharuan dan uji e-mel →</a></section></main>;
+ return <main className="shop" style={{maxWidth:800}}><a href="/admin/members">{ui("← Membership admin / Pentadbiran keahlian")}</a><h1>{ui("Club email / E-mel kelab")}</h1>
+ {result&&messages[result]&&<p className="shop-note" role="status">{ui(messages[result])}{result!=='connected'&&<> <small>{ui("Reference / Rujukan: ")}{result}</small></>}</p>}
+ <section className="shop-card"><h2>{linked?ui('Connected / Disambungkan'):ui('Connect Gmail / Sambungkan Gmail')}</h2><p>{CLUB_EMAIL}</p><p>{ui("Google settings / Tetapan Google: ")}{configured?ui('Present / Tersedia'):ui('Missing / Tiada')}</p>{linked&&<p>{ui("Authorised on / Dibenarkan pada: ")}{new Date(linked.connected_at).toLocaleDateString(language==='ms'?'ms-MY':'en-MY',{timeZone:'Asia/Kuala_Lumpur'})}{ui(". This confirms authorisation, not email delivery. / Ini mengesahkan kebenaran, bukan penghantaran e-mel.")}</p>}
+ <p>{ui("The website requests permission to send email and confirm your email address. It does not request access to read or delete your inbox. Select only the club account when Google asks.")}</p>
+ {storageError&&<p className="shop-error" role="alert">{ui(storageError)}</p>}<form action={connect}><button disabled={!configured||!!storageError}>{linked?ui('Reconnect Gmail / Sambung semula Gmail'):ui('Connect club Gmail / Sambung Gmail kelab')}</button></form></section>
+ <section className="shop-note"><h2>{ui("Renewal emails / E-mel pembaharuan")}</h2><p>{ui("While Google OAuth is in Testing, this connection normally expires after 7 days. Complete production readiness before relying on unattended emails. Requests are saved even if email fails; reconnect Gmail and retry from renewal administration. / Semasa OAuth Google dalam mod Testing, sambungan biasanya tamat selepas 7 hari. Lengkapkan persediaan Production sebelum bergantung pada e-mel tanpa pengawasan. Permohonan tetap disimpan jika e-mel gagal; sambung semula Gmail dan cuba lagi dalam pentadbiran pembaharuan.")}</p><p>{ui("Keep GMAIL_ENCRYPTION_KEY unchanged: it protects both the Gmail connection and private renewal records. / Jangan ubah GMAIL_ENCRYPTION_KEY: ia melindungi sambungan Gmail dan rekod pembaharuan sulit.")}</p><a className="shop-link" href="/admin/renewals">{ui("Manage renewals and test email / Urus pembaharuan dan uji e-mel →")}</a></section></main>;
 }
