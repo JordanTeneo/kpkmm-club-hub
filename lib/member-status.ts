@@ -1,8 +1,9 @@
 import {db} from './shop';
 import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash} from './renewals';
+import {lookupName,normalizeName} from './roster';
 // Keep older result names type-compatible during rolling deployments; only active/inactive are returned.
-export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched';year?:number;pending?:boolean};
+export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched'|'ambiguous';year?:number;pending?:boolean};
 export type StatusRecord={status:string;year:number|null};
 export function malaysiaYear(now=new Date()){return Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(now));}
 export function calculateStatus(records:StatusRecord[],now=new Date()):MembershipStatus{
@@ -10,12 +11,18 @@ export function calculateStatus(records:StatusRecord[],now=new Date()):Membershi
  return {status:records.some(r=>r.status==='approved'&&r.year===year)?'active':'inactive',year};
 }
 export function validateLookup(form:FormData){
+ const name=form.get('name');
+ if(typeof name==='string'){
+  if(name.length>150||normalizeName(name).length<2||/[\u0000-\u001f]/u.test(name))throw Error('Invalid name');
+  return {email:'',identityKey:'name:'+normalizeName(name)};
+ }
  const identity=String(form.get('identity')||'').trim().replace(/[- ]/g,'');
  if(!/^\d{12}$/.test(identity))throw Error('Invalid MyKad');
  return {email:'',identityKey:'mykad:malaysia:'+identity};
 }
 export async function lookupMembership(identityKeyOrEmail:string,legacyIdentityKey?:string){
  const identityKey=legacyIdentityKey??identityKeyOrEmail;
+ if(identityKey.startsWith('name:'))return lookupName(identityKey.slice(5),malaysiaYear());
  if(!/^mykad:malaysia:\d{12}$/.test(identityKey))throw Error('Invalid MyKad');
  await Promise.all([membershipReady(),renewalsReady()]);
  const year=malaysiaYear();
