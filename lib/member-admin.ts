@@ -37,10 +37,9 @@ export async function listMembers(year:number):Promise<ManagedMember[]>{
  }).sort(compareMemberNumbers);
 }
 export function editedMember(form:FormData){
- const memberNumber=String(form.get('memberNumber')||''),year=validYear(form.get('year')),status=String(form.get('status')||'');
- if(!['active','inactive'].includes(status))throw Error('Invalid status');
+ const memberNumber=String(form.get('memberNumber')||''),year=validYear(form.get('year'));
  const text=(k:string)=>String(form.get(k)||'').trim();
- const member=validateRoster({year,source:'Admin edit',members:[{memberNumber,name:text('name'),active:status==='active',identity:text('identity'),phone:text('phone'),email:text('email'),address:[text('address'),[text('postcode'),text('state')].filter(Boolean).join(' '),text('mailingCountry')].filter(Boolean).join('\n'),...(form.has('postcode')?{addressLine:text('address'),postcode:text('postcode'),state:text('state'),mailingCountry:text('mailingCountry')}:{}),sourceRow:2}]}).members[0];
+ const member=validateRoster({year,source:'Admin edit',members:[{memberNumber,name:text('name'),active:false,identity:text('identity'),phone:text('phone'),email:text('email'),address:[text('address'),[text('postcode'),text('state')].filter(Boolean).join(' '),text('mailingCountry')].filter(Boolean).join('\n'),...(form.has('postcode')?{addressLine:text('address'),postcode:text('postcode'),state:text('state'),mailingCountry:text('mailingCountry')}:{}),sourceRow:2}]}).members[0];
  if(member.email&&!/^\S+@\S+\.\S+$/.test(member.email))throw Error('Invalid email');
  const reason=text('reason');if(reason.length<3||reason.length>500)throw Error('Reason required');
  const revision=text('revision');if(!revision||revision.length>100)throw Error('Invalid revision');
@@ -53,7 +52,7 @@ export async function saveMember(form:FormData){
  const changing=corrected!==member.memberNumber;
  if(changing && (!/^[ABJKDMNCPRTWFL]-\d{2}-\d{3,10}$/.test(corrected)||/^-?0+$/.test(corrected.split('-')[2])))return 'invalid-id';
  if(changing && form.get('confirmIdCorrection')!=='yes')return 'confirm-id';
- await adminRosterReady();
+ await adminRosterReady();await membershipReady();await renewalsReady();
  return db().begin(async sql=>{
   // Serialize corrections, regular edits and imports so an ID cannot split across years.
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
@@ -74,11 +73,16 @@ export async function saveMember(form:FormData){
    await sql`INSERT INTO club_member_id_history(old_number,new_number) VALUES(${member.memberNumber},${corrected})`;
    await sql`UPDATE club_roster_edits SET member_number=${corrected} WHERE member_number=${member.memberNumber}`;
   }
-  const updated={...previous,...member,memberNumber:corrected,sourceRow:previous.sourceRow};
+  const identity=previous.identityType==='passport'?'passport:'+(previous.country||'Malaysia').toLowerCase()+':'+previous.identity:/^\d{12}$/.test(previous.identity||'')?'mykad:malaysia:'+previous.identity:null;
+  const apps=identity?await sql`SELECT 1 FROM club_applications WHERE identity_hash=${fingerprint(identity)} AND status='approved' AND membership_year=${year} LIMIT 1`:[];
+  const renewals=identity?await sql`SELECT 1 FROM club_renewals WHERE identity_hash=${renewalHash(identity)} AND review_status='approved' AND renewal_year=${year} LIMIT 1`:[];
+  const active=rows[0].membership_year===year&&rows[0].status_override?rows[0].active:!!((rows[0].membership_year===year&&rows[0].active)||apps.length||renewals.length);
+  // Ignore any submitted status, including forms opened before this release.
+  const updated={...previous,...member,active,memberNumber:corrected,sourceRow:previous.sourceRow};
   if(previous.identityType==='passport')updated.identity=String(form.get('identity')||'').trim().toUpperCase();
   const payload=sealRenewal(JSON.stringify(updated));
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${corrected},${year},${sealRenewal(JSON.stringify({...rows[0],memberNumber:member.memberNumber}))},${payload},${sealRenewal(changing?'ID correction '+member.memberNumber+' → '+corrected+': '+reason:reason)})`;
-  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(updated.identity,updated.identityType,updated.country)},${payload},${member.active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
+  await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${corrected},${year},${nameKey(member.name)},${identityKey(updated.identity,updated.identityType,updated.country)},${payload},${active},true) ON CONFLICT(member_number,membership_year) DO UPDATE SET name_hash=excluded.name_hash,identity_hash=excluded.identity_hash,payload=excluded.payload,active=excluded.active,status_override=true,updated_at=now()`;
   return 'saved';
  });
 }
