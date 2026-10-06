@@ -3,7 +3,7 @@ let authorised=false,request,records,writes,audits,fail=false;
 const id='00000000-0000-4000-8000-000000000001';
 const sql=async(p,...v)=>{const q=p.join('?');
  if(q.startsWith('SELECT id'))return request?[request]:[];
- if(q.startsWith('SELECT DISTINCT'))return records;
+ if(q.startsWith('SELECT DISTINCT')){if(request?.payload&&JSON.parse(request.payload).rosterMemberNumber){assert.match(q,/WHERE member_number=/);assert.equal(v[0],JSON.parse(request.payload).rosterMemberNumber);}return records;}
  if(q.startsWith('INSERT INTO club_roster_edits')){audits++;return [];}
  if(q.startsWith('INSERT INTO club_member_roster')){writes++;records=[{member_number:v[0],membership_year:v[1],name_hash:v[2],identity_hash:v[3],payload:v[4],active:v[5],status_override:v[6]}];}
  if(q.startsWith('UPDATE club_renewals')){if(fail)throw Error('database failed');request.review_status=v[0];}
@@ -24,6 +24,8 @@ function setup({year=2026,active=false,override=true}={}){request={id,identity_h
  setup();await mod.reviewRenewal(id,'approved');records[0].status_override=true;records[0].active=false;await mod.reviewRenewal(id,'rejected');assert.equal(records[0].active,false);assert.equal(records[0].status_override,true);
  setup();records=[];assert.equal(await mod.reviewRenewal(id,'approved'),'unmatched');assert.equal(request.review_status,'pending');assert.equal(writes,0);
  setup();records.push({...records[0],member_number:'B-09-002'});assert.equal(await mod.reviewRenewal(id,'approved'),'ambiguous');assert.equal(request.review_status,'pending');
+ setup();request.payload=JSON.stringify({rosterMemberNumber:'B-09-001'});request.identity_hash='roster-member:B-09-001';records[0].identity_hash=null;await mod.reviewRenewal(id,'approved');assert.equal(records[0].active,true);assert.equal(records[0].member_number,'B-09-001');assert.equal(records[0].identity_hash,null);
+ setup();request.payload=JSON.stringify({rosterMemberNumber:'invalid id'});assert.equal(await mod.reviewRenewal(id,'approved'),'invalid');assert.equal(writes,0);
  setup();fail=true;await assert.rejects(()=>mod.reviewRenewal(id,'approved'));assert.equal(records[0].active,false);assert.equal(request.review_status,'pending');assert.equal(writes,0);
  console.log('PASS: approval activates roster, inactive overrides cleared, annual rollover, permanent ID/address preservation, idempotency, safe approval reversal, unmatched/duplicate blocking, auth and atomic rollback.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
