@@ -8,7 +8,7 @@ import {membershipMailReady,notifyMembership} from '../../lib/membership-mail';
 export type ApplicationResult={error?:string;success?:string};
 export async function requestMembership(_:ApplicationResult,form:FormData):Promise<ApplicationResult>{
  if(form.get('consent')!=='yes'||form.get('website'))return {error:'Check the form and consent checkbox. / Semak borang dan persetujuan.'};
- let applicant;try{applicant=validateApplicant(form);}catch{return {error:'Check all fields. MyKad must have 12 digits; passports need 5–20 letters/numbers. / Semak semua maklumat. MyKad mesti 12 digit; pasport 5–20 huruf/nombor.'};}
+ let applicant;try{applicant=validateApplicant(form,true);}catch{return {error:'Check all fields, including address, postcode, state and country. Malaysian postcodes must have 5 digits. MyKad must have 12 digits; passports need 5–20 letters/numbers. / Semak semua medan termasuk alamat, poskod, negeri dan negara. Poskod Malaysia mesti 5 digit. MyKad mesti 12 digit; pasport 5–20 huruf/nombor.'};}
  let savedId:string|undefined;
  try{await membershipReady();await membershipMailReady();const ip=(await headers()).get('x-vercel-forwarded-for')?.split(',')[0]||(await headers()).get('x-forwarded-for')?.split(',')[0]||'unknown';
  if(!(await applicationLimit(fingerprint('ip:'+ip)))||!(await applicationLimit(fingerprint('email:'+applicant.email))))return {error:'Too many requests. Try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.'};
