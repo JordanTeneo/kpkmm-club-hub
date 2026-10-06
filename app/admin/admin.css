@@ -1,0 +1,56 @@
+.club-admin{max-width:1200px;margin:auto;padding:32px 24px 56px!important;color:#38271e}
+.club-admin *{box-sizing:border-box}
+.club-admin h1{font-size:clamp(28px,4vw,40px);line-height:1.2;margin:8px 0 12px;letter-spacing:-.035em}
+.club-admin h1 span,.club-admin h2 span{font-size:.55em;font-weight:500;color:#76604d;letter-spacing:0}
+.club-admin h2{font-size:24px;margin:0 0 18px}
+.admin-kicker{font-size:11px;letter-spacing:.14em;font-weight:800;color:#93472b;margin:0}
+.admin-header{display:flex;justify-content:space-between;gap:24px;align-items:center;padding:12px 0 28px}
+.admin-header p:not(.admin-kicker),.admin-section-heading p{color:#76604d;margin:0}
+.admin-header-actions{display:flex;align-items:center;gap:16px;flex-shrink:0;font-size:14px}
+.club-admin form{display:grid;gap:14px;margin:0;min-width:0}
+.club-admin label{display:grid;gap:6px;font-size:14px;font-weight:650}
+.club-admin input:not([type=hidden]):not([type=checkbox]),.club-admin textarea,.club-admin select{width:100%;min-width:0;min-height:44px;padding:11px 12px;border:1px solid #d9c8aa;border-radius:9px;background:#fffdf7;color:#38271e;font-size:16px}
+.club-admin textarea{resize:vertical}
+.club-admin button{min-height:44px;padding:10px 17px;border:1px solid #483022;border-radius:9px;background:#483022;color:#fff6e4;cursor:pointer;font-weight:650;width:fit-content;max-width:100%}
+.club-admin button.admin-secondary{background:#fff9ed;color:#483022;border-color:#d9c8aa}
+.club-admin button:disabled{opacity:.45;cursor:not-allowed}
+.admin-tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid #d9c8aa;padding-bottom:14px;margin-bottom:28px}
+.admin-tabs a{padding:11px 18px;border-radius:9px;font-size:14px;font-weight:650}
+.admin-tabs a[aria-current=page]{background:#483022;color:#fff6e4}
+.admin-tabs a:hover,.admin-link-card:hover{background:#f3e4c8}
+.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.admin-stats a{padding:20px;border:1px solid #dbc8a7;border-radius:14px;background:#f4e5c8;font-size:14px}
+.admin-stats strong{display:block;font-size:30px;line-height:1.3}
+.admin-group{margin-bottom:30px}
+.admin-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.admin-link-card{display:block;border:1px solid #dfceb0;border-radius:14px;background:#fffaf0;padding:22px;transition:background .15s}
+.admin-link-card strong{display:flex;justify-content:space-between;gap:12px;font-size:17px}
+.admin-link-card p{font-size:13px;color:#76604d;line-height:1.65;margin:10px 0 0}
+.admin-back{display:inline-block;margin-bottom:24px;font-size:14px;font-weight:650}
+.admin-section-heading{margin-bottom:24px}
+.admin-create,.admin-record{border:1px solid #deccad;border-radius:12px;background:#fffaf0;margin-bottom:12px;overflow:hidden}
+.club-admin summary{cursor:pointer;padding:18px;min-height:52px}
+.admin-create{background:#f3e4c8}
+.admin-create>summary{font-weight:750}
+.admin-create>form,.admin-record-body{padding:20px;border-top:1px solid #e1d1b6}
+.admin-record>summary{display:flex;align-items:center;gap:16px}
+.admin-record>summary strong,.admin-record>summary small{display:block;overflow-wrap:anywhere}
+.admin-record>summary small{color:#76604d;margin-top:4px}
+.admin-record-number{color:#967654;font-size:14px}
+.admin-edit-hint{margin-left:auto;white-space:nowrap;font-size:12px;color:#76604d}
+.admin-record[open]>summary{background:#f3e4c8}
+.admin-record-body{display:grid;gap:24px}
+.admin-order{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.admin-poster{display:flex;align-items:start;gap:24px;padding-top:20px;border-top:1px solid #e1d1b6}
+.admin-poster form{flex:1}
+.admin-danger{border-top:1px solid #e1d1b6;color:#8c3022}
+.admin-danger summary{padding-left:0;font-size:14px}
+.admin-danger label{display:flex;align-items:center;gap:10px}
+.admin-danger button{background:#8c3022}
+.admin-footnote{font-size:12px;color:#76604d;border-top:1px solid #deccad;padding-top:20px;margin-top:32px}
+.admin-empty{padding:30px;text-align:center}
+.admin-login{max-width:520px;padding-top:70px!important}
+.admin-login .admin-kicker{margin-top:36px}
+.admin-login form{margin-top:24px}
+@media(max-width:850px){.admin-header{align-items:start;flex-direction:column}.admin-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.club-admin{padding:20px 16px 40px!important}.admin-card-grid{grid-template-columns:1fr}.admin-stats{gap:8px}.admin-stats a{padding:12px;font-size:12px}.admin-stats strong{font-size:26px}.admin-tabs a{padding:10px;font-size:12px}.club-admin h1 span{display:block;margin-top:8px}.admin-edit-hint{display:none}.admin-poster{flex-direction:column}.admin-poster form{width:100%}.admin-record-body,.admin-create>form{padding:16px}.admin-header-actions{flex-wrap:wrap}}

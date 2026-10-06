@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getClubData, saveClubData, savePhoto } from "../../lib/club-data";
 
+import "./admin.css";
+
 import { AlbumManager } from "../album-ui";
 
 const cookieName = "kpkmm-admin";
@@ -12,7 +14,9 @@ function same(a: string, b: string) { const x = Buffer.from(a); const y = Buffer
 function signature(value: string) { return createHmac("sha256", process.env.ADMIN_SESSION_SECRET || "missing").update(value).digest("hex"); }
 async function signedIn() { const raw = (await cookies()).get(cookieName)?.value; if (!raw || !process.env.ADMIN_SESSION_SECRET) return false; const [value, sig] = raw.split("."); return !!value && !!sig && Number(value) > Date.now() && same(sig, signature(value)); }
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ section?: string; error?: string }> }) {
+  const query = await searchParams;
+  const section = ["notices", "archive", "photos"].includes(query.section || "") ? query.section! : "overview";
   const ok = await signedIn();
   async function login(formData: FormData) { "use server"; const password = String(formData.get("password") || ""); if (!process.env.ADMIN_PASSWORD || !same(password, process.env.ADMIN_PASSWORD)) redirect("/admin?error=1"); const expiry = String(Date.now() + 43200000); (await cookies()).set(cookieName, expiry + "." + signature(expiry), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 43200 }); redirect("/admin"); }
   async function logout() { "use server"; (await cookies()).delete(cookieName); redirect("/admin"); }
@@ -82,9 +86,48 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
     await saveClubData(current);
     refresh();
   }
-  if (!ok) return <main style={{ padding: 40 }}><a href="/">← KPKMM website</a><h1>KPKMM club admin</h1><p>Sign in to manage notices, club archive and shared moments.</p><form action={login}><input name="password" type="password" placeholder="Admin password" required /><button>Sign in</button></form></main>;
+
+  if (!ok) return <main className="club-admin admin-login"><a href="/">← KPKMM website</a><p className="admin-kicker">COMMITTEE ACCESS</p><h1>Welcome back</h1><p>Sign in to manage your club. / Log masuk untuk mengurus kelab.</p>{query.error && <p role="alert">Incorrect password. Please try again.</p>}<form action={login}><label>Admin password / Kata laluan<input name="password" type="password" autoComplete="current-password" required /></label><button>Sign in / Log masuk</button></form></main>;
   const data = await getClubData();
-  const card = { border: "1px solid #bbb", padding: 16, display: "grid", gap: 10 };
-  const eventPicker = (selected?: string) => <select name="eventId" defaultValue={selected || ""}><option value="">Not linked to an outing</option>{data.events.map((event) => <option value={event.id} key={event.id}>{event.date} — {event.title}</option>)}</select>;
-  return <main style={{ padding: "24px", maxWidth: 1100, margin: "0 auto" }}><a href="/">← View KPKMM website</a><h1>KPKMM club admin</h1><p><a href="/admin/shop" className="button">Manage marketplace / Urus kedai →</a></p><p><a href="/admin/videos" className="button">Manage videos / Urus video →</a></p><p><a href="/admin/banner" className="button">Manage homepage banner / Urus sepanduk utama →</a></p><p><a href="/admin/members/roster" className="button">Manage members & Excel / Urus ahli & Excel →</a></p><p><a href="/admin/members" className="button">Membership requests / Permohonan keahlian →</a></p><form action={logout}><button>Sign out</button></form><hr/><section><h2>Add an outing</h2><form action={addRecord}><input type="hidden" name="type" value="event" /><input name="date" placeholder="Date, e.g. 17 MAY 2026" required /><input name="title" placeholder="Outing title" required /><textarea name="details" placeholder="Story" required /><button>Publish outing</button></form></section><section><h2>Post a notice</h2><p>After posting, add its poster in “Manage notices” below.</p><form action={addRecord}><input type="hidden" name="type" value="notice" /><input name="date" placeholder="Date label" required /><input name="title" placeholder="Notice heading" required /><textarea name="details" placeholder="Message" required /><button>Post notice</button></form></section><hr/><section><h2>Manage notices</h2>{data.notices.map((item) => <article key={item.id} style={card}><form action={updateRecord}><input type="hidden" name="type" value="notice" /><input type="hidden" name="id" value={item.id} /><input name="date" defaultValue={item.date} required /><input name="title" defaultValue={item.title} required /><textarea name="details" defaultValue={item.details} required /><button>Save notice</button></form>{item.posterUrl && <img src={item.posterUrl} alt="Notice poster" style={{ maxWidth: 300, width: "100%", height: "auto" }} />}<form action={attachPoster}><input type="hidden" name="id" value={item.id} /><input name="poster" type="file" accept="image/jpeg,image/png,image/webp" required /><button>{item.posterUrl ? "Replace poster" : "Upload poster"}</button></form><form action={removeRecord}><input type="hidden" name="type" value="notice" /><input type="hidden" name="id" value={item.id} /><button>Delete notice</button></form></article>)}</section><hr/><section><h2>Manage club archive</h2><p>Photos linked to an outing appear with its shared moments on the public site.</p>{data.events.map((item, index) => <article key={item.id} style={card}><div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}><strong>Position / Kedudukan {index + 1}</strong><form action={reorderArchive}><input type="hidden" name="id" value={item.id}/><input type="hidden" name="direction" value="up"/><button disabled={index === 0}>↑ Move up / Naik</button></form><form action={reorderArchive}><input type="hidden" name="id" value={item.id}/><input type="hidden" name="direction" value="down"/><button disabled={index === data.events.length - 1}>↓ Move down / Turun</button></form></div><form action={updateRecord}><input type="hidden" name="type" value="event" /><input type="hidden" name="id" value={item.id} /><input name="date" defaultValue={item.date} required /><input name="title" defaultValue={item.title} required /><textarea name="details" defaultValue={item.details} required /><button>Save outing</button></form><p>{data.moments.filter((moment) => moment.eventId === item.id).length} linked shared moments</p><form action={removeRecord}><input type="hidden" name="type" value="event" /><input type="hidden" name="id" value={item.id} /><button>Delete outing</button></form></article>)}</section><hr/><AlbumManager photos={data.moments} events={data.events} action={manageAlbum} /><hr/><p>{data.events.length} outings · {data.notices.length} notices · {data.moments.length} photos</p></main>;
+  const fields = (item?: { date: string; title: string; details: string }) => <><label>Date label / Tarikh<input name="date" defaultValue={item?.date} placeholder="17 MAY 2026" required /></label><label>Title / Tajuk<input name="title" defaultValue={item?.title} required /></label><label>Details / Butiran<textarea name="details" defaultValue={item?.details} rows={4} required /></label></>;
+  const groups = [
+    { title: "Membership", bm: "Keahlian", links: [
+      ["/admin/members/roster", "Member listing & Excel", "Senarai ahli · Edit records, status and exports"],
+      ["/admin/members", "New applications", "Permohonan baharu · Review requests to join"],
+      ["/admin/renewals", "Membership renewals", "Pembaharuan · Review payments and renewals"],
+    ] },
+    { title: "Website", bm: "Laman web", links: [
+      ["/admin?section=notices#workspace", "Notice board", "Papan kenyataan · Publish messages and posters"],
+      ["/admin?section=archive#workspace", "Club archive", "Arkib kelab · Edit outings and arrange their order"],
+      ["/admin?section=photos#workspace", "Shared moments", "Momen bersama · Add and organize photo albums"],
+      ["/admin/banner", "Homepage banner", "Sepanduk utama · Change the featured photo"],
+      ["/admin/videos", "Videos", "Video · Manage YouTube links"],
+    ] },
+    { title: "Shop & settings", bm: "Kedai & tetapan", links: [
+      ["/admin/shop", "Marketplace", "Kedai · Manage products, stock and orders"],
+      ["/admin/email", "Club email", "E-mel kelab · Manage notification connection"],
+    ] },
+  ];
+  return <main className="club-admin">
+    <header className="admin-header"><div><p className="admin-kicker">KPKMM · COMMITTEE WORKSPACE</p><h1>Club dashboard <span>/ Pentadbiran kelab</span></h1><p>Everything you need to keep the club running, in one place.</p></div><div className="admin-header-actions"><a href="/">View website ↗</a><form action={logout}><button className="admin-secondary">Sign out / Log keluar</button></form></div></header>
+    <nav className="admin-tabs" aria-label="Admin sections">{[["overview","Overview / Utama"],["notices","Notices / Notis"],["archive","Archive / Arkib"],["photos","Photos / Foto"]].map(([id,label])=><a key={id} href={id==="overview"?"/admin":"/admin?section="+id+"#workspace"} aria-current={section===id?"page":undefined}>{label}</a>)}</nav>
+    {section==="overview" ? <>
+      <div className="admin-stats"><a href="/admin?section=notices#workspace"><strong>{data.notices.length}</strong> Notices / Notis</a><a href="/admin?section=archive#workspace"><strong>{data.events.length}</strong> Outings / Aktiviti</a><a href="/admin?section=photos#workspace"><strong>{data.moments.length}</strong> Photos / Foto</a></div>
+      {groups.map(group=><section className="admin-group" key={group.title}><h2>{group.title} <span>/ {group.bm}</span></h2><div className="admin-card-grid">{group.links.map(([href,title,description])=><a className="admin-link-card" href={href} key={href}><strong>{title}<span aria-hidden="true">↗</span></strong><p>{description}</p></a>)}</div></section>)}
+    </> : <section id="workspace" className="admin-workspace">
+      <a className="admin-back" href="/admin">← Dashboard / Utama</a>
+      {section==="photos" ? <AlbumManager photos={data.moments} events={data.events} action={manageAlbum} /> : <>
+        <div className="admin-section-heading"><h2>{section==="notices"?"Notice board / Papan kenyataan":"Club archive / Arkib kelab"}</h2><p>{section==="notices"?"Open a notice to edit its message or poster.":"Open an outing to edit it. Use the arrows to change the public display order."}</p></div>
+        <details className="admin-create"><summary>＋ {section==="notices"?"Add notice / Tambah notis":"Add outing / Tambah aktiviti"}</summary><form action={addRecord}><input type="hidden" name="type" value={section==="notices"?"notice":"event"} />{fields()}<button>{section==="notices"?"Publish notice / Siarkan notis":"Publish outing / Siarkan aktiviti"}</button><small>{section==="notices"?"After publishing, open the notice below to attach its poster.":"Link photos to this outing in the Photos tab."}</small></form></details>
+        {(section==="notices"?data.notices:data.events).length===0 && <p className="admin-empty">Nothing here yet. Use the add button above to get started.</p>}
+        {(section==="notices"?data.notices:data.events).map((item,index)=><details className="admin-record" key={item.id}><summary><span className="admin-record-number">{String(index+1).padStart(2,"0")}</span><span><strong>{item.title}</strong><small>{item.date}</small></span><span className="admin-edit-hint">Edit / Sunting ＋</span></summary><div className="admin-record-body">
+          {section==="archive" && <div className="admin-order"><strong>Position / Kedudukan {index+1}</strong>{["up","down"].map(direction=><form action={reorderArchive} key={direction}><input type="hidden" name="id" value={item.id}/><input type="hidden" name="direction" value={direction}/><button className="admin-secondary" disabled={direction==="up"?index===0:index===data.events.length-1}>{direction==="up"?"↑ Move up / Naik":"↓ Move down / Turun"}</button></form>)}</div>}
+          <form action={updateRecord}><input type="hidden" name="type" value={section==="notices"?"notice":"event"}/><input type="hidden" name="id" value={item.id}/>{fields(item)}<button>Save changes / Simpan perubahan</button></form>
+          {section==="notices" ? <div className="admin-poster">{"posterUrl" in item && typeof item.posterUrl==="string" && item.posterUrl && <img src={item.posterUrl} alt={"Poster: "+item.title} loading="lazy" width={240} style={{height:"auto",maxWidth:"100%"}}/>}<form action={attachPoster}><input type="hidden" name="id" value={item.id}/><label>Poster image / Gambar poster<input name="poster" type="file" accept="image/jpeg,image/png,image/webp" required/></label><small>JPG, PNG or WebP · Maximum 4 MB</small><button className="admin-secondary">Upload / replace poster</button></form></div> : <p>{data.moments.filter(moment=>moment.eventId===item.id).length} linked photos · <a href="/admin?section=photos#workspace">Manage photos →</a></p>}
+          <details className="admin-danger"><summary>Delete {section==="notices"?"notice":"outing"} / Padam</summary><p>This removes the item from the website.{section==="archive"?" Linked photos remain in Shared moments.":""}</p><form action={removeRecord}><input type="hidden" name="type" value={section==="notices"?"notice":"event"}/><input type="hidden" name="id" value={item.id}/><label><input type="checkbox" required/> I confirm I want to delete this item.</label><button>Confirm deletion / Sahkan padam</button></form></details>
+        </div></details>)}
+      </>}
+    </section>}
+    <p className="admin-footnote">KPKMM administration · Changes become visible on the website after saving.</p>
+  </main>;
 }
