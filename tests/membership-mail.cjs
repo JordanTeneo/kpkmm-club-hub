@@ -14,7 +14,10 @@ const mail=load('lib/membership-mail.ts',{'./shop':{uuid:v=>/^[0-9a-f-]{36}$/.te
  await Promise.all([mail.notifyMembership(id),mail.notifyMembership(id)]);assert.equal(sends,1);assert.ok(queries.some(q=>q.v.includes('unknown')));
  let inserted=0,notified=0,duplicate=false,allow=true,dbFails=false;
  const action=load('app/join/actions.ts',{'next/headers':{headers:async()=>({get:()=>null})},'next/cache':{revalidatePath:()=>{}},'../../lib/shop':{db:()=>async()=>{if(dbFails)throw Error('DB unavailable');inserted++;return duplicate?[]:[{application_id:id}];}},'../../lib/membership':{...member,membershipReady:async()=>{},applicationLimit:async()=>allow},'../../lib/membership-mail':{membershipMailReady:async()=>{},notifyMembership:async()=>{notified++;throw Error('Gmail unavailable');}}});
- const form=()=>{const f=new FormData();Object.entries({...applicant,consent:'yes'}).forEach(([k,v])=>f.set(k,v));return f;};
+ const form=()=>{const f=new FormData();Object.entries({...applicant,postcode:'01234',state:'Selangor',mailingCountry:'Malaysia',consent:'yes'}).forEach(([k,v])=>f.set(k,v));return f;};
+ const structured=member.validateApplicant(form(),true);assert.equal(structured.postcode,'01234');assert.equal(structured.country,'Test Country');assert.equal(structured.mailingCountry,'Malaysia');assert.match(structured.address,/01234 Selangor\nMalaysia/);assert.equal(member.unseal(member.seal(structured)).postcode,'01234');
+ for(const key of ['postcode','state','mailingCountry']){const missing=form();missing.delete(key);assert.throws(()=>member.validateApplicant(missing,true));}
+ const overseas=form();overseas.set('postcode','SW1A 1AA');assert.throws(()=>member.validateApplicant(overseas,true));overseas.set('mailingCountry','United Kingdom');assert.equal(member.validateApplicant(overseas,true).postcode,'SW1A 1AA');
  let f=form();f.delete('consent');assert.ok((await action.requestMembership({},f)).error);assert.equal(inserted,0);
  allow=false;assert.ok((await action.requestMembership({},form())).error);assert.equal(inserted,0);allow=true;
  assert.ok((await action.requestMembership({},form())).success);assert.equal(notified,1);
