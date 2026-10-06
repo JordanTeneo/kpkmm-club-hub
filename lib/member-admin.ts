@@ -32,7 +32,8 @@ export async function listMembers(year:number):Promise<ManagedMember[]>{
   const m=JSON.parse(openRenewal(r.payload)) as RosterMember;
   const key=m.identityType==='passport'?'passport:'+(m.country||'Malaysia').toLowerCase()+':'+m.identity:/^\d{12}$/.test(m.identity)?'mykad:malaysia:'+m.identity:null;
   const override=r.membership_year===year&&r.status_override;
-  const active=override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key))));
+  const lifetime=Number.isInteger(m.lifetimeSince)&&m.lifetimeSince!<=year;
+  const active=lifetime||(override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key)))));
   return {...m,memberNumber:r.member_number,active,year,recordYear:r.membership_year,revision:r.revision,override};
  }).sort(compareMemberNumbers);
 }
@@ -79,6 +80,7 @@ export async function saveMember(form:FormData){
   const active=rows[0].membership_year===year&&rows[0].status_override?rows[0].active:!!((rows[0].membership_year===year&&rows[0].active)||apps.length||renewals.length);
   // Ignore any submitted status, including forms opened before this release.
   const updated={...previous,...member,active,memberNumber:corrected,sourceRow:previous.sourceRow};
+  if(form.has('vehicles')){const text=String(form.get('vehicles')||'');if(text.length>2000)throw Error('Too many vehicle numbers');updated.vehicles=[...new Set(text.split(/[,\n\r]+/).map(v=>v.trim().toUpperCase()).filter(Boolean))];if(updated.vehicles.length>30||updated.vehicles.some((v:string)=>v.length>80))throw Error('Invalid vehicle numbers');}
   if(previous.identityType==='passport')updated.identity=String(form.get('identity')||'').trim().toUpperCase();
   const payload=sealRenewal(JSON.stringify(updated));
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${corrected},${year},${sealRenewal(JSON.stringify({...rows[0],memberNumber:member.memberNumber}))},${payload},${sealRenewal(changing?'ID correction '+member.memberNumber+' → '+corrected+': '+reason:reason)})`;

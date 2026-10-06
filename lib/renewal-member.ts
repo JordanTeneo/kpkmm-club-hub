@@ -13,7 +13,7 @@ function identification(value:string){
  const compact=value.normalize('NFKC').toUpperCase().replace(/\s/g,'');
  return /^\d{6}-?\d{2}-?\d{4}$/.test(compact)?compact.replace(/-/g,''):compact;
 }
-type Match = {status:'missing'|'ambiguous'|'review'|'reinstate'} | {status:'eligible';identityHash:string;details:RenewalDetails};
+type Match = {status:'missing'|'ambiguous'|'review'|'reinstate'|'lifetime'} | {status:'eligible';identityHash:string;details:RenewalDetails};
 // Server-only lookup: never return this record to a public component or action result.
 export async function findRenewalMember(lookup:RenewalLookup,currentYear:number,year:number):Promise<Match>{
  await rosterReady();
@@ -26,6 +26,7 @@ export async function findRenewalMember(lookup:RenewalLookup,currentYear:number,
  const matches=rows.map(row=>({row,member:JSON.parse(openRenewal(row.payload)) as RosterMember})).filter(({member})=>lookup.mode==='name'?normalizeName(member.name)===normalizeName(lookup.value):!!member.identity&&identification(member.identity)===identification(lookup.value));
  if(matches.length!==1)return {status:matches.length?'ambiguous':'missing'};
  const {row,member}=matches[0];
+ if(Number.isInteger(member.lifetimeSince)&&member.lifetimeSince!<=year)return {status:'lifetime'};
  const history=await db()`SELECT max(membership_year) AS year FROM club_member_roster WHERE member_number=${row.member_number} AND active=true AND membership_year<=${currentYear}`;
  const last=history[0]?.year;
  let eligibility:'eligible'|'reinstate'|'review'=typeof last==='number'?(currentYear-last>1?'reinstate':'eligible'):'review';

@@ -3,7 +3,7 @@ import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash} from './renewals';
 import {lookupName,normalizeName} from './roster';
 // Keep older result names type-compatible during rolling deployments; only active/inactive are returned.
-export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched'|'ambiguous';year?:number;pending?:boolean};
+export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched'|'ambiguous';year?:number;pending?:boolean;lifetime?:boolean};
 export type StatusRecord={status:string;year:number|null};
 export function malaysiaYear(now=new Date()){return Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(now));}
 export function calculateStatus(records:StatusRecord[],now=new Date()):MembershipStatus{

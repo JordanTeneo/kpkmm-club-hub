@@ -17,6 +17,7 @@ export async function renewMemberByAdmin(form:FormData){
   const rows=await sql`SELECT * FROM club_member_roster WHERE member_number=${number} AND membership_year<=${year} ORDER BY membership_year DESC LIMIT 1 FOR UPDATE`;
   const row=rows[0];if(!row)return 'missing';
   const member=JSON.parse(openRenewal(row.payload));
+  if(Number.isInteger(member.lifetimeSince)&&member.lifetimeSince<=year)return 'lifetime';
   const hash=row.identity_hash||renewalHash('roster-member:'+number);
   const prior=await sql`SELECT id FROM club_renewals WHERE identity_hash=${hash} AND renewal_year=${year} LIMIT 1`;
   if(prior.length)return 'existing';
