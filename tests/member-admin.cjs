@@ -11,6 +11,9 @@ const f=new FormData();Object.entries({memberNumber:'B-09-001',name:'Sample Memb
  f.set('status','other');assert.throws(()=>m.editedMember(f));f.set('status','active');f.set('reason','');assert.throws(()=>m.editedMember(f));
  assert.throws(()=>m.validYear('bad'));assert.throws(()=>m.validYear(1999));
  rows=[{member_number:'B-09-001',membership_year:2025,payload:JSON.stringify({name:'Sample',identity:''}),active:true,status_override:false,revision:'old'}];assert.equal((await m.listMembers(2026))[0].active,false);rows[0].membership_year=2026;assert.equal((await m.listMembers(2026))[0].active,true);
+ rows=['A-10-038','J-26-1000','W-25-010','B-09-001','P-20-2','UNKNOWN'].map(member_number=>({...rows[0],member_number}));
+ assert.deepEqual(Array.from(await m.listMembers(2026),r=>r.memberNumber),['B-09-001','P-20-2','W-25-010','A-10-038','J-26-1000','UNKNOWN']);
+ assert.ok(m.compareMemberNumbers({memberNumber:'B-26-001'},{memberNumber:'J-25-1'})<0);
  const excel=load('lib/member-excel.ts');const sample=excel.memberWorkbook([['ID','Name'],['001','=HYPERLINK("bad")'],['002','A & B < C']],'2026 active');assert.equal(sample.readUInt32LE(0),0x04034b50);assert.ok(sample.includes(Buffer.from('t="inlineStr"')));assert.ok(!sample.includes(Buffer.from('<f>')));assert.ok(sample.includes(Buffer.from('A &amp; B &lt; C')));
  fs.writeFileSync('../work/member-export-test.xlsx',sample);
  let captured;
