@@ -8,7 +8,7 @@ const f=new FormData();Object.entries({memberNumber:'B-09-001',name:'Sample Memb
 (async()=>{
  await assert.rejects(()=>m.saveMember(f));assert.equal(writes,0);authorised=true;assert.equal(await m.saveMember(f),'saved');assert.equal(writes,2);
  revision='changed';assert.equal(await m.saveMember(f),'conflict');assert.equal(writes,2);
- f.set('status','other');assert.throws(()=>m.editedMember(f));f.set('status','active');f.set('reason','');assert.throws(()=>m.editedMember(f));
+ f.set('status','other');assert.equal(m.editedMember(f).member.active,false);f.set('status','active');f.set('reason','');assert.throws(()=>m.editedMember(f));
  assert.throws(()=>m.validYear('bad'));assert.throws(()=>m.validYear(1999));
  rows=[{member_number:'B-09-001',membership_year:2025,payload:JSON.stringify({name:'Sample',identity:''}),active:true,status_override:false,revision:'old'}];assert.equal((await m.listMembers(2026))[0].active,false);rows[0].membership_year=2026;assert.equal((await m.listMembers(2026))[0].active,true);
  rows=['A-10-038','J-26-1000','W-25-010','B-09-001','P-20-2','UNKNOWN'].map(member_number=>({...rows[0],member_number}));
