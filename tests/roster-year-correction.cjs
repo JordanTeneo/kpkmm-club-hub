@@ -1,0 +1,31 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+const members=Array.from({length:242},(_,i)=>({memberNumber:'B-09-'+String(i+1).padStart(3,'0'),active:i<67}));
+const plan={source:'Senarai ahli_Oct2026 only.xlsx',fromYear:2026,toYear:2025,members};
+let admin=true,repeated=false,rows,apps,renewals,edits,writes,fail=false;
+const sql=async(p,...v)=>{const q=p.join('?');
+ if(q.startsWith('SELECT id FROM'))return repeated?[{id:'done'}]:[];
+ if(q.startsWith('SELECT payload FROM club_roster_imports'))return [{payload:JSON.stringify({members})}];
+ if(q.startsWith('SELECT old_number'))return [];
+ if(q.startsWith('SELECT * FROM club_member_roster'))return rows;
+ if(q.startsWith('SELECT identity_hash FROM club_applications'))return apps;
+ if(q.startsWith('SELECT identity_hash FROM club_renewals'))return renewals;
+ if(q.startsWith('SELECT member_number,before_payload'))return edits;
+ if(q.startsWith('INSERT')||q.startsWith('UPDATE')){if(fail&&writes.length===2)throw Error('storage failure');writes.push({q,v});}
+ return [];
+};sql.json=x=>x;sql.begin=async fn=>{const old=writes.slice();try{return await fn(sql);}catch(e){writes=old;throw e;}};
+const mocks={'./shop':{isAdmin:async()=>admin,db:()=>sql},'./member-admin':{adminRosterReady:async()=>{}},'./membership':{membershipReady:async()=>{},fingerprint:s=>'f:'+s},'./renewals':{renewalsReady:async()=>{},renewalHash:s=>'h:'+s,sealRenewal:s=>s,openRenewal:s=>s}};
+const mod={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/roster-year-correction.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:mod,require:n=>mocks[n]||require(n)});
+function reset(){admin=true;repeated=false;fail=false;apps=[];renewals=[];edits=[];writes=[];rows=members.map(m=>({member_number:m.memberNumber,membership_year:2026,name_hash:'name',identity_hash:null,active:m.active,payload:JSON.stringify({...m,name:'Example',identity:'',address:'Preserved address'})}));}
+(async()=>{reset();admin=false;await assert.rejects(()=>mod.correctRosterYear(plan));admin=true;
+ await assert.rejects(()=>mod.correctRosterYear({...plan,toYear:2024}));
+ await assert.rejects(()=>mod.correctRosterYear({...plan,members:[...members.slice(1),members[1]]}));
+ let r=await mod.correctRosterYear(plan);assert.equal(r.cleared2026,67);assert.equal(r.active2025,67);assert.equal(writes.length,0);
+ renewals=[{identity_hash:'h:roster-member:B-09-001'}];rows[100].active=true;
+ r=await mod.correctRosterYear(plan,true);assert.equal(r.cleared2026,66);assert.equal(r.preserved2026,2);assert.equal(writes.length,4);
+ const hist=writes.find(w=>w.q.startsWith('INSERT INTO club_member_roster')).v[0];assert.equal(hist.length,242);assert.equal(hist.filter(m=>m.active).length,67);assert.equal(JSON.parse(hist[0].payload).address,'Preserved address');
+ const current=writes.find(w=>w.q.startsWith('UPDATE')).v[0];assert.equal(current.filter(m=>m.active).length,2);assert.equal(writes[0].v[0].length,484);
+ repeated=true;r=await mod.correctRosterYear(plan,true);assert.equal(r.repeated,true);assert.equal(writes.length,4);
+ reset();fail=true;await assert.rejects(()=>mod.correctRosterYear(plan,true));assert.equal(writes.length,0);
+ reset();edits=[{member_number:members[0].memberNumber,before_payload:JSON.stringify({active:false}),after_payload:JSON.stringify({active:true})}];r=await mod.correctRosterYear(plan);assert.equal(r.preserved2026,1);
+ console.log('PASS: authorization, bounded plan, preview without writes, correct annual status, independent renewals/manual activations preserved, personal data retained, 484 audited rows, duplicate protection and atomic rollback.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
