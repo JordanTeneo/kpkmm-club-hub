@@ -10,9 +10,9 @@ export async function GET(request:Request){
  try{year=validYear(q.get('year'));if(!['active','inactive','all'].includes(status||''))throw Error('Invalid status');}catch{return new Response('Invalid year or status',{status:400,headers:privateHeaders});}
  try{
   const members=(await listMembers(year)).filter(m=>status==='all'||m.active===(status==='active')),includeIdentity=q.get('identity')==='yes';
-  const headers=['Member ID / No. ahli','Name / Nama','Year / Tahun','Status','Phone / Telefon','Email / E-mel','Registered address / Alamat berdaftar'];
+  const headers=['Member ID / No. ahli','Name / Nama','Year / Tahun','Status','Phone / Telefon','Email / E-mel','Address / Alamat','Postcode / Poskod','State / Negeri','Country / Negara'];
   if(includeIdentity)headers.push('Identification / Pengenalan');
-  const rows=members.map(m=>[m.memberNumber,m.name,String(year),m.active?'Active / Aktif':'Inactive / Tidak aktif',m.phone,m.email,m.address,...(includeIdentity?[m.identity]:[])]);
+  const rows=members.map(m=>[m.memberNumber,m.name,String(year),m.active?'Active / Aktif':'Inactive / Tidak aktif',m.phone,m.email,m.addressLine??m.address,m.postcode||"",m.state||"",m.mailingCountry||"",...(includeIdentity?[m.identity]:[])]);
   const file=memberWorkbook([headers,...rows],year+' '+status);
   return new Response(new Uint8Array(file),{headers:{...privateHeaders,'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="KPKMM-members-${year}-${status}.xlsx"`}});
  }catch{return new Response('Export unavailable. No partial file was generated. Please retry.',{status:503,headers:privateHeaders});}
