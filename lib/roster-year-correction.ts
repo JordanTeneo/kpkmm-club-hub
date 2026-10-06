@@ -48,7 +48,7 @@ export async function correctRosterYear(input:unknown,apply=false){
    const hashes=[current.identity_hash,key?renewalHash(key):null,renewalHash('roster-member:'+id)].filter(Boolean);
    // A later explicit status change is independent of the original import.
    const edits=allEdits.filter(e=>e.member_number===id);
-   const separatelyActivated=edits.some(e=>{const before=JSON.parse(openRenewal(e.before_payload)),after=JSON.parse(openRenewal(e.after_payload));return before.active===false&&after.active===true;});
+   const separatelyActivated=current.active&&edits.some(e=>{const before=JSON.parse(openRenewal(e.before_payload)),after=JSON.parse(openRenewal(e.after_payload));return before.active===false&&after.active===true;});
    const active=corrected2026Active(imported.active,current.active,!!((key&&apps.some(a=>a.identity_hash===fingerprint(key)))||renewals.some(r=>hashes.includes(r.identity_hash))||separatelyActivated));
    if(active)preserved2026++;else if(current.active)cleared2026++;
    if(!apply)continue;
