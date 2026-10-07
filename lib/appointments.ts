@@ -21,7 +21,7 @@ export async function appointmentAdmin(){
 export async function adminAppointments(){
  if(!await appointmentAdmin())throw Error('Unauthorised');
  await Promise.all([appointmentReady(),rosterReady()]);
- const [rows,members]=await Promise.all([db()`SELECT *,starts::text,ends::text FROM club_appointments ORDER BY starts DESC,role,display_name`,db()`SELECT DISTINCT ON(member_number) member_number,payload FROM club_member_roster ORDER BY member_number,membership_year DESC`]);
+ const [rows,members]=await Promise.all([db()`SELECT id,member_number,display_name,role,role_en,role_ms,starts::text,ends::text,cancelled,version FROM club_appointments ORDER BY starts DESC,role,display_name`,db()`SELECT DISTINCT ON(member_number) member_number,payload FROM club_member_roster ORDER BY member_number,membership_year DESC`]);
  return {rows:rows as unknown as Appointment[],members:members.flatMap(row=>{const m=JSON.parse(openRenewal(row.payload));return m.deceased?[]:[{number:row.member_number as string,name:String(m.name)}];})};
 }
 export async function publicAppointments(){
