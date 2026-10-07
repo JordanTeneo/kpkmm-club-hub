@@ -1,0 +1,12 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+const pricing={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/shop-pricing.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:pricing});
+for(const [price,percent,expected] of [[10000,20,8000],[10000,0,10000],[1999,15,1699],[100,99,1],[1,0,1],[101,50,51]])assert.equal(pricing.discountedPrice(price,percent),expected);
+for(const input of ['-1','100','10.5','abc','',null])assert.throws(()=>pricing.readDiscount(input));
+assert.equal(pricing.readDiscount('20'),20);assert.equal(pricing.readDiscount('0'),0);
+assert.throws(()=>pricing.discountedPrice(1,99));
+const actions=fs.readFileSync('app/shop/actions.ts','utf8');assert(actions.includes('if(unitPrice!==price)'));assert(actions.includes('${quantity},${unitPrice}'));assert(actions.includes('original_unit_price,discount_percent'));
+const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/shop/product-price.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports:out,require:n=>n==='../../lib/shop-pricing'?pricing:require(n)});
+const {renderToStaticMarkup}=require('react-dom/server'),React=require('react');
+const discounted=renderToStaticMarkup(React.createElement(out.ProductPrice,{price:10000,percent:20,bm:false}));assert(discounted.includes('<del>RM 100.00</del>'));assert(discounted.includes('RM 80.00'));assert(discounted.includes('20% off'));
+const normal=renderToStaticMarkup(React.createElement(out.ProductPrice,{price:10000,percent:0,bm:false}));assert(!normal.includes('<del>'));
+console.log('PASS: percentage validation, sen rounding, positive pricing, immutable order snapshot and displayed prices');

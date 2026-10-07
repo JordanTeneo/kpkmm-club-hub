@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
 function load(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),Buffer,FormData,Intl,Date});return exports;}
 let appRows=[],renewRows=[],queries=[];
-const m=load('lib/member-status.ts',{'./roster':{lookupMyKadRoster:async()=>null,normalizeName:v=>v.trim().replace(/\s+/g,' ').toUpperCase(),lookupName:async()=>({status:'active',year:new Date().getFullYear()})},'./shop':{db:()=>async(p,...values)=>{const q=p.join('?');queries.push({q,values});assert.ok(!q.includes('payload'));assert.ok(q.includes("='approved'"));assert.ok(q.includes('year=?'));return (q.includes('club_applications')?appRows:renewRows).filter(r=>r.year===values[1]&&r.status==='approved');}},'./membership':{membershipReady:async()=>{},fingerprint:v=>'app-'+v},'./renewals':{renewalsReady:async()=>{},renewalHash:v=>'renew-'+v}});
+const m=load('lib/member-status.ts',{'./roster':{lookupMyKadRoster:async()=>null,normalizeName:v=>v.trim().replace(/\s+/g,' ').toUpperCase(),lookupName:async()=>({status:'active',year:new Date().getFullYear()})},'./shop':{db:()=>async(p,...values)=>{const q=p.join('?');queries.push({q,values});assert.ok(!q.includes('payload'));assert.ok(q.includes('identity_hash=?'));return (q.includes('club_applications')?appRows:renewRows);}},'./membership':{membershipReady:async()=>{},fingerprint:v=>'app-'+v},'./renewals':{renewalsReady:async()=>{},renewalHash:v=>'renew-'+v}});
 const now=new Date('2026-10-05T04:00:00Z'),approved=year=>({status:'approved',year});
 assert.equal(m.calculateStatus([approved(2026)],now).status,'active');
 assert.equal(m.calculateStatus([approved(2026)],new Date('2026-12-31T15:59:59Z')).status,'active');
@@ -12,7 +12,7 @@ f.set('identity','900101101234');assert.equal(m.validateLookup(f).identityKey,'m
 for(const bad of ['TEST12345','123','', '9001011012345']){const badForm=new FormData();badForm.set('identity',bad);assert.throws(()=>m.validateLookup(badForm));}
 (async()=>{
  const year=m.malaysiaYear(),identityKey=m.validateLookup(f).identityKey;
- assert.equal((await m.lookupMembership(identityKey)).status,'inactive');
+ assert.equal((await m.lookupMembership(identityKey)).status,'unmatched');
  appRows=[approved(year)];const result=await m.lookupMembership(identityKey);assert.equal(result.status,'active');assert.deepEqual(Object.keys(result).sort(),['status','year']);
  appRows=[approved(year-1)];assert.equal((await m.lookupMembership(identityKey)).status,'inactive');
  appRows=[];renewRows=[approved(year)];assert.equal((await m.lookupMembership(identityKey)).status,'active');

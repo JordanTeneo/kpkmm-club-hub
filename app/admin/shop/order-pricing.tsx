@@ -1,0 +1,4 @@
+import {orderPriceLines} from '../../../lib/shop-order-pricing';
+export function OrderPricing({order,bm}:{order:Parameters<typeof orderPriceLines>[0];bm:boolean}){
+ return <section aria-label={bm?'Semakan jumlah bayaran':'Payment amount comparison'}><h4>{bm?'Semakan jumlah bayaran':'Payment amount comparison'}</h4><dl style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(0,1fr)',gap:'8px 16px',maxWidth:640}}>{orderPriceLines(order,bm).map(([label,value])=><div key={label} style={{display:'contents'}}><dt>{label}</dt><dd style={{margin:0,textAlign:'right',overflowWrap:'anywhere'}}><strong>{value}</strong></dd></div>)}</dl><p>{bm?'Bandingkan jumlah ini dengan slip bayaran dan transaksi dalam akaun Maybank sebelum meluluskan bayaran.':'Compare this total with the payment slip and the transaction in the Maybank account before approving payment.'}</p></section>;
+}

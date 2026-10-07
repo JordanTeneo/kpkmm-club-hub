@@ -19,12 +19,25 @@ export async function shopReady() {
     await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS email text NOT NULL DEFAULT ''`;
     await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS customer_address jsonb`;
     await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS language text NOT NULL DEFAULT 'en'`;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS discount_percent integer NOT NULL DEFAULT 0 CHECK(discount_percent BETWEEN 0 AND 99)`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS original_unit_price integer, ADD COLUMN IF NOT EXISTS discount_percent integer NOT NULL DEFAULT 0 CHECK(discount_percent BETWEEN 0 AND 99)`;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS delivery_fee integer NOT NULL DEFAULT 0 CHECK(delivery_fee >= 0)`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS fulfilment text CHECK(fulfilment IN ('pickup','delivery')), ADD COLUMN IF NOT EXISTS delivery_fee integer NOT NULL DEFAULT 0 CHECK(delivery_fee >= 0), ADD COLUMN IF NOT EXISTS carrier text NOT NULL DEFAULT '', ADD COLUMN IF NOT EXISTS tracking_number text NOT NULL DEFAULT ''`;
     await sql`CREATE TABLE IF NOT EXISTS shop_order_mail(order_id uuid NOT NULL REFERENCES shop_orders(id),kind text NOT NULL CHECK(kind IN ('purchase','completed')),status text NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','sending','accepted','failed','unknown','skipped')),attempt_at timestamptz,PRIMARY KEY(order_id,kind))`;
+    await sql.begin(async tx=>{
+      await tx`SELECT pg_advisory_xact_lock(hashtext('shop-mail-tracking-schema-v1'))`;
+      const migrated=await tx`SELECT 1 FROM pg_constraint WHERE conrelid='shop_order_mail'::regclass AND conname='shop_order_mail_kind_v3_check'`;
+      if(!migrated.length){
+        await tx`ALTER TABLE shop_order_mail DROP CONSTRAINT IF EXISTS shop_order_mail_kind_check`;
+        await tx`ALTER TABLE shop_order_mail DROP CONSTRAINT IF EXISTS shop_order_mail_kind_v2_check`;
+        await tx`ALTER TABLE shop_order_mail ADD CONSTRAINT shop_order_mail_kind_v3_check CHECK(kind IN ('received','purchase','completed','tracking'))`;
+      }
+    });
   })().catch(e => { ready = undefined; throw e; });
   await ready;
 }
-export type Product = { id: string; name: string; name_ms: string; description: string; description_ms: string; price: number; stock: number; active: boolean; image: string; updated_at: Date };
-export type Order = { id: string; product_id: string; product_name: string; quantity: number; unit_price: number; customer_name: string; phone: string; email:string; customer_address:import('./shop-customer').ShopAddress|null; status: string; created_at: Date; has_receipt: boolean };
+export type Product = { id: string; name: string; name_ms: string; description: string; description_ms: string; price: number; discount_percent:number; stock: number; delivery_fee:number; active: boolean; image: string; updated_at: Date };
+export type Order = { id: string; product_id: string; product_name: string; quantity: number; unit_price: number; original_unit_price?:number|null; discount_percent?:number; fulfilment:string|null; delivery_fee:number; carrier:string; tracking_number:string; customer_name: string; phone: string; email:string; customer_address:import('./shop-customer').ShopAddress|null; status: string; created_at: Date; has_receipt: boolean };
 export const money = (cents: number) => 'RM ' + (cents / 100).toFixed(2);
 export const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 export const uuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);

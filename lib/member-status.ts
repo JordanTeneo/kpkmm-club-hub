@@ -2,7 +2,7 @@ import {db} from './shop';
 import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash} from './renewals';
 import {lookupName,normalizeName,lookupMyKadRoster} from './roster';
-// Keep older result names type-compatible during rolling deployments; only active/inactive are returned.
+// Public results never disclose deceased flags or personal record details.
 export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched'|'ambiguous';year?:number;pending?:boolean;lifetime?:boolean;newMember?:boolean};
 export type StatusRecord={status:string;year:number|null};
 export function malaysiaYear(now=new Date()){return Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(now));}
@@ -26,12 +26,12 @@ export async function lookupMembership(identityKeyOrEmail:string,legacyIdentityK
  if(!/^mykad:malaysia:\d{12}$/.test(identityKey))throw Error('Invalid MyKad');
  await Promise.all([membershipReady(),renewalsReady()]);
  const year=malaysiaYear();
- // Only check approved current-year records. No personal payload is loaded or decrypted.
+ // Read status/year only, so historical matches can be distinguished from no record.
  const [applications,renewals,roster]=await Promise.all([
-  db()`SELECT 1 FROM club_applications WHERE identity_hash=${fingerprint(identityKey)} AND status='approved' AND membership_year=${year} LIMIT 1`,
-  db()`SELECT 1 FROM club_renewals WHERE identity_hash=${renewalHash(identityKey)} AND review_status='approved' AND renewal_year=${year} LIMIT 1`,
+  db()`SELECT status,membership_year AS year FROM club_applications WHERE identity_hash=${fingerprint(identityKey)}`,
+  db()`SELECT review_status AS status,renewal_year AS year FROM club_renewals WHERE identity_hash=${renewalHash(identityKey)}`,
   lookupMyKadRoster(identityKey,year)
  ]);
- if(roster)return roster;
- return {status:applications.length||renewals.length?'active':'inactive',year} as MembershipStatus;
+ if(roster&&!roster.checkOnline){const {checkOnline,...result}=roster;return result;}
+ return {status:[...applications,...renewals].some(r=>r.status==='approved'&&r.year===year)?'active':roster||applications.length||renewals.length?'inactive':'unmatched',year} as MembershipStatus;
 }

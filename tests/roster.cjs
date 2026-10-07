@@ -16,7 +16,7 @@ assert.throws(()=>m.validateRoster({...input,members:[{...person,active:'yes'}]}
  roster=[{member_number:'B-09-001',active:true,membership_year:2026}];
  assert.equal((await m.lookupName('Sample Member',2026)).status,'active');assert.equal((await m.lookupName('Sample Member',2027)).status,'inactive');
  roster.push({member_number:'B-09-002',active:false,membership_year:2026});assert.equal((await m.lookupName('Sample Member',2026)).status,'ambiguous');
- roster=[];assert.equal((await m.lookupName('Not Found',2026)).status,'inactive');
+ roster=[];assert.equal((await m.lookupName('Not Found',2026)).status,'unmatched');
  const details={name:'Sample Member',identityType:'mykad',identity:'900101101234',country:'Malaysia'};
  apps=[{payload:JSON.stringify(details),status:'approved',membership_year:2026}];assert.equal((await m.lookupName('sample member',2026)).status,'active');
  roster=[{member_number:'B-09-001',identity_hash:'mykad:malaysia:900101101234',active:false,membership_year:2026,status_override:true}];assert.equal((await m.lookupName('sample member',2026)).status,'inactive');roster=[];
@@ -28,7 +28,7 @@ assert.throws(()=>m.validateRoster({...input,members:[{...person,active:'yes'}]}
  const key='mykad:malaysia:900101101234';
  assert.equal((await m.lookupMyKadRoster(key,2026)).status,'active');
  roster[0].active=false;roster[0].status_override=true;assert.equal((await m.lookupMyKadRoster(key,2026)).status,'inactive');
- roster[0].membership_year=2025;assert.equal(await m.lookupMyKadRoster(key,2026),null);
+ roster[0].membership_year=2025;assert.equal((await m.lookupMyKadRoster(key,2026)).checkOnline,true);
  roster[0].payload=JSON.stringify({...person,lifetimeSince:2025});assert.equal((await m.lookupMyKadRoster(key,2026)).lifetime,true);
  roster[0].payload=JSON.stringify({...person,deceased:true});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');
  roster.push({...roster[0],member_number:'B-09-002'});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');

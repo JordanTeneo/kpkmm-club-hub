@@ -58,7 +58,7 @@ export async function importRoster(input:unknown){
 
 // Private online records stay encrypted. Only a bounded, server-side exact name comparison is made.
 // No matching names, IDs or other personal fields are returned to the public form.
-export async function lookupName(name:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean;newMember?:boolean}>{
+export async function lookupName(name:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous'|'unmatched';year:number;lifetime?:boolean;newMember?:boolean}>{
  await Promise.all([rosterReady(),membershipReady(),renewalsReady()]);
  const [roster,apps,renewals]=await Promise.all([
   db()`SELECT member_number,identity_hash,membership_year,active,status_override,payload FROM club_member_roster WHERE name_hash=${nameKey(name)}`,
@@ -80,10 +80,10 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
  }
  const lifetime=people.size===1&&roster.some(r=>{const m=r.payload?JSON.parse(openRenewal(r.payload)):{};return Number.isInteger(m.lifetimeSince)&&m.lifetimeSince<=year;});
  const newMember=people.size===1&&roster.some(r=>r.membership_year===year&&r.payload&&annualStatus({...JSON.parse(openRenewal(r.payload)),active:r.active},year)==='new');
- return {...(newMember?{newMember:true}:{}),status:people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year,...(lifetime?{lifetime:true}:{})};
+ return {...(newMember?{newMember:true}:{}),status:people.size===0?'unmatched':people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year,...(lifetime?{lifetime:true}:{})};
 }
 // Exact hashed MyKad match; no personal details leave this server-side lookup.
-export async function lookupMyKadRoster(key:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean;newMember?:boolean}|null>{
+export async function lookupMyKadRoster(key:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean;newMember?:boolean;checkOnline?:boolean}|null>{
  if(!/^mykad:malaysia:\d{12}$/.test(key))throw Error('Invalid MyKad');
  await rosterReady();
  const rows=await db()`SELECT member_number,membership_year,active,status_override,payload FROM (
@@ -102,7 +102,7 @@ export async function lookupMyKadRoster(key:string,year:number):Promise<{status:
   if(row.status_override)return {status:'inactive',year};
  }
  // A historical roster alone must not hide a newer approved online renewal.
- return null;
+ return {status:'inactive',year,checkOnline:true};
 }
 export async function renewalMemberMatches(name:string,key:string,currentYear:number){
  await rosterReady();
