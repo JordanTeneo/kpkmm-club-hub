@@ -24,5 +24,14 @@ assert.throws(()=>m.validateRoster({...input,members:[{...person,active:'yes'}]}
  renewals=[{payload:JSON.stringify(details),review_status:'approved',renewal_year:2026}];assert.equal((await m.lookupName('sample member',2026)).status,'active');
  const result=await m.lookupName('sample member',2026);assert.deepEqual(Object.keys(result).sort(),['status','year']);
  assert.equal(await m.renewalEligibility('test',2026),'review');years=[2024,null,null];assert.equal(await m.renewalEligibility('test',2026),'reinstate');years=[2025,null,null];assert.equal(await m.renewalEligibility('test',2026),'eligible');years=[2024,null,2026];assert.equal(await m.renewalEligibility('test',2026),'eligible');
- console.log('PASS: roster validation, permanent IDs, atomic idempotent import, exact normalized names, duplicate-name safety, year boundaries, approved online records, minimal public results, renewal eligibility.');
+ roster=[{member_number:'B-09-001',membership_year:2026,active:true,payload:JSON.stringify(person)}];
+ const key='mykad:malaysia:900101101234';
+ assert.equal((await m.lookupMyKadRoster(key,2026)).status,'active');
+ roster[0].active=false;roster[0].status_override=true;assert.equal((await m.lookupMyKadRoster(key,2026)).status,'inactive');
+ roster[0].membership_year=2025;assert.equal(await m.lookupMyKadRoster(key,2026),null);
+ roster[0].payload=JSON.stringify({...person,lifetimeSince:2025});assert.equal((await m.lookupMyKadRoster(key,2026)).lifetime,true);
+ roster[0].payload=JSON.stringify({...person,deceased:true});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');
+ roster.push({...roster[0],member_number:'B-09-002'});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');
+ roster=[];assert.equal(await m.lookupMyKadRoster(key,2026),null);await assert.rejects(()=>m.lookupMyKadRoster('bad',2026));
+ console.log('PASS: roster/name validation plus MyKad imported active, inactive override, historical fallback, lifetime, deceased, duplicate and unknown lookups.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
