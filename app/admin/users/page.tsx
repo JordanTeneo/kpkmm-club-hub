@@ -1,0 +1,65 @@
+import {headers} from 'next/headers';
+import {redirect} from 'next/navigation';
+import {revalidatePath} from 'next/cache';
+import {getMigrations} from 'better-auth/db/migration';
+import {committeeAuth} from '../../../lib/committee-auth';
+import {committeeEnabled,committeeSession,committeeReady,committeeAudit} from '../../../lib/committee-access';
+import {db,isAdmin} from '../../../lib/shop';
+import {getLanguage} from '../../language';
+import '../../shop/shop.css';
+export const dynamic='force-dynamic';
+async function setup(form:FormData){
+ 'use server';
+ if(await committeeEnabled()||!(await isAdmin()))throw Error('Unauthorised');
+ const auth=committeeAuth();const migration=await getMigrations(auth.options);await migration.runMigrations();
+ await db().begin(async sql=>{
+  await sql`SELECT id FROM club_committee_settings WHERE id=1 FOR UPDATE`;
+  const existing=await sql`SELECT id FROM committee_user LIMIT 1`;if(existing.length)throw Error('Owner already created. Sign in with that account.');
+  await auth.api.createUser({body:{email:String(form.get('email')||''),password:String(form.get('password')||''),name:String(form.get('name')||''),role:'admin'}});
+ });
+ redirect('/admin/users?result=created');
+}
+async function activate(){
+ 'use server';
+ await committeeReady();const session=await committeeSession();if(!session?.superAdmin)throw Error('Sign in to the new owner account first');
+ await db()`UPDATE club_committee_settings SET enabled=true WHERE id=1`;
+ await committeeAudit('individual-accounts-enabled',session.user.id);redirect('/admin/users');
+}
+async function manage(form:FormData){
+ 'use server';
+ if(!(await committeeEnabled()))throw Error('Activate individual accounts first');
+ const session=await committeeSession();if(!session?.superAdmin)throw Error('Unauthorised');
+ const auth=committeeAuth(),h=await headers(),operation=String(form.get('operation')),id=String(form.get('id')||'');
+ if(operation==='create'){
+  const scopes=form.getAll('scope').map(String).filter(s=>['membership','content','shop'].includes(s));
+  const result=await auth.api.createUser({headers:h,body:{email:String(form.get('email')||''),name:String(form.get('name')||''),password:String(form.get('password')||''),role:'user'}});
+  await db()`INSERT INTO club_committee_permissions(user_id,scopes) VALUES(${result.user.id},${scopes})`;
+  await committeeAudit('create-user',result.user.id);
+ }else{
+  const rows=await db()`SELECT role FROM committee_user WHERE id=${id}`;
+  if(!rows.length||rows[0].role==='admin')throw Error('Owner accounts cannot be changed here');
+  if(operation==='disable'){
+   await db()`UPDATE club_committee_permissions SET disabled=true WHERE user_id=${id}`;
+   await auth.api.revokeUserSessions({headers:h,body:{userId:id}});
+  }else if(operation==='enable')await db()`UPDATE club_committee_permissions SET disabled=false WHERE user_id=${id}`;
+  else if(operation==='reset'){
+   await auth.api.setUserPassword({headers:h,body:{userId:id,newPassword:String(form.get('password')||'')}});
+   await auth.api.revokeUserSessions({headers:h,body:{userId:id}});
+  }else if(operation==='permissions'){
+   const scopes=form.getAll('scope').map(String).filter(s=>['membership','content','shop'].includes(s));
+   await db()`UPDATE club_committee_permissions SET scopes=${scopes} WHERE user_id=${id}`;
+  }else throw Error('Invalid action');
+  await committeeAudit(operation,id);
+ }
+ revalidatePath('/admin/users');
+}
+export default async function Users(){
+ const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
+ const enabled=await committeeEnabled();let session=null;try{session=await committeeSession();}catch{}
+ if(enabled?!session?.superAdmin:!(await isAdmin())&&!session?.superAdmin)redirect('/admin');
+ const fields=<><label>{t('Name','Nama')}<input name="name" required maxLength={150}/></label><label>{t('Email — sign-in ID','E-mel — ID log masuk')}<input name="email" type="email" required/></label><label>{t('Password (at least 12 characters)','Kata laluan (sekurang-kurangnya 12 aksara)')}<input name="password" type="password" minLength={12} required autoComplete="new-password"/></label></>;
+ if(!enabled)return <main className="shop"><h1>{t('Set up your Super Admin account','Sediakan akaun Super Admin')}</h1><p>{t('Create your personal owner account, then sign in below and activate individual accounts. Your existing admin access stays available until activation. Activation disables the shared-password login.','Cipta akaun pemilik, kemudian log masuk dan aktifkan akaun individu. Akses sedia ada kekal sehingga pengaktifan. Log masuk kata laluan bersama dihentikan selepas pengaktifan.')}</p><form action={setup}>{fields}<button>{t('Create owner account','Cipta akaun pemilik')}</button></form><a className="shop-link" href="/admin/sign-in">{t('Sign in to your owner account','Log masuk akaun pemilik')}</a>{session?.superAdmin&&<form action={activate}><button>{t('Activate individual accounts','Aktifkan akaun individu')}</button></form>}</main>;
+ const rows=await db()`SELECT u.id,u.name,u.email,u.role,p.scopes,p.disabled FROM committee_user u LEFT JOIN club_committee_permissions p ON p.user_id=u.id ORDER BY u.name`;
+ const scopes=(selected:string[]=[])=>['membership','content','shop'].map(s=><label key={s}><input type="checkbox" name="scope" value={s} defaultChecked={selected.includes(s)}/>{s}</label>);
+ return <main className="shop"><a href="/admin">← Admin</a><h1>{t('Committee accounts','Akaun jawatankuasa')}</h1><section className="shop-card"><h2>{t('Create committee account','Cipta akaun jawatankuasa')}</h2><form action={manage}><input type="hidden" name="operation" value="create"/>{fields}{scopes()}<button>{t('Create account','Cipta akaun')}</button></form><p>{t('Share credentials privately. No invitation email is sent automatically.','Kongsi maklumat log masuk secara sulit. Tiada e-mel jemputan automatik dihantar.')}</p></section>{rows.map(u=><section className="shop-card" key={u.id}><h2>{u.name}</h2><p>{u.email} · {u.role==='admin'?'Super Admin':u.disabled?t('Disabled','Dinyahaktifkan'):t('Enabled','Diaktifkan')}</p>{u.role!=='admin'&&<><form action={manage}><input type="hidden" name="id" value={u.id}/><button name="operation" value={u.disabled?'enable':'disable'}>{u.disabled?t('Reactivate','Aktifkan semula'):t('Disable and revoke sessions','Nyahaktif dan tamatkan sesi')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/>{scopes(u.scopes)}<button name="operation" value="permissions">{t('Save permissions','Simpan kebenaran')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/><label>{t('New password','Kata laluan baharu')}<input name="password" type="password" required minLength={12} autoComplete="new-password"/></label><button name="operation" value="reset">{t('Reset password','Tetap semula kata laluan')}</button></form></>}</section>)}</main>;
+}

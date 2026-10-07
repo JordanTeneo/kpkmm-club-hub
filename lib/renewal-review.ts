@@ -5,7 +5,7 @@ import {renewalsReady,openRenewal,sealRenewal} from './renewals';
 
 // Approval and annual membership activation commit together, or neither does.
 export async function reviewRenewal(id:string,status:string){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id)||!['pending','approved','rejected'].includes(status))return 'invalid';
  await adminRosterReady();await renewalsReady();
  return db().begin(async sql=>{
@@ -26,6 +26,9 @@ export async function reviewRenewal(id:string,status:string){
   if(row){
    const previous=JSON.parse(openRenewal(row.payload));
    const current=row.membership_year===year;
+   if(status==='approved'&&previous.deceased)return 'ineligible';
+   if(status==='approved'&&Number.isInteger(previous.lifetimeSince)&&previous.lifetimeSince<=year)return 'ineligible';
+   if(status==='approved'&&current&&row.active&&previous.renewalActivation?.id!==id)return 'already-active';
    let next=previous,active=row.active,override=row.status_override,write=false;
    if(status==='approved'){
     if(!(request.review_status==='approved'&&current&&row.active&&previous.renewalActivation?.id===id)){
@@ -43,6 +46,7 @@ export async function reviewRenewal(id:string,status:string){
     await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${row.member_number},${year},${row.name_hash},${row.identity_hash},${payload},${active},${override}) ON CONFLICT(member_number,membership_year) DO UPDATE SET payload=excluded.payload,active=excluded.active,status_override=excluded.status_override,updated_at=now()`;
    }
   }
+  if(status==='approved'&&request.review_status!=='approved')await sql`UPDATE club_renewals SET member_mail_status=CASE WHEN member_mail_status='not_queued' THEN 'queued' ELSE member_mail_status END WHERE id=${id}`;
   await sql`UPDATE club_renewals SET review_status=${status} WHERE id=${id}`;
   return status==='approved'?'activated':'saved';
  });

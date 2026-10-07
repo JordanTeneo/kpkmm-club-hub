@@ -12,7 +12,7 @@ export const metadata={title:'Member roster import | KPKMM',robots:{index:false,
 export const maxDuration=60;
 async function saveAddresses(form:FormData){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  let result='address-error';
  try{
   const file=form.get('addresses');
@@ -25,7 +25,7 @@ async function saveAddresses(form:FormData){
 }
 async function save(form:FormData){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  let result='file';
  try{
   const file=form.get('roster');
@@ -39,7 +39,7 @@ async function save(form:FormData){
 export default async function ImportMembers({searchParams}:{searchParams:Promise<{result?:string;updated?:string;skipped?:string}>}){
  const language = await getUiLanguage(), ui = uiText(language);
 
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const {result,updated,skipped}=await searchParams;
  let totals,history;
  try{await rosterReady();[totals,history]=await Promise.all([

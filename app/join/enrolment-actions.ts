@@ -9,7 +9,7 @@ type Result={error?:string;success?:string};
 async function translator(){const bm=(await getLanguage())==='ms';return (en:string,ms:string)=>bm?ms:en;}
 function refresh(id:string){for(const path of ['/admin/members','/admin/members/'+id,'/admin/members/roster','/membership-status'])revalidatePath(path);}
 export async function reviewEnrolment(_:Result,form:FormData):Promise<Result>{
- const t=await translator();if(!(await isAdmin()))return {error:t('Please sign in again.','Sila log masuk semula.')};
+ const t=await translator();if(!(await isAdmin('membership')))return {error:t('Please sign in again.','Sila log masuk semula.')};
  const id=String(form.get('id')||''),action=String(form.get('decision')||''),version=String(form.get('version')||'');
  if(!uuid(id))return {error:t('Invalid request.','Permohonan tidak sah.')};
  try{
@@ -32,7 +32,7 @@ export async function reviewEnrolment(_:Result,form:FormData):Promise<Result>{
  }catch{return {error:t('Unable to complete this action. Refresh to check the saved status before trying again.','Tindakan tidak dapat diselesaikan. Muat semula untuk menyemak status sebelum mencuba lagi.')};}
 }
 export async function retryEnrolmentEmail(_:Result,form:FormData):Promise<Result>{
- const t=await translator();if(!(await isAdmin()))return {error:t('Please sign in again.','Sila log masuk semula.')};
+ const t=await translator();if(!(await isAdmin('membership')))return {error:t('Please sign in again.','Sila log masuk semula.')};
  const id=String(form.get('id')||''),mail=String(form.get('mail')||'');
  if(!uuid(id)||!uuid(mail))return {error:t('Invalid request.','Permohonan tidak sah.')};
  try{await enrolmentReady();if(!(await renewalLimit('enrolment-admin:'+id,30)))throw Error('Rate limited');await deliverEnrolment(id,form.get('checked')==='yes',mail);refresh(id);return {success:t('Email status updated. Accepted means Gmail accepted the message, not guaranteed delivery.','Status e-mel dikemas kini. Diterima bermakna Gmail menerima mesej, bukan jaminan penghantaran.')};}

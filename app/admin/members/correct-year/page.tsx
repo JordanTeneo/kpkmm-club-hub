@@ -9,14 +9,14 @@ export const maxDuration=60;
 export const metadata={title:'Restore 2026 status | KPKMM',robots:{index:false,follow:false}};
 async function save(form:FormData){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  let query='error';
  try{const apply=form.get('mode')==='apply';const r=await restore2026Statuses(apply);query=(r.repeated?'repeated':apply?'saved':'preview')+'&restored='+r.restored+'&skipped='+r.skipped;}catch{}
  revalidatePath('/admin/members/roster');revalidatePath('/admin/members/import');revalidatePath('/membership-status');
  redirect('/admin/members/correct-year?result='+query);
 }
 export default async function Page({searchParams}:{searchParams:Promise<{result?:string;restored?:string;skipped?:string}>}){
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const language=await getLanguage(),t=(en:string,bm:string)=>language==='ms'?bm:en,q=await searchParams;
  return <main className="shop" style={{maxWidth:850}}><a href="/admin/members/roster">{t('Back to member listing','Kembali ke senarai ahli')}</a><h1>{t('Restore 2026 membership status','Pulihkan status keahlian 2026')}</h1>
  <p>{t('Restore only the active statuses removed by the previous year correction, using the saved audit records. Keep 2025 history, membership numbers, personal details and payment records unchanged. No emails are sent.','Pulihkan hanya status aktif yang dibuang oleh pembetulan tahun sebelumnya, menggunakan rekod audit. Sejarah 2025, nombor ahli, maklumat peribadi dan rekod bayaran dikekalkan. Tiada e-mel dihantar.')}</p>

@@ -12,7 +12,7 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Membership requests | KPKMM',robots:{index:false,follow:false}};
 async function retryNotification(form:FormData){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const id=String(form.get('id')||'');if(!uuid(id))redirect('/admin/members?result=failed');
  let result='failed';
  try{await membershipReady();await membershipMailReady();if(await applicationLimit(fingerprint('admin-mail')))result=await notifyMembership(id,form.get('checked')==='yes');else result='limited';}catch{}
@@ -25,7 +25,7 @@ const labels:Record<string,string>={queued:'Waiting to send / Menunggu penghanta
 export default async function Members({searchParams}:{searchParams:Promise<{page?:string;status?:string;result?:string}>}){
  const language = await getUiLanguage(), ui = uiText(language);
 
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const query=await searchParams,page=Math.max(1,Math.min(10000,Math.floor(Number(query.page)||1)));
  const status=['pending','approved','rejected'].includes(query.status||'')?query.status!:'pending';
  let rows;

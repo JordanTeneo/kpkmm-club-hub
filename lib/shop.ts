@@ -24,7 +24,9 @@ export type Order = { id: string; product_id: string; product_name: string; quan
 export const money = (cents: number) => 'RM ' + (cents / 100).toFixed(2);
 export const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 export const uuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-export async function isAdmin() {
+export async function isAdmin(scope?:'membership'|'content'|'shop') {
+  const {committeeEnabled,committeeAllowed}=await import('./committee-access');
+  if(await committeeEnabled())return committeeAllowed(scope);
   const secret = process.env.ADMIN_SESSION_SECRET;
   const raw = (await cookies()).get('kpkmm-admin')?.value;
   if (!secret || !raw) return false;

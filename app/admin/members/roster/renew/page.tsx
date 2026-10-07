@@ -1,3 +1,4 @@
+import {deliverRenewalConfirmation} from '../../../../../lib/renewal-confirmation';
 import {redirect,notFound} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
 import {isAdmin,uuid} from '../../../../../lib/shop';
@@ -13,18 +14,19 @@ export const metadata={title:'Renew member | KPKMM',robots:{index:false,follow:f
 async function renew(_: {error?:string;success?:string},form:FormData){
  'use server';
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
- if(!(await isAdmin()))return {error:t('Please sign in again.','Sila log masuk semula.')};
+ if(!(await isAdmin('membership')))return {error:t('Please sign in again.','Sila log masuk semula.')};
  let result:string;try{result=await renewMemberByAdmin(form);}catch{return {error:t('Unable to confirm renewal. Refresh and check the renewal records before trying again.','Tidak dapat mengesahkan pembaharuan. Muat semula dan semak rekod sebelum mencuba lagi.')};}
  if(!uuid(result)){
-  const errors:Record<string,[string,string]>={lifetime:['Lifetime member: no annual renewal or payment is required.','Ahli seumur hidup: tiada pembaharuan atau bayaran tahunan diperlukan.'],proof:['Attach a JPG, PNG or PDF payment proof under 700 KB.','Lampirkan bukti bayaran JPG, PNG atau PDF di bawah 700 KB.'],existing:['A renewal already exists for this member and year. Review it in Renewals; its proof has not been overwritten.','Pembaharuan ahli dan tahun ini sudah wujud. Semak dalam Pembaharuan; bukti asal tidak ditindih.'],missing:['Member not found. Return to the listing and select the member again.','Ahli tidak ditemui. Kembali ke senarai dan pilih ahli semula.'],invalid:['Choose this year or next year, confirm verified payment and provide a committee note.','Pilih tahun ini atau tahun depan, sahkan bayaran dan berikan catatan jawatankuasa.']};
+  const errors:Record<string,[string,string]>={deceased:['This record cannot be renewed.','Rekod ini tidak boleh diperbaharui.'],lifetime:['Lifetime member: no annual renewal or payment is required.','Ahli seumur hidup: tiada pembaharuan atau bayaran tahunan diperlukan.'],proof:['Attach a JPG, PNG or PDF payment proof under 700 KB.','Lampirkan bukti bayaran JPG, PNG atau PDF di bawah 700 KB.'],existing:['Membership is already valid or a renewal exists for this year. Choose the next year or review Renewals; no proof was overwritten.','Pembaharuan ahli dan tahun ini sudah wujud. Semak dalam Pembaharuan; bukti asal tidak ditindih.'],missing:['Member not found. Return to the listing and select the member again.','Ahli tidak ditemui. Kembali ke senarai dan pilih ahli semula.'],invalid:['Choose this year or next year, confirm verified payment and provide a committee note.','Pilih tahun ini atau tahun depan, sahkan bayaran dan berikan catatan jawatankuasa.']};
   return {error:t(...(errors[result]||errors.invalid))};
  }
+ try{await deliverRenewalConfirmation(result);}catch{}
  try{await deliverRenewal(result);}catch{/* Renewal and proof remain saved independently of email. */}
  for(const path of ['/admin/members/roster','/admin/renewals','/membership-status'])revalidatePath(path);
  return {success:t('Renewal saved with payment proof. Membership is active for the selected year until 31 December. The existing membership number is unchanged. View the receipt under Renewals → Approved.','Pembaharuan dan bukti bayaran disimpan. Keahlian aktif untuk tahun dipilih sehingga 31 Disember. Nombor ahli dikekalkan. Lihat resit di Pembaharuan → Diluluskan.')};
 }
 export default async function AdminRenew({searchParams}:{searchParams:Promise<{member?:string;year?:string}>}){
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en,q=await searchParams,current=malaysiaYear();
  if(!/^[A-Za-z0-9-]{1,30}$/.test(q.member||''))notFound();
  const member=(await listMembers(current+1)).find(m=>m.memberNumber===q.member);if(!member)notFound();

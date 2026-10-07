@@ -17,6 +17,7 @@ export function openRenewal(value:string){const [iv,tag,data]=value.split('.').m
 export async function renewalsReady(){
  key();
  await db()`CREATE TABLE IF NOT EXISTS club_renewals(id uuid PRIMARY KEY,identity_hash text NOT NULL,renewal_year integer NOT NULL,amount integer NOT NULL DEFAULT 15000 CHECK(amount=15000),payload text NOT NULL,proof text NOT NULL,proof_type text NOT NULL,review_status text NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending','approved','rejected')),mail_status text NOT NULL DEFAULT 'queued' CHECK(mail_status IN ('queued','sending','accepted','failed','unknown')),mail_id text,mail_attempt_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(identity_hash,renewal_year))`;
+ await db()`ALTER TABLE club_renewals ADD COLUMN IF NOT EXISTS member_mail_status text NOT NULL DEFAULT 'not_queued'`;
  await db()`CREATE TABLE IF NOT EXISTS renewal_limits(key text PRIMARY KEY,count integer NOT NULL,expires_at timestamptz NOT NULL)`;
 }
 export async function renewalLimit(value:string,maximum:number){

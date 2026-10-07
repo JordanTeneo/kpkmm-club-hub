@@ -3,7 +3,7 @@ import {db,isAdmin} from './shop';
 import {adminRosterReady} from './member-admin';
 import {sealRenewal,openRenewal} from './renewals';
 export async function updateHistory2025(input:unknown,apply=false){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  const p=input as {year:number;source:string;members:{memberNumber:string;active:boolean}[]};
  if(!p||p.year!==2025||p.source!=='Senarai ahli_Oct2025 only.xlsx'||!Array.isArray(p.members)||p.members.length!==242||p.members.filter(m=>m.active===true).length!==100)throw Error('Invalid 2025 plan');
  const ids=new Set<string>();for(const m of p.members){if(!/^[A-Za-z0-9-]{1,30}$/.test(m.memberNumber)||typeof m.active!=='boolean'||ids.has(m.memberNumber))throw Error('Invalid member');ids.add(m.memberNumber);}

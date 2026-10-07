@@ -5,7 +5,7 @@ export function attachPreviousYear(current:ManagedMember[],previous:ManagedMembe
   const record=prior.get(m.memberNumber);
   // An older roster alone is not evidence of inactivity in the requested year.
   const previousActive=record?.active?true:record?.recordYear===year-1?false:null;
-  return {...m,previousActive};
+  return {...m,previousActive,previousStatus:previousActive===null?null:record?.annualStatus};
  });
 }
 export async function listMembersWithHistory(year:number){

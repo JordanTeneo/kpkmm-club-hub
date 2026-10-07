@@ -1,4 +1,6 @@
 
+import {setDeceased} from '../../../../../lib/member-special';
+import {statusLabel} from '../../../../../lib/annual-status';
 import {uiText} from '../../../../../lib/ui-text';
 import {getLanguage as getUiLanguage} from '../../../../language';
 import {AddressFields} from '../../../../address-fields';
@@ -11,16 +13,22 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Edit member | KPKMM',robots:{index:false,follow:false}};
 async function save(form:FormData){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  let result='invalid';try{result=await saveMember(form);}catch{}
  const member=result==='saved'?String(form.get('correctedMemberNumber')||form.get('memberNumber')||'').trim().toUpperCase():String(form.get('memberNumber')||''),year=String(form.get('year')||'');
  revalidatePath('/admin/members/roster');revalidatePath('/membership-status');
  redirect('/admin/members/roster/edit?member='+encodeURIComponent(member)+'&year='+encodeURIComponent(year)+'&result='+result);
 }
+async function special(form:FormData){
+ 'use server';
+ const result=await setDeceased(form);
+ revalidatePath('/admin/members/roster');revalidatePath('/membership-status');
+ redirect('/admin/members/roster/edit?member='+encodeURIComponent(String(form.get('memberNumber')))+'&year='+encodeURIComponent(String(form.get('year')))+'&result='+result);
+}
 export default async function EditMember({searchParams}:{searchParams:Promise<{member?:string;year?:string;result?:string}>}){
  const language = await getUiLanguage(), ui = uiText(language),t=(en:string,ms:string)=>language==='ms'?ms:en;
 
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const q=await searchParams;let year;try{year=validYear(q.year);}catch{notFound();}
  if(!/^[A-Za-z0-9-]{1,30}$/.test(q.member||''))notFound();
  let member,history;try{member=(await listMembers(year)).find(m=>m.memberNumber===q.member);history=await db()`SELECT created_at,membership_year FROM club_roster_edits WHERE member_number=${q.member!} ORDER BY created_at DESC LIMIT 10`;}catch{return <main className="shop"><p>{ui("Private record unavailable. Please retry. / Rekod sulit tidak tersedia.")}</p></main>;}
@@ -33,7 +41,8 @@ export default async function EditMember({searchParams}:{searchParams:Promise<{m
  <label>{ui("MyKad / Passport")}<input name="identity" defaultValue={member.identity} maxLength={254} autoComplete="off"/></label>
  <label>{ui("Phone / Telefon")}<input name="phone" defaultValue={member.phone} maxLength={254}/></label><label>{ui("Email / E-mel")}<input name="email" type="email" defaultValue={member.email} maxLength={254}/></label><AddressFields value={member} required={false}/>
  <label>{t("Vehicle numbers (comma-separated or one per line)","Nombor kenderaan (dipisahkan koma atau satu setiap baris)")}<textarea name="vehicles" defaultValue={(member.vehicles||[]).join("\n")} maxLength={2000} rows={3}/></label>
- <p>{year}: <strong>{member.active?ui('Active / Aktif'):ui('Inactive / Tidak aktif')}</strong></p><p><a className="shop-link" href={'/admin/members/roster/renew?member='+encodeURIComponent(member.memberNumber)+'&year='+year}>{t('Renew membership','Perbaharui keahlian')}</a></p>
+ <p>{year}: <strong>{statusLabel(member.annualStatus,language==='ms')}</strong></p><p><a className="shop-link" href={'/admin/members/roster/renew?member='+encodeURIComponent(member.memberNumber)+'&year='+year}>{t('Renew membership','Perbaharui keahlian')}</a></p>
  <label>{ui("Reason for update / Sebab kemas kini")}<textarea name="reason" required minLength={3} maxLength={500} rows={2}/></label><button>{ui("Save member / Simpan ahli")}</button></form></section>
+ <section className="shop-card"><h2>{t('Special record','Rekod khas')}</h2><p>{t('Mark deceased only after committee confirmation. Annual payment history is preserved; renewals and member emails are stopped. This can be reversed to correct an error.','Tandakan meninggal dunia hanya selepas pengesahan jawatankuasa. Sejarah bayaran dikekalkan; pembaharuan dan e-mel ahli dihentikan. Tanda boleh dibatalkan untuk membetulkan kesilapan.')}</p><form action={special}><input type="hidden" name="memberNumber" value={member.memberNumber}/><input type="hidden" name="year" value={year}/><input type="hidden" name="deceased" value={member.deceased?'no':'yes'}/><label>{t('Reason','Sebab')}<input name="reason" required minLength={3} maxLength={500}/></label><label><input type="checkbox" name="confirmed" value="yes" required/>{t('I confirm this change has been verified.','Saya mengesahkan perubahan ini telah disemak.')}</label><button>{member.deceased?t('Remove deceased flag','Batalkan tanda meninggal dunia'):t('Mark deceased','Tandakan meninggal dunia')}</button></form></section>
  <section className="shop-note"><h2>{ui("Change history / Sejarah perubahan")}</h2>{history.length?history.map((r,i)=><p key={i}>{r.membership_year} · {new Date(r.created_at).toLocaleString(language==='ms'?'ms-MY':'en-MY',{timeZone:'Asia/Kuala_Lumpur'})}{ui(" — Admin update / Kemas kini pentadbir")}</p>):<p>{ui("No manual edits yet. / Tiada suntingan manual.")}</p>}</section></main>;
 }

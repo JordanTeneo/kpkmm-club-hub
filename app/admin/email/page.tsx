@@ -12,7 +12,7 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Club email connection | KPKMM',robots:{index:false,follow:false}};
 async function connect(){
  'use server';
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  let id;try{id=googleConfig().id;}catch{redirect('/admin/email?result=settings');}
  const jar=await cookies(),state=randomBytes(32).toString('hex');
  const session=digest(jar.get('kpkmm-admin')!.value);
@@ -23,7 +23,7 @@ async function connect(){
 export default async function EmailSettings({searchParams}:{searchParams:Promise<{result?:string}>}){
  const language = await getUiLanguage(), ui = uiText(language);
 
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const {result}=await searchParams;
  let configured=false,linked:null|{email:string;connected_at:Date}=null,storageError='';
  try{googleConfig();configured=true;}catch{}

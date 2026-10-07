@@ -6,8 +6,8 @@ const sql=async(p,...v)=>{const q=p.join('?');queries.push({q,v});
  if(q.startsWith('SELECT old_number'))return retired?[{old_number:'B-26-002'}]:[];
  if(q.startsWith('SELECT membership_year,payload'))return [2025,2026].map(year=>({membership_year:year,payload:JSON.stringify({memberNumber:'B-09-001',name:'Sample',active:year===2026})}));
  return [];};sql.begin=async fn=>fn(sql);
-const mocks={'./shop':{db:()=>sql,isAdmin:async()=>authorised},'./roster':{rosterReady:async()=>{},validateRoster:d=>d,nameKey:v=>v,identityKey:v=>v},'./membership':{},'./renewals':{sealRenewal:v=>v,openRenewal:v=>v}};
-const exportsObject={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/member-admin.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:exportsObject,require:n=>mocks[n]||require(n),Buffer});
+const mocks={'./shop':{db:()=>sql,isAdmin:async()=>authorised},'./roster':{rosterReady:async()=>{},validateRoster:d=>d,nameKey:v=>v,identityKey:v=>v},'./membership':{membershipReady:async()=>{}},'./renewals':{renewalsReady:async()=>{},sealRenewal:v=>v,openRenewal:v=>v}};
+const exportsObject={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/member-admin.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:exportsObject,require:n=>n==='./annual-status'?{annualStatus:m=>m.active?'active':'inactive'}:mocks[n]||require(n),Buffer});
 // Match the real validator's return shape.
 mocks['./roster'].validateRoster=d=>d;
 const f=new FormData();Object.entries({memberNumber:'B-09-001',correctedMemberNumber:'B-26-002',name:'Sample',year:'2026',status:'active',reason:'Correct transcription',revision:'original'}).forEach(([k,v])=>f.set(k,v));

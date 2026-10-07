@@ -2,7 +2,7 @@ import { db,shopReady,isAdmin,ownsOrder,uuid } from '../../../../../lib/shop';
 export const runtime='nodejs';
 export async function GET(_:Request,{params}:{params:Promise<{id:string}>}) {
   const {id}=await params;
-  if(!uuid(id)||(!(await isAdmin())&&!(await ownsOrder(id))))return new Response('Not found',{status:404});
+  if(!uuid(id)||(!(await isAdmin('shop'))&&!(await ownsOrder(id))))return new Response('Not found',{status:404});
   await shopReady(); const [order]=await db()`SELECT receipt,receipt_type FROM shop_orders WHERE id=${id}`;
   if(!order?.receipt)return new Response('Not found',{status:404});
   const ext=order.receipt_type==='application/pdf'?'pdf':order.receipt_type==='image/png'?'png':'jpg';

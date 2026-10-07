@@ -15,7 +15,7 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Manage videos | KPKMM',robots:{index:false,follow:false}};
 async function save(_:Result,form:FormData):Promise<Result>{
   'use server';
-  if(!(await isAdmin()))return {error:'Please sign in as admin. / Sila log masuk sebagai pentadbir.'};
+  if(!(await isAdmin('content')))return {error:'Please sign in as admin. / Sila log masuk sebagai pentadbir.'};
   const id=String(form.get('id')||randomUUID()),op=String(form.get('operation')||'save');
   if(!uuid(id)||!['save','delete','restore'].includes(op))return {error:'Invalid request. / Permintaan tidak sah.'};
   try{
@@ -39,7 +39,7 @@ async function save(_:Result,form:FormData):Promise<Result>{
 export default async function ManageVideos(){
  const ui = uiText(await getUiLanguage());
 
-  if(!(await isAdmin()))redirect('/admin');
+  if(!(await isAdmin('content')))redirect('/admin');
   await videosReady();const videos=await db()<ClubVideo[]>`SELECT * FROM club_videos ORDER BY updated_at DESC`;const {events}=await getClubData();
   const bm=(await getLanguage())==='ms';const t=(en:string,ms:string)=>bm?ms:en;
   function fields(v?:ClubVideo){return <><input type="hidden" name="id" value={v?.id||randomUUID()}/><input type="hidden" name="version" value={v?.updated_at.toISOString()||''}/><label>{t('YouTube link','Pautan YouTube')}<input name="url" type="url" required defaultValue={v?'https://www.youtube.com/watch?v='+v.youtube_id:''}/></label><label>{t('Title','Tajuk')}<input name="title" required maxLength={200} defaultValue={v?.title}/></label><label>{t('Description','Penerangan')}<textarea name="description" maxLength={2000} defaultValue={v?.description}/></label><label>{t('Linked outing','Aktiviti berkaitan')}<select name="event_id" defaultValue={v?.event_id||''}><option value="">{t('No linked outing','Tiada aktiviti berkaitan')}</option>{events.map(e=><option key={e.id} value={e.id}>{e.title}</option>)}</select></label></>;}

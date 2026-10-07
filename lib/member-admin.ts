@@ -1,10 +1,11 @@
+import {annualStatus,type AnnualStatus} from './annual-status';
 import {randomUUID} from 'node:crypto';
 import {db,isAdmin} from './shop';
 import {rosterReady,validateRoster,nameKey,identityKey,type RosterMember} from './roster';
 import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
-export type ManagedMember=RosterMember & {year:number;recordYear:number;revision:string;override:boolean};
+export type ManagedMember=RosterMember & {year:number;recordYear:number;revision:string;override:boolean;annualStatus:AnnualStatus};
 export function compareMemberNumbers(a:{memberNumber:string},b:{memberNumber:string}){
  const aSuffix=a.memberNumber.match(/-(\d+)$/)?.[1],bSuffix=b.memberNumber.match(/-(\d+)$/)?.[1];
  if(aSuffix!==undefined&&bSuffix!==undefined){
@@ -34,7 +35,7 @@ export async function listMembers(year:number):Promise<ManagedMember[]>{
   const override=r.membership_year===year&&r.status_override;
   const lifetime=Number.isInteger(m.lifetimeSince)&&m.lifetimeSince!<=year;
   const active=lifetime||(override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key)))));
-  return {...m,memberNumber:r.member_number,active,year,recordYear:r.membership_year,revision:r.revision,override};
+  return {...m,memberNumber:r.member_number,active:active&&!m.deceased,annualStatus:annualStatus({...m,active},year),year,recordYear:r.membership_year,revision:r.revision,override};
  }).sort(compareMemberNumbers);
 }
 export function editedMember(form:FormData){
@@ -47,7 +48,7 @@ export function editedMember(form:FormData){
  return {member,year,reason,revision};
 }
 export async function saveMember(form:FormData){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  const {member,year,reason,revision}=editedMember(form);
  const corrected=String(form.get('correctedMemberNumber')||member.memberNumber).trim().toUpperCase();
  const changing=corrected!==member.memberNumber;

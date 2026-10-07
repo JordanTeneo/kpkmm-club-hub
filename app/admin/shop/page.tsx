@@ -13,7 +13,7 @@ export const metadata={title:'Manage marketplace | KPKMM',robots:{index:false,fo
 export default async function ManageShop({searchParams}:{searchParams:Promise<{page?:string}>}) {
  const ui = uiText(await getUiLanguage());
 
-  if(!(await isAdmin()))redirect('/admin');
+  if(!(await isAdmin('shop')))redirect('/admin');
   const bm=(await getLanguage())==='ms'; const t=(en:string,ms:string)=>bm?ms:en;
   await shopReady();
   const page=Math.max(1,Math.min(100000,Number((await searchParams).page)||1));

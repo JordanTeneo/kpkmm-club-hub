@@ -5,7 +5,7 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const privateHeaders={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 export async function GET(request:Request){
- if(!(await isAdmin()))return new Response('Unauthorised',{status:401,headers:privateHeaders});
+ if(!(await isAdmin('membership')))return new Response('Unauthorised',{status:401,headers:privateHeaders});
  const id=new URL(request.url).searchParams.get('id')||'';
  if(!uuid(id))return new Response('Not found',{status:404,headers:privateHeaders});
  try{
