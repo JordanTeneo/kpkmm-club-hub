@@ -60,7 +60,7 @@ export async function uploadReceipt(_: Result, form: FormData): Promise<Result> 
 }
 export async function saveProduct(_: Result, form: FormData): Promise<Result> {
   try {
-    if(!(await isAdmin())) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
+    if(!(await isAdmin('shop'))) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
     await shopReady(); const id=text(form,'id')||randomUUID(); if(!uuid(id)) throw new Error('Invalid product.');
     const name=text(form,'name'), nameMs=text(form,'name_ms'), description=text(form,'description',2000), descriptionMs=text(form,'description_ms',2000);
     const priceText=text(form,'price'); const price=Math.round(Number(priceText)*100), stock=Number(form.get('stock')), active=form.get('active')==='yes';
@@ -80,7 +80,7 @@ export async function saveProduct(_: Result, form: FormData): Promise<Result> {
 }
 export async function setProductDeleted(_: Result, form: FormData): Promise<Result> {
   try {
-    if(!(await isAdmin())) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
+    if(!(await isAdmin('shop'))) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
     await shopReady();
     const id=text(form,'id'), operation=text(form,'operation');
     if(!uuid(id)||!['delete','restore'].includes(operation)) throw new Error('Invalid product. / Produk tidak sah.');
@@ -98,7 +98,7 @@ export async function setProductDeleted(_: Result, form: FormData): Promise<Resu
 }
 export async function updateOrder(_: Result, form: FormData): Promise<Result> {
   try {
-    if(!(await isAdmin())) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
+    if(!(await isAdmin('shop'))) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
     await shopReady(); const id=text(form,'id'), status=text(form,'status');
     if(!uuid(id)||!['paid','cancelled','pending'].includes(status)) throw new Error('Invalid order status.');
     await db().begin(async sql => {
