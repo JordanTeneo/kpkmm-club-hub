@@ -1,0 +1,11 @@
+.club-navigation{display:flex;align-items:center;gap:20px;padding:10px max(3vw,16px);background:#2e2119;color:#fff8ea;font-size:14px}
+.club-nav-brand{font-weight:800;letter-spacing:.09em;flex-shrink:0}
+.club-site-menu{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:1;min-width:0}
+.club-site-menu nav,.club-nav-tools,.club-nav-tools form{display:flex;align-items:center;gap:8px}
+.club-navigation a{display:flex;align-items:center;min-height:44px;padding:8px;text-decoration:none;color:inherit}
+.club-navigation button{min-height:44px;border:1px solid #a89271;border-radius:8px;background:transparent;color:inherit;padding:10px 12px;font:inherit;cursor:pointer}
+.club-navigation button[aria-pressed=true]{background:#f7ebd1;color:#2e2119;font-weight:700}
+.club-navigation a[aria-current=page]{text-decoration:underline;text-underline-offset:5px}
+.club-navigation :focus-visible{outline:3px solid #f2c564;outline-offset:3px}
+.club-menu-toggle{display:none}
+@media(max-width:1100px){.club-navigation{flex-wrap:wrap;justify-content:space-between;gap:4px}.club-menu-toggle{display:flex;align-items:center;gap:12px}.club-site-menu{display:none;flex-basis:100%;padding-top:12px}.club-site-menu.is-open{display:block}.club-site-menu nav{display:grid;grid-template-columns:1fr;gap:2px}.club-site-menu nav a{padding:12px;border-radius:8px}.club-site-menu nav a:hover{background:#493629}.club-nav-tools{border-top:1px solid #6e5945;margin-top:12px;padding-top:12px;justify-content:space-between}.club-navigation .club-nav-tools form{width:auto;margin:0}}
