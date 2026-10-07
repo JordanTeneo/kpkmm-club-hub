@@ -11,13 +11,16 @@ export const dynamic='force-dynamic';
 async function setup(form:FormData){
  'use server';
  if(await committeeEnabled()||!(await isAdmin()))throw Error('Unauthorised');
+ let result='created';
+ try{
  const auth=committeeAuth();const migration=await getMigrations(auth.options);await migration.runMigrations();
  await db().begin(async sql=>{
   await sql`SELECT id FROM club_committee_settings WHERE id=1 FOR UPDATE`;
-  const existing=await sql`SELECT id FROM committee_user LIMIT 1`;if(existing.length)throw Error('Owner already created. Sign in with that account.');
+ const existing=await sql`SELECT id FROM committee_user LIMIT 1`;if(existing.length){result='exists';return;}
   await auth.api.createUser({body:{email:String(form.get('email')||''),password:String(form.get('password')||''),name:String(form.get('name')||''),role:'admin'}});
  });
- redirect('/admin/users?result=created');
+ }catch{result='setup-error';console.error('Committee owner setup failed; credentials omitted');}
+ redirect('/admin/users?result='+result);
 }
 async function activate(){
  'use server';
@@ -53,12 +56,23 @@ async function manage(form:FormData){
  }
  revalidatePath('/admin/users');
 }
-export default async function Users(){
+export default async function Users({searchParams}:{searchParams:Promise<{result?:string}>}){
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
+ const {result}=await searchParams;
  const enabled=await committeeEnabled();let session=null;try{session=await committeeSession();}catch{}
  if(enabled?!session?.superAdmin:!(await isAdmin())&&!session?.superAdmin)redirect('/admin');
  const fields=<><label>{t('Name','Nama')}<input name="name" required maxLength={150}/></label><label>{t('Email — sign-in ID','E-mel — ID log masuk')}<input name="email" type="email" required/></label><label>{t('Password (at least 12 characters)','Kata laluan (sekurang-kurangnya 12 aksara)')}<input name="password" type="password" minLength={12} required autoComplete="new-password"/></label></>;
- if(!enabled)return <main className="shop"><h1>{t('Set up your Super Admin account','Sediakan akaun Super Admin')}</h1><p>{t('Create your personal owner account, then sign in below and activate individual accounts. Your existing admin access stays available until activation. Activation disables the shared-password login.','Cipta akaun pemilik, kemudian log masuk dan aktifkan akaun individu. Akses sedia ada kekal sehingga pengaktifan. Log masuk kata laluan bersama dihentikan selepas pengaktifan.')}</p><form action={setup}>{fields}<button>{t('Create owner account','Cipta akaun pemilik')}</button></form><a className="shop-link" href="/admin/sign-in">{t('Sign in to your owner account','Log masuk akaun pemilik')}</a>{session?.superAdmin&&<form action={activate}><button>{t('Activate individual accounts','Aktifkan akaun individu')}</button></form>}</main>;
+ if(!enabled){
+  let configured=true;try{committeeAuth();}catch{configured=false;}
+  return <main className="shop"><h1>{t('Set up your Super Admin account','Sediakan akaun Super Admin')}</h1>
+   <p>{t('Create your personal owner account, then sign in below and activate individual accounts. Your existing admin access stays available until activation. Activation disables the shared-password login.','Cipta akaun pemilik, kemudian log masuk dan aktifkan akaun individu. Akses sedia ada kekal sehingga pengaktifan. Log masuk kata laluan bersama dihentikan selepas pengaktifan.')}</p>
+   {!configured&&<p role="alert">{t('Secure account configuration is unavailable. Keep the existing encryption keys unchanged and contact the website administrator.','Konfigurasi akaun selamat tidak tersedia. Jangan ubah kunci penyulitan sedia ada dan hubungi pentadbir laman.')}</p>}
+   {result==='setup-error'&&<p role="alert">{t('Account setup could not be completed. Check your email format and use a password of at least 12 characters. If this continues, contact the website administrator. Existing admin access is unchanged.','Persediaan akaun tidak berjaya. Semak format e-mel dan gunakan kata laluan sekurang-kurangnya 12 aksara. Jika berterusan, hubungi pentadbir laman. Akses pentadbir sedia ada tidak berubah.')}</p>}
+   {['created','exists'].includes(result||'')&&<p role="status">{t('Your owner account is available. Sign in below, then activate individual accounts.','Akaun pemilik tersedia. Log masuk di bawah, kemudian aktifkan akaun individu.')}</p>}
+   {configured&&!['created','exists'].includes(result||'')&&<form action={setup}>{fields}<button>{t('Create owner account','Cipta akaun pemilik')}</button></form>}
+   <a className="shop-link" href="/admin/sign-in">{t('Sign in to your owner account','Log masuk akaun pemilik')}</a>{session?.superAdmin&&<form action={activate}><button>{t('Activate individual accounts','Aktifkan akaun individu')}</button></form>}
+  </main>;
+ }
  const rows=await db()`SELECT u.id,u.name,u.email,u.role,p.scopes,p.disabled FROM committee_user u LEFT JOIN club_committee_permissions p ON p.user_id=u.id ORDER BY u.name`;
  const scopes=(selected:string[]=[])=>['membership','content','shop'].map(s=><label key={s}><input type="checkbox" name="scope" value={s} defaultChecked={selected.includes(s)}/>{s}</label>);
  return <main className="shop"><a href="/admin">← Admin</a><h1>{t('Committee accounts','Akaun jawatankuasa')}</h1><section className="shop-card"><h2>{t('Create committee account','Cipta akaun jawatankuasa')}</h2><form action={manage}><input type="hidden" name="operation" value="create"/>{fields}{scopes()}<button>{t('Create account','Cipta akaun')}</button></form><p>{t('Share credentials privately. No invitation email is sent automatically.','Kongsi maklumat log masuk secara sulit. Tiada e-mel jemputan automatik dihantar.')}</p></section>{rows.map(u=><section className="shop-card" key={u.id}><h2>{u.name}</h2><p>{u.email} · {u.role==='admin'?'Super Admin':u.disabled?t('Disabled','Dinyahaktifkan'):t('Enabled','Diaktifkan')}</p>{u.role!=='admin'&&<><form action={manage}><input type="hidden" name="id" value={u.id}/><button name="operation" value={u.disabled?'enable':'disable'}>{u.disabled?t('Reactivate','Aktifkan semula'):t('Disable and revoke sessions','Nyahaktif dan tamatkan sesi')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/>{scopes(u.scopes)}<button name="operation" value="permissions">{t('Save permissions','Simpan kebenaran')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/><label>{t('New password','Kata laluan baharu')}<input name="password" type="password" required minLength={12} autoComplete="new-password"/></label><button name="operation" value="reset">{t('Reset password','Tetap semula kata laluan')}</button></form></>}</section>)}</main>;
