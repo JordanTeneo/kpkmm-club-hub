@@ -106,12 +106,14 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
       ["/admin/members/roster", "Member listing & Excel", "Senarai ahli · Edit records, status and exports"],
       ["/admin/members", "New applications", "Permohonan baharu · Review requests to join"],
       ["/admin/renewals", "Membership renewals", "Pembaharuan · Review payments and renewals"],
+      ["/admin/reminders", "Renewal reminders", "Pause or enable reminder emails and review sending history"],
     ] },
     { title: "Website", bm: "Laman web", links: [
       ["/admin?section=notices#workspace", "Notice board", "Papan kenyataan · Publish messages and posters"],
       ["/admin?section=archive#workspace", "Club archive", "Arkib kelab · Edit outings and arrange their order"],
       ["/admin?section=photos#workspace", "Shared moments", "Momen bersama · Add and organize photo albums"],
       ["/admin/banner", "Homepage banner", "Sepanduk utama · Change the featured photo"],
+      ["/admin/celebrations", "Celebration greetings", "Manage festive banners, greeting cards and display dates"],
       ["/admin/videos", "Videos", "Video · Manage YouTube links"],
     ] },
     { title: "Shop & settings", bm: "Kedai & tetapan", links: [

@@ -1,0 +1,26 @@
+.back-to-top {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: var(--brown);
+  color: var(--cream);
+  box-shadow: 0 4px 16px #2e211930;
+  font: 600 14px/1.4 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.back-to-top[hidden] { display: none; }
+.back-to-top:hover { background: var(--red-dark); }
+.back-to-top:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+.back-to-top > span:first-child { font-size: 20px; line-height: 1; }
+#page-top:focus { outline: none; }
+/* Leave room at the end of each page so the floating control cannot cover its last action. */
+body { padding-bottom: 80px; }
+@media print { .back-to-top { display: none; } body { padding-bottom: 0; } }

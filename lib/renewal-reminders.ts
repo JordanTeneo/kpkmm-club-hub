@@ -3,10 +3,11 @@ import {db} from './shop';
 import {rosterReady} from './roster';
 import {renewalsReady,openRenewal,sendClubMessage} from './renewals';
 import {enrolmentMessage} from './enrolment';
+import {reminderConfig,reminderText} from './reminder-settings';
 export function malaysiaDay(now=new Date()){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);}
 export function reminderYear(day:string){const [y,m,d]=day.split('-').map(Number);return m===12&&d>=15?y+1:y;}
-export function monthDue(last:string,day:string){
- const [y,m,d]=last.slice(0,10).split('-').map(Number),next=new Date(Date.UTC(y,m,1));
+export function monthDue(last:string,day:string,months=1){
+ const [y,m,d]=last.slice(0,10).split('-').map(Number),next=new Date(Date.UTC(y,m-1+months,1));
  const lastDay=new Date(Date.UTC(next.getUTCFullYear(),next.getUTCMonth()+1,0)).getUTCDate();
  next.setUTCDate(Math.min(d,lastDay));return day>=next.toISOString().slice(0,10);
 }
@@ -14,6 +15,7 @@ export async function remindersReady(){
  await Promise.all([rosterReady(),renewalsReady()]);
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_settings(id integer PRIMARY KEY CHECK(id=1),paused boolean NOT NULL DEFAULT true,start_date date NOT NULL DEFAULT '2026-12-15')`;
  await db()`INSERT INTO club_reminder_settings(id) VALUES(1) ON CONFLICT DO NOTHING`;
+ await db()`ALTER TABLE club_reminder_settings ADD COLUMN IF NOT EXISTS config jsonb NOT NULL DEFAULT '{}'::jsonb`;
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_preferences(member_number text PRIMARY KEY,opt_out boolean NOT NULL DEFAULT false,undeliverable boolean NOT NULL DEFAULT false,token text UNIQUE NOT NULL)`;
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_mail(id uuid PRIMARY KEY,member_number text NOT NULL,target_year integer NOT NULL,attempt_day date NOT NULL,status text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(member_number,attempt_day))`;
 }
@@ -33,10 +35,11 @@ export async function runReminders(now=new Date()){
  for(let slot=0;slot<20&&Date.now()<deadline;slot++){
   const claim=await db().begin(async sql=>{
    await sql`SELECT pg_advisory_xact_lock(hashtext('kpkmm-reminder-daily'))`;
-   const settings=await sql`SELECT paused,start_date::text FROM club_reminder_settings WHERE id=1`;
+   const settings=await sql`SELECT paused,start_date::text,config FROM club_reminder_settings WHERE id=1 FOR SHARE`;
+   const config=reminderConfig(settings[0].config);
    if(settings[0].paused||day<settings[0].start_date)return null;
    const count=await sql`SELECT count(*)::integer AS count FROM club_reminder_mail WHERE attempt_day=${day}::date`;
-   if(count[0].count>=20)return null;
+   if(count[0].count>=config.dailyLimit)return null;
    await sql`LOCK TABLE club_member_roster IN SHARE MODE`;
    const [rows,pending,prefs,history]=await Promise.all([
     sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster ORDER BY membership_year DESC`,
@@ -47,7 +50,7 @@ export async function runReminders(now=new Date()){
    const candidates=[...new Set(rows.map(r=>String(r.member_number)))].sort((a,b)=>(history.find(h=>h.member_number===a)?.last_day||'').localeCompare(history.find(h=>h.member_number===b)?.last_day||'')||a.localeCompare(b));
    for(const number of candidates){
     const pref=prefs.find(p=>p.member_number===number),last=history.find(h=>h.member_number===number)?.last_day;
-    if(pref?.opt_out||pref?.undeliverable||history.find(h=>h.member_number===number)?.uncertain||last&&!monthDue(last,day))continue;
+    if(pref?.opt_out||pref?.undeliverable||history.find(h=>h.member_number===number)?.uncertain||last&&!monthDue(last,day,config.intervalMonths))continue;
     const member=eligible(rows,number,target,pending);if(!member)continue;
     const token=pref?.token||randomBytes(32).toString('hex');
     await sql`INSERT INTO club_reminder_preferences(member_number,token) VALUES(${number},${token}) ON CONFLICT DO NOTHING`;
@@ -61,13 +64,14 @@ export async function runReminders(now=new Date()){
   try{
    status=await db().begin(async sql=>{
     await sql`LOCK TABLE club_member_roster IN SHARE MODE`;
-    const setting=await sql`SELECT paused FROM club_reminder_settings WHERE id=1 FOR SHARE`;
+    const setting=await sql`SELECT paused,start_date::text,config FROM club_reminder_settings WHERE id=1 FOR SHARE`;
     const pref=await sql`SELECT opt_out,undeliverable FROM club_reminder_preferences WHERE member_number=${claim.number} FOR UPDATE`;
     const rows=await sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster WHERE member_number=${claim.number} ORDER BY membership_year DESC`;
     const pending=await sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${target}`;
     const member=eligible(rows,claim.number,target,pending);
-    if(setting[0].paused||pref[0]?.opt_out||pref[0]?.undeliverable||!member)return 'skipped';
-    const raw=enrolmentMessage(member.email,'KPKMM — membership renewal reminder / Peringatan pembaharuan',`Dear / Salam ${member.name},\n\nYou are eligible to renew your KPKMM membership for ${target}. The annual fee is RM150. If you have already paid, please contact the committee before paying again.\nAnda layak memperbaharui keahlian KPKMM untuk ${target}. Yuran tahunan ialah RM150. Jika sudah membayar, hubungi jawatankuasa sebelum membayar lagi.\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
+    if(setting[0].paused||day<setting[0].start_date||pref[0]?.opt_out||pref[0]?.undeliverable||!member)return 'skipped';
+    const config=reminderConfig(setting[0].config);
+    const raw=enrolmentMessage(member.email,reminderText(config.subject,member.name,target).replace(/[\r\n]/g,' '),`${reminderText(config.message,member.name,target)}\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
     return (await sendClubMessage(raw)).state;
    });
   }catch{}

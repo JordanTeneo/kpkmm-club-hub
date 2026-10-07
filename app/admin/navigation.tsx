@@ -16,7 +16,7 @@ const sections=[
  ['/admin/videos','Videos','Video'],
  ['/admin/shop','Marketplace','Kedai'],
  ['/admin/email','Club email','E-mel kelab'],
- ['/admin/reminders','Reminders','Peringatan'],
+ ['/admin/reminders','Renewal reminders','Peringatan pembaharuan'],
  ['/admin/users','Committee accounts','Akaun jawatankuasa'],
 ] as const;
 

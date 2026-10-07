@@ -8,7 +8,7 @@ assert.equal(a.annualStatus({active:true,paymentHistory:[{year:2020,status:'new'
 assert.equal(a.annualStatus({active:false,lifetimeSince:2020},2026),'lifetime');
 assert.equal(a.annualStatus({active:true,lifetimeSince:2020,deceased:true},2026),'deceased');
 assert.equal(a.annualStatus({active:true},2026),'active');
-const r=load('lib/renewal-reminders.ts',{'./shop':{},'./roster':{},'./renewals':{},'./enrolment':{}});
+const r=load('lib/renewal-reminders.ts',{'./reminder-settings':load('lib/reminder-settings.ts'),'./shop':{},'./roster':{},'./renewals':{},'./enrolment':{}});
 assert.equal(r.reminderYear('2026-12-14'),2026);assert.equal(r.reminderYear('2026-12-15'),2027);assert.equal(r.reminderYear('2027-01-01'),2027);
 assert.equal(r.monthDue('2026-12-15','2027-01-14'),false);assert.equal(r.monthDue('2026-12-15','2027-01-15'),true);assert.equal(r.monthDue('2027-01-31','2027-02-28'),true);
 assert.equal(r.malaysiaDay(new Date('2026-12-14T16:00:00Z')),'2026-12-15');

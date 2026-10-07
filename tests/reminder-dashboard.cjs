@@ -1,0 +1,10 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const dashboard=fs.readFileSync('app/admin/page.tsx','utf8');
+const membership=dashboard.split('{ title: "Membership"')[1].split('{ title: "Website"')[0];
+assert.ok(membership.includes('["/admin/reminders", "Renewal reminders", "Pause or enable reminder emails and review sending history"]'));
+const catalog=JSON.parse(fs.readFileSync('lib/ui-catalog.json','utf8'));
+assert.deepEqual(catalog['Renewal reminders'],['Renewal reminders','Peringatan pembaharuan']);
+assert.ok(catalog['Pause or enable reminder emails and review sending history'][1]);
+const controls=fs.readFileSync('app/admin/reminders/page.tsx','utf8');
+assert.match(controls,/isAdmin\('membership'\)/);assert.match(controls,/Enable reminders/);assert.match(controls,/Pause reminders/);assert.match(controls,/Recent delivery attempts/);
+console.log('PASS: Reminder dashboard shortcut, translations and existing protected management controls.');

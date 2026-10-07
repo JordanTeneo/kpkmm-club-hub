@@ -1,0 +1,16 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+const e={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/member-since.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:e});
+const row=(year,active,override=false)=>({membership_year:year,active,status_override:override});
+assert.equal(e.firstActiveYear({paymentHistory:[{year:2016,status:'new'},{year:2025,status:'paid'}]},[row(2026,true)],2026),2016);
+assert.equal(e.firstActiveYear({},[row(2015,false),row(2018,true),row(2026,false)],2026),2018);
+assert.equal(e.firstActiveYear({paymentHistory:[{year:2020,status:'sponsored'}]},[],2026),2020);
+assert.equal(e.firstActiveYear({paymentHistory:[{year:2016,status:'paid'},{year:2018,status:'paid'}]},[row(2016,false,true)],2026),2018);
+assert.equal(e.firstActiveYear({paymentHistory:[{year:2027,status:'new'}]},[row(2027,true)],2026),undefined);
+assert.equal(e.firstActiveYear({lifetimeSince:2020},[row(2020,true)],2026),undefined);
+assert.equal(e.firstActiveYear({paymentHistory:[{year:2010,status:'review'}]},[],2026),undefined);
+assert.equal(e.lastActiveYear({paymentHistory:[{year:2016,status:'new'},{year:2025,status:'paid'}]},[row(2026,false)],2026),2025);
+assert.equal(e.lastActiveYear({},[row(2025,true),row(2026,true)],2026),2026);
+assert.equal(e.lastActiveYear({paymentHistory:[{year:2026,status:'paid'},{year:2024,status:'sponsored'}]},[row(2026,false,true)],2026),2024);
+assert.equal(e.lastActiveYear({paymentHistory:[{year:2027,status:'new'},{year:2025,status:'paid'}]},[],2026),2025);
+assert.equal(e.lastActiveYear({},[],2026),undefined);
+console.log('PASS: First/last active years, inactive gaps, sponsorship, corrections, reporting-year cutoff and unknown history.');

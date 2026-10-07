@@ -1,11 +1,12 @@
 import {annualStatus,type AnnualStatus} from './annual-status';
+import {firstActiveYear,lastActiveYear,type AnnualEvidence} from './member-since';
 import {randomUUID} from 'node:crypto';
 import {db,isAdmin} from './shop';
 import {rosterReady,validateRoster,nameKey,identityKey,type RosterMember} from './roster';
 import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
-export type ManagedMember=RosterMember & {year:number;recordYear:number;revision:string;override:boolean;annualStatus:AnnualStatus};
+export type ManagedMember=RosterMember & {year:number;recordYear:number;revision:string;override:boolean;annualStatus:AnnualStatus;memberSince?:number;lastActiveYear?:number};
 export function compareMemberNumbers(a:{memberNumber:string},b:{memberNumber:string}){
  const aSuffix=a.memberNumber.match(/-(\d+)$/)?.[1],bSuffix=b.memberNumber.match(/-(\d+)$/)?.[1];
  if(aSuffix!==undefined&&bSuffix!==undefined){
@@ -26,20 +27,26 @@ export async function adminRosterReady(){
 }
 export async function listMembers(year:number):Promise<ManagedMember[]>{
  validYear(year);await Promise.all([adminRosterReady(),membershipReady(),renewalsReady()]);
- const [rows,apps,renewals]=await Promise.all([
+ const [rows,apps,renewals,history]=await Promise.all([
   db()`SELECT DISTINCT ON(member_number) member_number,membership_year,payload,active,status_override,updated_at::text AS revision FROM club_member_roster WHERE membership_year<=${year} ORDER BY member_number,membership_year DESC LIMIT 10001`,
   db()`SELECT identity_hash FROM club_applications WHERE status='approved' AND membership_year=${year}`,
-  db()`SELECT identity_hash FROM club_renewals WHERE review_status='approved' AND renewal_year=${year}`
+  db()`SELECT identity_hash FROM club_renewals WHERE review_status='approved' AND renewal_year=${year}`,
+  db()`SELECT member_number,membership_year,active,status_override FROM club_member_roster WHERE membership_year<=${year}`
  ]);
  if(rows.length>10000)throw Error('Roster too large');
  const appHashes=new Set(apps.map(r=>r.identity_hash)),renewHashes=new Set(renewals.map(r=>r.identity_hash));
+ const annualRecords=new Map<string,AnnualEvidence[]>();
+ for(const row of history){const records=annualRecords.get(row.member_number)||[];records.push(row as unknown as AnnualEvidence);annualRecords.set(row.member_number,records);}
  return rows.map(r=>{
   const m=JSON.parse(openRenewal(r.payload)) as RosterMember;
   const key=m.identityType==='passport'?'passport:'+(m.country||'Malaysia').toLowerCase()+':'+m.identity:/^\d{12}$/.test(m.identity)?'mykad:malaysia:'+m.identity:null;
   const override=r.membership_year===year&&r.status_override;
   const lifetime=Number.isInteger(m.lifetimeSince)&&m.lifetimeSince!<=year;
   const active=lifetime||(override?r.active:(r.membership_year===year&&r.active)||!!(key&&(appHashes.has(fingerprint(key))||renewHashes.has(renewalHash(key)))));
-  return {...m,memberNumber:r.member_number,active:active&&!m.deceased,annualStatus:annualStatus({...m,active},year),year,recordYear:r.membership_year,revision:r.revision,override};
+  const status=annualStatus({...m,active},year);
+  const records=[...(annualRecords.get(r.member_number)||[])];
+  if(status==='active'||status==='new')records.push({membership_year:year,active:true,status_override:false});
+  return {...m,memberNumber:r.member_number,active:active&&!m.deceased,annualStatus:status,memberSince:firstActiveYear(m,records,year),lastActiveYear:lastActiveYear(m,records,year),year,recordYear:r.membership_year,revision:r.revision,override};
  }).sort(compareMemberNumbers);
 }
 export function editedMember(form:FormData){

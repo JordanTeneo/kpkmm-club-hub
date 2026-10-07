@@ -3,7 +3,7 @@ import {useUiText,useUiLanguage} from '../../../ui-language';
 
 import {statusLabel,type AnnualStatus} from '../../../../lib/annual-status';
 import {useState} from 'react';
-type Member={memberNumber:string;name:string;active:boolean;annualStatus:AnnualStatus;previousStatus?:AnnualStatus|null;previousActive?:boolean|null;identity:string;address:string;email?:string;vehicles?:string[];lifetimeSince?:number;paymentHistory?:{year:number;note:string;status:string}[]};
+type Member={memberNumber:string;name:string;active:boolean;annualStatus:AnnualStatus;previousStatus?:AnnualStatus|null;previousActive?:boolean|null;identity:string;address:string;email?:string;vehicles?:string[];lifetimeSince?:number;memberSince?:number;lastActiveYear?:number;paymentHistory?:{year:number;note:string;status:string}[]};
 export function MemberList({members,year}:{members:Member[];year:number}){
  const ui = useUiText(),bm=useUiLanguage()==='ms',t=(en:string,ms:string)=>bm?ms:en;
 
@@ -29,7 +29,9 @@ export function MemberList({members,year}:{members:Member[];year:number}){
  `}</style>
  <div className="member-cards" role="region" aria-label={ui("Private member listing")}>{filtered.slice((current-1)*25,current*25).map(m=><article className="member-detail-card" key={m.memberNumber}>
  <header className="member-detail-head"><div><p>{m.memberNumber}</p><h3>{m.name}</h3></div><a className="shop-link" aria-label={t('Edit ','Sunting ')+m.memberNumber} href={'/admin/members/roster/edit?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{ui("Edit / Sunting")}</a><a className="shop-link" href={'/admin/members/roster/renew?member='+encodeURIComponent(m.memberNumber)+'&year='+year}>{t('Renew','Perbaharui')}</a></header>
- <dl><div><dt>{ui('MyKad / Passport')}</dt><dd>{m.identity||'—'}</dd></div><div><dt>{ui('Address / Alamat')}</dt><dd>{m.address||'—'}</dd></div>
+ <dl><div><dt>{t('Member since','Ahli sejak')}</dt><dd>{m.memberSince??t('No record','Tiada rekod')}</dd></div>
+ <div><dt>{t('Last active year','Tahun terakhir aktif')}</dt><dd>{m.lastActiveYear??t('No record','Tiada rekod')}</dd></div>
+ <div><dt>{ui('MyKad / Passport')}</dt><dd>{m.identity||'—'}</dd></div><div><dt>{ui('Address / Alamat')}</dt><dd>{m.address||'—'}</dd></div>
  <div><dt>{t('Email','E-mel')}</dt><dd>{m.email||'—'}</dd></div><div><dt>{t('Vehicle numbers','Nombor kenderaan')}</dt><dd>{m.vehicles?.length?m.vehicles.join('\n'):'—'}</dd></div>
  <div><dt>{year} {t('status','status')}</dt><dd>{statusLabel(m.annualStatus,bm)}</dd></div><div><dt>{year-1} {t('status','status')}</dt><dd>{m.previousStatus?statusLabel(m.previousStatus,bm):t('No record','Tiada rekod')}</dd></div></dl>
  {m.paymentHistory?.length?<details style={{marginTop:20}}><summary>{t('Payment and fee-waiver history','Sejarah bayaran dan pengecualian yuran')}</summary><ul>{m.paymentHistory.map(h=><li key={h.year}><strong>{h.year}</strong>: {({paid:t('Paid','Dibayar'),new:t('New member','Ahli baharu'),sponsored:t('Sponsored — fee waived','Tajaan — yuran dikecualikan'),lifetime:t('Lifetime membership','Keahlian seumur hidup'),inactive:t('No payment recorded','Tiada bayaran direkodkan'),review:t('Needs review','Perlu semakan')} as Record<string,string>)[h.status]||h.status}{h.note?' — '+h.note:''}</li>)}</ul></details>:null}
