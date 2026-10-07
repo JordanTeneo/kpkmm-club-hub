@@ -10,7 +10,7 @@ import '../../../shop/shop.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Review membership | KPKMM',robots:{index:false,follow:false}};
 export default async function Review({params}:{params:Promise<{id:string}>}){
- if(!(await isAdmin()))redirect('/admin');
+ if(!(await isAdmin('membership')))redirect('/admin');
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
  const {id}=await params;if(!uuid(id))notFound();await enrolmentReady();
  const rows=await db()`SELECT * FROM club_applications WHERE id=${id}`;if(!rows.length)notFound();
