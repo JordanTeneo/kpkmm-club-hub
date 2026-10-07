@@ -36,7 +36,7 @@ export async function importMasterHistory(input:unknown,apply=false){
    if(mapped.has(id))throw Error('Duplicate member');mapped.add(id);
    const existing=rows.filter(r=>r.member_number===id),latest=existing[0];if(!latest)throw Error('Unknown member');
    const current=JSON.parse(openRenewal(latest.payload));
-   const history=entry.history.map(h=>id==='W-19-284'&&h.year===2025?{year:2025,note:'Paid — confirmed by club administrator',status:'paid' as const}:{...h,status:paymentMarker(h.note)});
+   const history=entry.history.map(h=>current.paymentHistory?.find((saved:any)=>saved.year===h.year&&saved.manualCorrection)|| (id==='W-19-284'&&h.year===2025?{year:2025,note:'Paid — confirmed by club administrator',status:'paid' as const}:{...h,status:paymentMarker(h.note)}));
    const lifeYears=[current.lifetimeSince,...history.filter(h=>h.status==='lifetime').map(h=>h.year)].filter(y=>Number.isInteger(y));
    const lifetimeSince=lifeYears.length?Math.min(...lifeYears):undefined;if(lifetimeSince)lifetime++;
    review+=history.filter(h=>h.status==='review').length;

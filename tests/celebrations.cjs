@@ -1,0 +1,8 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+let admin=false,queries=[];const sql=async(p,...v)=>{queries.push(p.join('?'));return [];};sql.json=x=>x;
+const mocks={'server-only':{},'next/cache':{unstable_cache:fn=>fn},'./shop':{db:()=>sql,isAdmin:async()=>admin},'./club-data':{savePhoto:async()=>({url:'https://example.test/photo.webp'})}};
+const e={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/celebrations.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:e,require:n=>mocks[n]||require(n),Date,Intl,File});
+(async()=>{assert.equal(e.validDates('2026-02-30','2026-03-01'),false);assert.equal(e.validDates('2026-03-02','2026-03-01'),false);assert.equal(e.validDates('2026-03-01','2026-03-01'),true);
+const cards=[{enabled:true,starts:'2026-03-01',ends:'2026-03-01'},{enabled:false,starts:'2026-03-01',ends:'2026-03-01'}];assert.equal(e.visibleCelebrations(cards,new Date('2026-02-28T16:00:00Z')).length,1);assert.equal(e.visibleCelebrations(cards,new Date('2026-03-01T15:59:59Z')).length,1);assert.equal(e.visibleCelebrations(cards,new Date('2026-03-01T16:00:00Z')).length,0);
+await assert.rejects(()=>e.saveCelebration(new FormData()),/access/);assert.equal(queries.length,0);admin=true;await assert.rejects(()=>e.saveCelebration(new FormData()),/invalid/);assert.ok(!queries.some(q=>/INSERT|DELETE/.test(q)));
+console.log('PASS: Malaysia scheduling boundaries, inclusive end date, hidden greetings, date validation and admin permission guards.');})().catch(err=>{console.error(err);process.exitCode=1;});

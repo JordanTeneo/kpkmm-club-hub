@@ -1,6 +1,6 @@
 import {createCipheriv,createDecipheriv,createHmac,hkdfSync,randomBytes} from 'node:crypto';
 import {db} from './shop';
-export type Applicant={name:string;email:string;phone:string;identityType:'mykad'|'passport';identity:string;country:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string};
+export type Applicant={name:string;email:string;phone:string;identityType:'mykad'|'passport';identity:string;country:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;vehicles?:string[]};
 export function validateApplicant(form:FormData,structuredAddress=false):Applicant{
  const read=(key:string,max:number)=>{const value=String(form.get(key)||'').trim();if(!value||value.length>max)throw Error('invalid');return value;};
  const name=read('name',150),email=read('email',254).toLowerCase(),phone=read('phone',30),identityType=read('identityType',10),country=read('country',80),address=read('address',1000);
@@ -16,7 +16,11 @@ export function validateApplicant(form:FormData,structuredAddress=false):Applica
   mailing={addressLine:address,postcode,state,mailingCountry};
   fullAddress=[address,postcode+' '+state,mailingCountry].join('\n');
  }
- return {name,email,phone,identityType:identityType as Applicant['identityType'],identity,country:identityType==='mykad'?'Malaysia':country,address:fullAddress,...mailing};
+ const vehicleText=String(form.get('vehicles')||'');
+ if(vehicleText.length>2000)throw Error('invalid vehicles');
+ const vehicles=[...new Set(vehicleText.split(/[,\n\r]+/).map(v=>v.trim().toUpperCase()).filter(Boolean))];
+ if(vehicles.length>30||vehicles.some(v=>v.length>80||/[\u0000-\u001f\u007f]/.test(v)))throw Error('invalid vehicles');
+ return {vehicles,name,email,phone,identityType:identityType as Applicant['identityType'],identity,country:identityType==='mykad'?'Malaysia':country,address:fullAddress,...mailing};
 }
 function useV2(){return !process.env.ADMIN_SESSION_SECRET||process.env.ADMIN_SESSION_SECRET.length<24;}
 function key(v2=useV2()){const secret=v2?process.env.GMAIL_ENCRYPTION_KEY:process.env.ADMIN_SESSION_SECRET;if(!secret||secret.length<(v2?32:24))throw Error('Secure storage unavailable');return Buffer.from(hkdfSync('sha256',secret,v2?'kpkmm-membership-v2':'kpkmm-membership-v1','encrypted-applications',32));}

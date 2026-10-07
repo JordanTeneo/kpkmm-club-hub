@@ -22,6 +22,7 @@ export async function updateHistory2025(input:unknown,apply=false){
    const row=rows.find(r=>r.member_number===id);if(!row)throw Error('Historical member missing');
    if(row.active===entry.active&&row.status_override)continue;
    const member=JSON.parse(openRenewal(row.payload));
+   if(member.paymentHistory?.some((h:any)=>h.year===2025&&h.manualCorrection))continue;
    const payload=sealRenewal(JSON.stringify({...member,active:entry.active}));
    values.push({member_number:id,payload,active:entry.active});
    audits.push({id:randomUUID(),member_number:id,membership_year:2025,before_payload:sealRenewal(JSON.stringify(row)),after_payload:payload,reason:sealRenewal('2025 status reconciled against Senarai ahli_Oct2025 only.xlsx: paid/new active; blank inactive. No other year changed.')});

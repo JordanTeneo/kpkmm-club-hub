@@ -4,6 +4,7 @@ import {usePathname} from 'next/navigation';
 import {useUiLanguage} from '../ui-language';
 
 const sections=[
+ ['/admin/celebrations','Celebration greetings','Ucapan perayaan'],
  ['/admin/appointments','Committee appointments','Pelantikan jawatankuasa'],
  ['/admin/members/roster','Member listing','Senarai ahli'],
  ['/admin/members','Applications','Permohonan'],

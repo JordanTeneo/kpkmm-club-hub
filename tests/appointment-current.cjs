@@ -1,0 +1,14 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const form=fs.readFileSync('app/admin/appointments/form.tsx','utf8');
+const page=fs.readFileSync('app/admin/appointments/page.tsx','utf8');
+const publicView=fs.readFileSync('app/about/committee.tsx','utf8');
+const storage=fs.readFileSync('lib/appointments.ts','utf8');
+assert.ok(!/type="date"|name="starts"|name="ends"/.test(form));
+assert.ok(!/item\.starts|item\.ends/.test(page));
+assert.ok(!/row\.starts|row\.ends/.test(publicView));
+assert.ok(storage.includes('WHERE is_current IS NULL'));
+assert.ok(storage.includes('NOT cancelled AND starts<='));
+assert.ok(storage.includes('cancelled=true,is_current=false'));
+assert.ok(!storage.includes("form.get('starts')"));
+assert.ok(!storage.includes("form.get('ends')"));
+console.log('PASS: date-free public/admin UI, server-managed current appointments, one-time preservation of current vs historical records.');
