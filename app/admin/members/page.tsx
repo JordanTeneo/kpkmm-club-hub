@@ -20,7 +20,7 @@ async function retryNotification(form:FormData){
 }
 async function Links(){
  const language = await getUiLanguage(), ui = uiText(language);
-return <nav className="shop-actions" aria-label={ui("Membership administration")}><a href="/admin">{ui("← Dashboard / Pentadbiran kelab")}</a></nav>;}
+return null;}
 const labels:Record<string,string>={queued:'Waiting to send / Menunggu penghantaran',sending:'Sending or interrupted — check Gmail / Menghantar atau terganggu — semak Gmail',accepted:'Accepted by Gmail / Diterima Gmail',failed:'Failed — request saved / Gagal — permohonan disimpan',unknown:'Delivery uncertain — check Gmail / Penghantaran tidak pasti — semak Gmail'};
 export default async function Members({searchParams}:{searchParams:Promise<{page?:string;status?:string;result?:string}>}){
  const language = await getUiLanguage(), ui = uiText(language);
