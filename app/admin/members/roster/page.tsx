@@ -24,9 +24,8 @@ async function add(_: {error?:string},form:FormData):Promise<{error?:string}>{
 }
 export default async function Roster({searchParams}:{searchParams:Promise<{year?:string;add?:string}>}){
  const language=await getUiLanguage(),ui=uiText(language),t=(en:string,ms:string)=>language==='ms'?ms:en;
- const queues=await memberDashboard();
-
  if(!(await isAdmin('membership')))redirect('/admin');
+ const queues=await memberDashboard();
  const q=await searchParams;let year=malaysiaYear();try{if(q.year)year=validYear(q.year);}catch{}
  let members;try{members=await listMembersWithHistory(year);}catch{return <main className="shop"><a href="/admin/members">{ui("← Admin")}</a><h1>{ui("Member listing / Senarai ahli")}</h1><p>{ui("Private records are temporarily unavailable. No changes were made. / Rekod sulit tidak tersedia buat sementara waktu.")}</p></main>;}
  return <main className="shop"><h1>{ui("Member listing / Senarai ahli")}</h1><p>{ui("Private administrator access. Membership numbers remain permanent. Edit details, maintain annual status or download an Excel list. / Akses pentadbir sahaja. Nombor ahli kekal.")}</p>
