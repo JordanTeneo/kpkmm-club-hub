@@ -2,11 +2,16 @@ import {headers} from 'next/headers';
 import {db} from './shop';
 import {committeeAuth} from './committee-auth';
 export type CommitteeScope='membership'|'content'|'shop';
+// Cache schema readiness only, never users, permissions or session results.
+let ready:Promise<void>|undefined;
 export async function committeeReady(){
+ if(!ready)ready=(async()=>{
  await db()`CREATE TABLE IF NOT EXISTS club_committee_settings(id integer PRIMARY KEY CHECK(id=1),enabled boolean NOT NULL DEFAULT false)`;
  await db()`INSERT INTO club_committee_settings(id) VALUES(1) ON CONFLICT DO NOTHING`;
  await db()`CREATE TABLE IF NOT EXISTS club_committee_permissions(user_id text PRIMARY KEY,scopes text[] NOT NULL DEFAULT '{}',disabled boolean NOT NULL DEFAULT false)`;
  await db()`CREATE TABLE IF NOT EXISTS club_committee_audit(id bigserial PRIMARY KEY,actor text NOT NULL,action text NOT NULL,target text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
+ })().catch(error=>{ready=undefined;throw error;});
+ await ready;
 }
 export async function committeeEnabled(){await committeeReady();return !!(await db()`SELECT enabled FROM club_committee_settings WHERE id=1`)[0]?.enabled;}
 export async function committeeSession(){

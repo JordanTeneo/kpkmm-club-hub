@@ -16,9 +16,13 @@ export function compareMemberNumbers(a:{memberNumber:string},b:{memberNumber:str
  return a.memberNumber.localeCompare(b.memberNumber,'en');
 }
 export function validYear(value:unknown){const year=Number(value);if(!Number.isInteger(year)||year<2000||year>2200)throw Error('Invalid year');return year;}
+let ready:Promise<void>|undefined;
 export async function adminRosterReady(){
+ if(!ready)ready=(async()=>{
  await rosterReady();
  await db()`CREATE TABLE IF NOT EXISTS club_roster_edits(id uuid PRIMARY KEY,member_number text NOT NULL,membership_year integer NOT NULL,before_payload text NOT NULL,after_payload text NOT NULL,reason text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
+ })().catch(error=>{ready=undefined;throw error;});
+ await ready;
 }
 export async function listMembers(year:number):Promise<ManagedMember[]>{
  validYear(year);await Promise.all([adminRosterReady(),membershipReady(),renewalsReady()]);

@@ -14,11 +14,15 @@ function key(){
 export function renewalHash(value:string){return createHmac('sha256',key()).update(value).digest('hex');}
 export function sealRenewal(value:string){const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key(),iv);const data=Buffer.concat([cipher.update(value,'utf8'),cipher.final()]);return [iv,cipher.getAuthTag(),data].map(b=>b.toString('base64')).join('.');}
 export function openRenewal(value:string){const [iv,tag,data]=value.split('.').map(v=>Buffer.from(v,'base64'));const cipher=createDecipheriv('aes-256-gcm',key(),iv);cipher.setAuthTag(tag);return Buffer.concat([cipher.update(data),cipher.final()]).toString('utf8');}
+let ready:Promise<void>|undefined;
 export async function renewalsReady(){
  key();
+ if(!ready)ready=(async()=>{
  await db()`CREATE TABLE IF NOT EXISTS club_renewals(id uuid PRIMARY KEY,identity_hash text NOT NULL,renewal_year integer NOT NULL,amount integer NOT NULL DEFAULT 15000 CHECK(amount=15000),payload text NOT NULL,proof text NOT NULL,proof_type text NOT NULL,review_status text NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending','approved','rejected')),mail_status text NOT NULL DEFAULT 'queued' CHECK(mail_status IN ('queued','sending','accepted','failed','unknown')),mail_id text,mail_attempt_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(identity_hash,renewal_year))`;
  await db()`ALTER TABLE club_renewals ADD COLUMN IF NOT EXISTS member_mail_status text NOT NULL DEFAULT 'not_queued'`;
  await db()`CREATE TABLE IF NOT EXISTS renewal_limits(key text PRIMARY KEY,count integer NOT NULL,expires_at timestamptz NOT NULL)`;
+ })().catch(error=>{ready=undefined;throw error;});
+ await ready;
 }
 export async function renewalLimit(value:string,maximum:number){
  const rows=await db()`INSERT INTO renewal_limits(key,count,expires_at) VALUES(${renewalHash(value)},1,now()+interval '1 hour') ON CONFLICT(key) DO UPDATE SET count=CASE WHEN renewal_limits.expires_at<now() THEN 1 ELSE LEAST(renewal_limits.count+1,100000) END,expires_at=CASE WHEN renewal_limits.expires_at<now() THEN now()+interval '1 hour' ELSE renewal_limits.expires_at END RETURNING count`;

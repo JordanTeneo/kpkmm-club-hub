@@ -1,7 +1,11 @@
 import {db} from './shop';
 export type Banner={url:string;en:string;ms:string;position:string};
 export const defaultBanner:Banner={url:'/480344529_938897448327800_71183251801792565_n.jpg',en:'KPKMM TOGETHER',ms:'BERSAMA KPKMM',position:'center'};
-export async function bannerReady(){await db()`CREATE TABLE IF NOT EXISTS club_banner (id integer PRIMARY KEY CHECK(id=1), settings jsonb NOT NULL)`;}
+let ready:Promise<void>|undefined;
+export async function bannerReady(){
+ if(!ready)ready=(async()=>{await db()`CREATE TABLE IF NOT EXISTS club_banner (id integer PRIMARY KEY CHECK(id=1), settings jsonb NOT NULL)`;})().catch(error=>{ready=undefined;throw error;});
+ await ready;
+}
 export function decodeBanner(raw:unknown):Banner{
  for(let i=0;i<3&&typeof raw==='string';i++)raw=JSON.parse(raw);
  if(raw==null)return {...defaultBanner};

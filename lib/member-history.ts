@@ -10,7 +10,9 @@ export function attachPreviousYear(current:ManagedMember[],previous:ManagedMembe
 }
 export async function listMembersWithHistory(year:number){
  validYear(year);
- const current=await listMembers(year);
- const previous=year>2000?await listMembers(year-1):[];
+ const [current,previous]=await Promise.all([
+  listMembers(year),
+  year>2000?listMembers(year-1):Promise.resolve([])
+ ]);
  return attachPreviousYear(current,previous,year);
 }
