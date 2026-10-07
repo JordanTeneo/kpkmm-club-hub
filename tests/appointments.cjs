@@ -16,7 +16,7 @@ function form(extra={}){const f=new FormData();Object.entries({member:'B-26-999'
  overlap=true;await assert.rejects(()=>m.saveAppointment(form({role:'advisor',advisorName:'External Advisor'})),/overlap/);await assert.rejects(()=>m.saveAppointment(form()),/overlap/);overlap=false;deceased=true;await assert.rejects(()=>m.saveAppointment(form()),/invalid/);deceased=false;
  const edit={id:'00000000-0000-0000-0000-000000000001',version:'1'};stale=true;await assert.rejects(()=>m.saveAppointment(form(edit)),/stale/);stale=false;
  await m.saveAppointment(form({...edit,operation:'cancel'}));assert.ok(queries.some(x=>x.q.includes('SET cancelled=true')));
- queries=[];await m.publicAppointments();assert.ok(queries[0].q.includes('AND is_current'));assert.ok(!queries[0].q.includes('ends>='));assert.ok(!/member_number|payload|email|identity|advisor_details/.test(queries[0].q));
+ queries=[];await m.publicAppointments();assert.ok(queries[0].q.includes('AND is_current'));assert.ok(!queries[0].q.includes('ends>='));assert.ok(!/member_number|payload|email|identity/.test(queries[0].q));
  owner=false;queries=[];delegate={superAdmin:false,user:{id:'delegated-admin'},scopes:['membership','content']};
  await assert.rejects(()=>m.adminAppointments(),/Unauthorised/);await assert.rejects(()=>m.saveAppointment(form()),/access/);assert.equal(queries.length,0);
  delegate.scopes=['appointments'];assert.equal(await m.appointmentAdmin(),'delegated-admin');

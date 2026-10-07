@@ -5,6 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db, shopReady, digest, uuid, isAdmin, ownsOrder, limit, readImage } from '../../lib/shop';
 import { savePhoto } from '../../lib/club-data';
+import {readShopCustomer} from '../../lib/shop-customer';
+import {queueShopMail,deliverShopMail,type ShopMailKind} from '../../lib/shop-mail';
+import {getLanguage} from '../language';
 
 export type Result = { error?: string; success?: string };
 const text = (form: FormData, key: string, max = 200) => String(form.get(key) || '').trim().slice(0,max);
@@ -16,11 +19,12 @@ export async function placeOrder(_: Result, form: FormData): Promise<Result> {
   const id=text(form,'id'), token=text(form,'token'), product=text(form,'product');
   try {
     if (!uuid(id) || !uuid(product) || !/^[a-f0-9]{64}$/.test(token)) throw new Error('Refresh and try again. / Muat semula dan cuba lagi.');
-    const name=text(form,'name',100), phone=text(form,'phone',30), quantity=Number(form.get('quantity')), price=Number(form.get('price'));
+    const {name,phone,email,address}=readShopCustomer(form), quantity=Number(form.get('quantity')), price=Number(form.get('price'));
     if (name.length<2 || !/^[+0-9 ()-]{7,30}$/.test(phone) || !Number.isInteger(quantity) || quantity<1 || quantity>20 || form.get('consent')!=='yes') throw new Error('Check your name, phone number and quantity. / Semak nama, nombor telefon dan kuantiti.');
     await shopReady();
     const ip=(await headers()).get('x-forwarded-for')?.split(',')[0] || 'unknown';
     await limit('orders:'+digest(ip),10);
+    const language=await getLanguage();
     await db().begin(async sql => {
       await sql`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
       const existing=await sql`SELECT token_hash FROM shop_orders WHERE id=${id}`;
@@ -30,7 +34,7 @@ export async function placeOrder(_: Result, form: FormData): Promise<Result> {
       if(!p || p.deleted || !p.active || p.stock<quantity) throw new Error('Not enough stock. Refresh the shop. / Stok tidak mencukupi. Muat semula kedai.');
       if(p.price!==price) throw new Error('The price changed. Refresh before ordering. / Harga telah berubah. Muat semula sebelum menempah.');
       await sql`UPDATE shop_products SET stock=stock-${quantity},updated_at=now() WHERE id=${product}`;
-      await sql`INSERT INTO shop_orders (id,token_hash,product_id,product_name,quantity,unit_price,customer_name,phone) VALUES (${id},${digest(token)},${product},${p.name},${quantity},${p.price},${name},${phone})`;
+      await sql`INSERT INTO shop_orders (id,token_hash,product_id,product_name,quantity,unit_price,customer_name,phone,email,customer_address,language) VALUES (${id},${digest(token)},${product},${p.name},${quantity},${p.price},${name},${phone},${email},${sql.json(address)},${language})`;
     });
     await orderCookie(id,token); refresh();
   } catch(e) { return failure(e); }
@@ -53,8 +57,12 @@ export async function uploadReceipt(_: Result, form: FormData): Promise<Result> 
     const file=form.get('receipt'); if(!(file instanceof File)) throw new Error('Choose payment proof. / Pilih bukti bayaran.');
     const {bytes,type}=await readImage(file,true);
     await limit('receipt:'+id,20);
-    const rows=await db()`UPDATE shop_orders SET receipt=${bytes},receipt_type=${type},status='review',updated_at=now() WHERE id=${id} AND status IN ('pending','review') RETURNING id`;
-    if(!rows.length) throw new Error('This order is already paid or cancelled. / Tempahan telah dibayar atau dibatalkan.');
+    await db().begin(async sql=>{
+      const rows=await sql`UPDATE shop_orders SET receipt=${bytes},receipt_type=${type},status='review',updated_at=now() WHERE id=${id} AND status IN ('pending','review') RETURNING id`;
+      if(!rows.length) throw new Error('This order is already paid or cancelled. / Tempahan telah dibayar atau dibatalkan.');
+      await queueShopMail(sql as unknown as ReturnType<typeof db>,id,'purchase');
+    });
+    try{await deliverShopMail(id,'purchase');}catch{/* Order and queued notification are retained. */}
     revalidatePath('/shop/orders/'+id); refresh(); return {success:'Proof submitted for review. / Bukti dihantar untuk semakan.'};
   } catch(e) { return failure(e); }
 }
@@ -104,10 +112,24 @@ export async function updateOrder(_: Result, form: FormData): Promise<Result> {
     await db().begin(async sql => {
       const rows=await sql`SELECT * FROM shop_orders WHERE id=${id} FOR UPDATE`; const order=rows[0];
       if(!order || ['paid','cancelled'].includes(order.status)) throw new Error('This order is already finalised. / Tempahan ini telah dimuktamadkan.');
-      if(status==='paid' && !order.receipt) throw new Error('Payment proof is required before confirmation. / Bukti bayaran diperlukan sebelum pengesahan.');
+      if(status==='paid' && (!order.receipt||order.status!=='review')) throw new Error('A newly submitted payment proof is required before confirmation. / Bukti bayaran yang dihantar semula diperlukan sebelum pengesahan.');
       if(status==='cancelled') await sql`UPDATE shop_products SET stock=stock+${order.quantity},updated_at=now() WHERE id=${order.product_id}`;
       await sql`UPDATE shop_orders SET status=${status},updated_at=now() WHERE id=${id}`;
+      if(status==='paid')await queueShopMail(sql as unknown as ReturnType<typeof db>,id,'completed');
     });
+    if(status==='paid')try{await deliverShopMail(id,'completed');}catch{/* Purchase stays completed; notification is retryable. */}
     refresh(); revalidatePath('/shop/orders/'+id); return {success:'Order updated. / Tempahan dikemas kini.'};
   } catch(e) { return failure(e); }
+}
+
+export async function retryShopNotification(_:Result,form:FormData):Promise<Result>{
+ try{
+  if(!(await isAdmin('shop')))throw Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
+  const id=text(form,'id'),kind=text(form,'kind');
+  if(!uuid(id)||!['purchase','completed'].includes(kind))throw Error('Invalid notification');
+  await shopReady();await limit('shop-mail:'+id,10);
+  const state=await deliverShopMail(id,kind as ShopMailKind,form.get('checked')==='yes');
+  refresh();
+  return {success:state==='accepted'?'Email accepted by Gmail. / E-mel diterima Gmail.':'Check the notification status below. / Semak status pemberitahuan di bawah.'};
+ }catch(e){return failure(e);}
 }

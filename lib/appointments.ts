@@ -30,8 +30,13 @@ export async function adminAppointments(){
 }
 export async function publicAppointments(){
  await appointmentReady();
- // Deliberately project only public fields; never return member identifiers or contact details.
- return await db()`SELECT display_name,role,role_en,role_ms FROM club_appointments WHERE NOT cancelled AND is_current ORDER BY CASE role WHEN 'advisor' THEN 0 WHEN 'chairman' THEN 1 WHEN 'vice-chairman' THEN 2 WHEN 'secretary' THEN 3 WHEN 'assistant-secretary' THEN 4 WHEN 'treasurer' THEN 5 ELSE 6 END,display_name`;
+ // Advisor details are public by club policy; never return membership records or ciphertext.
+ const rows=await db()`SELECT display_name,role,role_en,role_ms,CASE WHEN role='advisor' THEN advisor_details_encrypted ELSE NULL END AS advisor_details_encrypted FROM club_appointments WHERE NOT cancelled AND is_current ORDER BY CASE role WHEN 'advisor' THEN 0 WHEN 'chairman' THEN 1 WHEN 'vice-chairman' THEN 2 WHEN 'secretary' THEN 3 WHEN 'assistant-secretary' THEN 4 WHEN 'treasurer' THEN 5 ELSE 6 END,display_name`;
+ return rows.map(row=>{
+  let details='';
+  if(row.role==='advisor'&&row.advisor_details_encrypted){try{details=openRenewal(row.advisor_details_encrypted);}catch{/* Keep the hierarchy available if a legacy detail cannot be decrypted. */}}
+  return {display_name:row.display_name,role:row.role,role_en:row.role_en,role_ms:row.role_ms,advisor_details:details};
+ });
 }
 export async function saveAppointment(form:FormData){
  const actor=await appointmentAdmin();if(!actor)throw Error('access');

@@ -1,15 +1,48 @@
 {
-  "Renewal reminders": ["Renewal reminders", "Peringatan pembaharuan"],
-  "Pause or enable reminder emails and review sending history": ["Pause or enable reminder emails and review sending history", "Jeda atau aktifkan e-mel peringatan dan semak sejarah penghantaran"],
-  "Celebration greetings": ["Celebration greetings", "Ucapan perayaan"],
-  "Manage festive banners, greeting cards and display dates": ["Manage festive banners, greeting cards and display dates", "Urus sepanduk perayaan, kad ucapan dan tarikh paparan"],
-  "New / Baharu": ["New", "Baharu"],
-  "Lifetime / Seumur hidup": ["Lifetime", "Seumur hidup"],
-  "Deceased / Telah meninggal dunia": ["Deceased", "Telah meninggal dunia"],
-  "Renewal reminders / Peringatan pembaharuan": ["Renewal reminders", "Peringatan pembaharuan"],
-  "Committee accounts / Akaun jawatankuasa": ["Committee accounts", "Akaun jawatankuasa"],
-  "Linked photos remain in Shared moments.": ["Linked photos remain in Shared moments.", "Foto berkaitan kekal dalam Momen bersama."],
-  "Your name and MyKad/passport details do not match a registered member. Please use your registered full name or contact the committee to correct your record before renewing or paying. / Nama dan maklumat MyKad/pasport tidak sepadan dengan ahli berdaftar. Gunakan nama penuh berdaftar atau hubungi jawatankuasa untuk membetulkan rekod sebelum memperbaharui atau membayar.": ["Your name and MyKad/passport details do not match a registered member. Please use your registered full name or contact the committee to correct your record before renewing or paying.", "Nama dan maklumat MyKad/pasport tidak sepadan dengan ahli berdaftar. Gunakan nama penuh berdaftar atau hubungi jawatankuasa untuk membetulkan rekod sebelum memperbaharui atau membayar."],
+  "Renewal reminders": [
+    "Renewal reminders",
+    "Peringatan pembaharuan"
+  ],
+  "Pause or enable reminder emails and review sending history": [
+    "Pause or enable reminder emails and review sending history",
+    "Jeda atau aktifkan e-mel peringatan dan semak sejarah penghantaran"
+  ],
+  "Celebration greetings": [
+    "Celebration greetings",
+    "Ucapan perayaan"
+  ],
+  "Manage festive banners, greeting cards and display dates": [
+    "Manage festive banners, greeting cards and display dates",
+    "Urus sepanduk perayaan, kad ucapan dan tarikh paparan"
+  ],
+  "New / Baharu": [
+    "New",
+    "Baharu"
+  ],
+  "Lifetime / Seumur hidup": [
+    "Lifetime",
+    "Seumur hidup"
+  ],
+  "Deceased / Telah meninggal dunia": [
+    "Deceased",
+    "Telah meninggal dunia"
+  ],
+  "Renewal reminders / Peringatan pembaharuan": [
+    "Renewal reminders",
+    "Peringatan pembaharuan"
+  ],
+  "Committee accounts / Akaun jawatankuasa": [
+    "Committee accounts",
+    "Akaun jawatankuasa"
+  ],
+  "Linked photos remain in Shared moments.": [
+    "Linked photos remain in Shared moments.",
+    "Foto berkaitan kekal dalam Momen bersama."
+  ],
+  "Your name and MyKad/passport details do not match a registered member. Please use your registered full name or contact the committee to correct your record before renewing or paying. / Nama dan maklumat MyKad/pasport tidak sepadan dengan ahli berdaftar. Gunakan nama penuh berdaftar atau hubungi jawatankuasa untuk membetulkan rekod sebelum memperbaharui atau membayar.": [
+    "Your name and MyKad/passport details do not match a registered member. Please use your registered full name or contact the committee to correct your record before renewing or paying.",
+    "Nama dan maklumat MyKad/pasport tidak sepadan dengan ahli berdaftar. Gunakan nama penuh berdaftar atau hubungi jawatankuasa untuk membetulkan rekod sebelum memperbaharui atau membayar."
+  ],
   "+ Add member / Tambah ahli": [
     "+ Add member",
     "Tambah ahli"
@@ -3265,5 +3298,25 @@
   "Edit": [
     "Edit",
     "Sunting"
+  ],
+  "Enter your full name, mobile number and valid email. / Masukkan nama penuh, nombor telefon bimbit dan e-mel yang sah.": [
+    "Enter your full name, mobile number and valid email.",
+    "Masukkan nama penuh, nombor telefon bimbit dan e-mel yang sah."
+  ],
+  "Enter your address, postcode, state and country. / Masukkan alamat, poskod, negeri dan negara.": [
+    "Enter your address, postcode, state and country.",
+    "Masukkan alamat, poskod, negeri dan negara."
+  ],
+  "A newly submitted payment proof is required before confirmation. / Bukti bayaran yang dihantar semula diperlukan sebelum pengesahan.": [
+    "A newly submitted payment proof is required before confirmation.",
+    "Bukti bayaran yang dihantar semula diperlukan sebelum pengesahan."
+  ],
+  "Email accepted by Gmail. / E-mel diterima Gmail.": [
+    "Email accepted by Gmail.",
+    "E-mel diterima Gmail."
+  ],
+  "Check the notification status below. / Semak status pemberitahuan di bawah.": [
+    "Check the notification status below.",
+    "Semak status pemberitahuan di bawah."
   ]
 }

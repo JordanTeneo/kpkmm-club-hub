@@ -2,7 +2,7 @@ import {publicAppointments} from '../../lib/appointments';
 import {appointmentTitle} from '../../lib/appointment-types';
 export async function PublicCommittee({bm}:{bm:boolean}){
  const rows=await publicAppointments();
- const cards=(role:string)=>rows.filter(row=>row.role===role).map((row,i)=><article className="committee-card" key={role+i}><p className="committee-role">{appointmentTitle({role:String(row.role),role_en:String(row.role_en),role_ms:String(row.role_ms)},bm)}</p><h3>{row.display_name}</h3></article>);
+ const cards=(role:string)=>rows.filter(row=>row.role===role).map((row,i)=><article className="committee-card" key={role+i}><p className="committee-role">{appointmentTitle({role:String(row.role),role_en:String(row.role_en),role_ms:String(row.role_ms)},bm)}</p><h3>{row.display_name}</h3>{role==='advisor'&&row.advisor_details&&<p className="committee-advisor-details">{row.advisor_details}</p>}</article>);
  return <section id="committee" className="current-committee"><h2>{bm?'Jawatankuasa Kelab Semasa':'Current Club Committee'}</h2><p>{bm?'Bersama memimpin keluarga Mini kita.':'The people guiding our Mini family.'}</p>{rows.length?<div className="committee-hierarchy">
   <div className={'committee-leadership'+(rows.some(r=>r.role==='advisor')?' has-advisor':'')}>
    {rows.some(r=>r.role==='chairman')&&<div className="committee-tier committee-president">{cards('chairman')}</div>}
@@ -17,6 +17,7 @@ export async function PublicCommittee({bm}:{bm:boolean}){
  </div>:<p>{bm?'Pelantikan jawatankuasa akan diumumkan di sini.':'Committee appointments will be announced here.'}</p>}
  <style>{`
  .committee-leadership{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 32px auto;max-width:620px;width:100%;margin:auto}
+ .committee-advisor-details{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5;margin:10px 0 0;color:#79593c}
  .committee-leadership.has-advisor{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px}
  .committee-president{grid-column:1;grid-row:1}
  .committee-vice{grid-column:1;grid-row:3}

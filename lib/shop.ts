@@ -16,11 +16,15 @@ export async function shopReady() {
     await sql`CREATE TABLE IF NOT EXISTS shop_orders (id uuid PRIMARY KEY, token_hash text NOT NULL, product_id uuid NOT NULL REFERENCES shop_products(id), product_name text NOT NULL, quantity integer NOT NULL CHECK(quantity > 0), unit_price integer NOT NULL CHECK(unit_price > 0), customer_name text NOT NULL, phone text NOT NULL, status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','review','paid','cancelled')), receipt bytea, receipt_type text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now())`;
     await sql`CREATE TABLE IF NOT EXISTS shop_limits (key text PRIMARY KEY, count integer NOT NULL, expires_at timestamptz NOT NULL)`;
     await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS email text NOT NULL DEFAULT ''`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS customer_address jsonb`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS language text NOT NULL DEFAULT 'en'`;
+    await sql`CREATE TABLE IF NOT EXISTS shop_order_mail(order_id uuid NOT NULL REFERENCES shop_orders(id),kind text NOT NULL CHECK(kind IN ('purchase','completed')),status text NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','sending','accepted','failed','unknown','skipped')),attempt_at timestamptz,PRIMARY KEY(order_id,kind))`;
   })().catch(e => { ready = undefined; throw e; });
   await ready;
 }
 export type Product = { id: string; name: string; name_ms: string; description: string; description_ms: string; price: number; stock: number; active: boolean; image: string; updated_at: Date };
-export type Order = { id: string; product_id: string; product_name: string; quantity: number; unit_price: number; customer_name: string; phone: string; status: string; created_at: Date; has_receipt: boolean };
+export type Order = { id: string; product_id: string; product_name: string; quantity: number; unit_price: number; customer_name: string; phone: string; email:string; customer_address:import('./shop-customer').ShopAddress|null; status: string; created_at: Date; has_receipt: boolean };
 export const money = (cents: number) => 'RM ' + (cents / 100).toFixed(2);
 export const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 export const uuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
