@@ -2,7 +2,7 @@ import {headers} from 'next/headers';
 import {cache} from 'react';
 import {db} from './shop';
 import {committeeAuth} from './committee-auth';
-export type CommitteeScope='membership'|'content'|'shop';
+export type CommitteeScope='membership'|'content'|'shop'|'appointments';
 // Cache schema readiness only, never users, permissions or session results.
 let ready:Promise<void>|undefined;
 export async function committeeReady(){

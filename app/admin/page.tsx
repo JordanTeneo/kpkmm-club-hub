@@ -1,5 +1,7 @@
 import {isAdmin} from '../../lib/shop';
-import {committeeEnabled} from '../../lib/committee-access';
+import {Suspense} from 'react';
+import {ApprovalDashboard} from './approval-dashboard';
+import {committeeEnabled,committeeSession} from '../../lib/committee-access';
 import {committeeAuth} from '../../lib/committee-auth';
 import {headers} from 'next/headers';
 
@@ -22,7 +24,8 @@ function signature(value: string) { return createHmac("sha256", process.env.ADMI
 async function signedIn() { return isAdmin('content'); }
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ section?: string; error?: string }> }) {
- const ui = uiText(await getUiLanguage());
+ const language=await getUiLanguage();
+ const ui = uiText(language);
 
   const query = await searchParams;
   const section = ["notices", "archive", "photos"].includes(query.section || "") ? query.section! : "overview";
@@ -99,6 +102,7 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
   }
 
   if (!ok) return <main className="club-admin admin-login"><a href="/">{ui("← KPKMM website")}</a><p className="admin-kicker">{ui("COMMITTEE ACCESS")}</p><h1>{ui("Welcome back")}</h1><p>{ui("Sign in to manage your club. / Log masuk untuk mengurus kelab.")}</p>{query.error && <p role="alert">{ui("Incorrect password. Please try again.")}</p>}<form action={login}><label>{ui("Admin password / Kata laluan")}<input name="password" type="password" autoComplete="current-password" required /></label><button>{ui("Sign in / Log masuk")}</button></form></main>;
+  const canManageAccounts = section==='overview' && (!individual || !!(await committeeSession())?.superAdmin);
   const data = await getClubData();
   const fields = (item?: { date: string; title: string; details: string }) => <><label>{ui("Date label / Tarikh")}<input name="date" defaultValue={item?.date} placeholder="17 MAY 2026" required /></label><label>{ui("Title / Tajuk")}<input name="title" defaultValue={item?.title} required /></label><label>{ui("Details / Butiran")}<textarea name="details" defaultValue={item?.details} rows={4} required /></label></>;
   const groups = [
@@ -119,13 +123,15 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
     { title: "Shop & settings", bm: "Kedai & tetapan", links: [
       ["/admin/shop", "Marketplace", "Kedai · Manage products, stock and orders"],
       ["/admin/email", "Club email", "E-mel kelab · Manage notification connection"],
+      ...(canManageAccounts ? [["/admin/users", language==='ms'?'Akaun jawatankuasa':'Committee accounts', language==='ms'?'Cipta akaun, tetapkan akses dan urus kata laluan jawatankuasa':'Create accounts, set access and manage committee passwords']] : []),
     ] },
   ];
   return <main className="club-admin">
     <header className="admin-header"><div><p className="admin-kicker">{ui("KPKMM · COMMITTEE WORKSPACE")}</p><h1>{ui("Club dashboard")}</h1><p>{ui("Everything you need to keep the club running, in one place.")}</p></div><div className="admin-header-actions"><form action={logout}><button className="admin-secondary">{ui("Sign out / Log keluar")}</button></form></div></header>
     {section==="overview" ? <>
+      <Suspense fallback={<p role="status">{language==='ms'?'Memuatkan jumlah kelulusan…':'Loading approval counts…'}</p>}><ApprovalDashboard bm={language==='ms'}/></Suspense>
       <div className="admin-stats"><a href="/admin?section=notices#workspace"><strong>{data.notices.length}</strong>{ui(" Notices / Notis")}</a><a href="/admin?section=archive#workspace"><strong>{data.events.length}</strong>{ui(" Outings / Aktiviti")}</a><a href="/admin?section=photos#workspace"><strong>{data.moments.length}</strong>{ui(" Photos / Foto")}</a></div>
-      <a className="admin-link-card" href="/admin/appointments"><strong>{(await getUiLanguage())==='ms'?'Pelantikan jawatankuasa':'Committee appointments'} ↗</strong><p>{(await getUiLanguage())==='ms'?'Lantik pemimpin kelab dan urus tempoh jawatan.':'Appoint club leaders and manage their terms.'}</p></a>
+      {(await isAdmin('appointments'))&&<a className="admin-link-card" href="/admin/appointments"><strong>{language==='ms'?'Pelantikan jawatankuasa':'Committee appointments'} ↗</strong><p>{language==='ms'?'Lantik dan urus jawatankuasa semasa.':'Appoint and manage the current committee.'}</p></a>}
       {groups.map(group=><section className="admin-group" key={group.title}><h2>{ui(group.title)} </h2><div className="admin-card-grid">{group.links.map(([href,title,description])=><a className="admin-link-card" href={href} key={href}><strong>{ui(title)}<span aria-hidden="true">↗</span></strong><p>{ui(description)}</p></a>)}</div></section>)}
     </> : <section id="workspace" className="admin-workspace">
       

@@ -18,7 +18,7 @@ async function appointmentReady(){
  await ready;
 }
 export async function appointmentAdmin(){
- if(await committeeEnabled()){const session=await committeeSession();return session?.superAdmin?session.user.id:null;}
+ if(await committeeEnabled()){const session=await committeeSession();return session&&(session.superAdmin||session.scopes?.includes('appointments'))?session.user.id:null;}
  return await isAdmin()?'legacy-owner':null;
 }
 export async function adminAppointments(){
@@ -30,7 +30,7 @@ export async function adminAppointments(){
 export async function publicAppointments(){
  await appointmentReady();
  // Deliberately project only public fields; never return member identifiers or contact details.
- return await db()`SELECT display_name,role,role_en,role_ms FROM club_appointments WHERE NOT cancelled AND is_current ORDER BY CASE role WHEN 'chairman' THEN 1 WHEN 'vice-chairman' THEN 2 WHEN 'secretary' THEN 3 WHEN 'assistant-secretary' THEN 4 WHEN 'treasurer' THEN 5 ELSE 6 END,display_name`;
+ return await db()`SELECT display_name,role,role_en,role_ms FROM club_appointments WHERE NOT cancelled AND is_current ORDER BY CASE role WHEN 'advisor' THEN 0 WHEN 'chairman' THEN 1 WHEN 'vice-chairman' THEN 2 WHEN 'secretary' THEN 3 WHEN 'assistant-secretary' THEN 4 WHEN 'treasurer' THEN 5 ELSE 6 END,display_name`;
 }
 export async function saveAppointment(form:FormData){
  const actor=await appointmentAdmin();if(!actor)throw Error('access');
