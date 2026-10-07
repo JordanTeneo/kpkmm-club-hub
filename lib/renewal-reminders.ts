@@ -59,8 +59,17 @@ export async function runReminders(now=new Date()){
   if(!claim)break;
   let status='unknown';
   try{
-   const raw=enrolmentMessage(claim.member.email,'KPKMM — membership renewal reminder / Peringatan pembaharuan',`Dear / Salam ${claim.member.name},\n\nYou are eligible to renew your KPKMM membership for ${target}. The annual fee is RM150. If you have already paid, please contact the committee before paying again.\nAnda layak memperbaharui keahlian KPKMM untuk ${target}. Yuran tahunan ialah RM150. Jika sudah membayar, hubungi jawatankuasa sebelum membayar lagi.\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
-   status=(await sendClubMessage(raw)).state;
+   status=await db().begin(async sql=>{
+    await sql`LOCK TABLE club_member_roster IN SHARE MODE`;
+    const setting=await sql`SELECT paused FROM club_reminder_settings WHERE id=1 FOR SHARE`;
+    const pref=await sql`SELECT opt_out,undeliverable FROM club_reminder_preferences WHERE member_number=${claim.number} FOR UPDATE`;
+    const rows=await sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster WHERE member_number=${claim.number} ORDER BY membership_year DESC`;
+    const pending=await sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${target}`;
+    const member=eligible(rows,claim.number,target,pending);
+    if(setting[0].paused||pref[0]?.opt_out||pref[0]?.undeliverable||!member)return 'skipped';
+    const raw=enrolmentMessage(member.email,'KPKMM — membership renewal reminder / Peringatan pembaharuan',`Dear / Salam ${member.name},\n\nYou are eligible to renew your KPKMM membership for ${target}. The annual fee is RM150. If you have already paid, please contact the committee before paying again.\nAnda layak memperbaharui keahlian KPKMM untuk ${target}. Yuran tahunan ialah RM150. Jika sudah membayar, hubungi jawatankuasa sebelum membayar lagi.\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
+    return (await sendClubMessage(raw)).state;
+   });
   }catch{}
   await db()`UPDATE club_reminder_mail SET status=${status} WHERE id=${claim.id}`;attempted++;
  }
