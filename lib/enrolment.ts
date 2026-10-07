@@ -37,7 +37,7 @@ async function queue(sql:any,id:string,kind:string,context:string,raw:string){
  await sql`INSERT INTO club_enrolment_mail(id,application_id,kind,context,payload) VALUES(${randomUUID()},${id},${kind},${context},${sealRenewal(raw)}) ON CONFLICT(application_id,kind,context) DO NOTHING`;
 }
 export async function approveApplication(id:string,year:number,previous:string){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id)||!['pending','rejected'].includes(previous))throw Error('Invalid request');
  validYear(year);const current=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
  if(year!==current)throw Error('Use the current membership year');
@@ -79,7 +79,7 @@ export async function savePayment(token:string,proof:{bytes:Buffer;type:string})
  });
 }
 export async function approvePayment(id:string,version:string){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id)||!uuid(version))return 'invalid';
  await enrolmentReady();await adminRosterReady();
  return db().begin(async sql=>{
@@ -99,7 +99,7 @@ export async function approvePayment(id:string,version:string){
   if(duplicates.length)return 'duplicate';
   const numbers=await sql`SELECT member_number AS number FROM club_member_roster UNION SELECT old_number AS number FROM club_member_id_history UNION SELECT new_number AS number FROM club_member_id_history`;
   const number=nextMemberNumber(numbers.map(r=>String(r.number)),prefix,year);
-  const payload=sealRenewal(JSON.stringify({...person,memberNumber:number,active:true,sourceRow:2}));
+  const payload=sealRenewal(JSON.stringify({...person,memberNumber:number,active:true,joinedYear:year,sourceRow:2}));
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${number},${year},${nameKey(person.name)},${hash},${payload},true,true)`;
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${number},${year},${sealRenewal('null')},${payload},${sealRenewal('Verified new member payment: '+id+' proof '+version)})`;
   await sql`UPDATE club_enrolments SET stage='active',member_number=${number},updated_at=now() WHERE application_id=${id}`;
@@ -110,7 +110,7 @@ export async function approvePayment(id:string,version:string){
  });
 }
 export async function reissuePayment(id:string,version:string){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id))return 'invalid';await enrolmentReady();
  return db().begin(async sql=>{
   const apps=await sql`SELECT * FROM club_applications WHERE id=${id} FOR UPDATE`;

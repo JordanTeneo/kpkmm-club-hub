@@ -15,7 +15,7 @@ export function paymentMarker(note:string):PaymentHistory['status']{
 export function splitVehicles(...values:string[]){return [...new Map(values.flatMap(v=>v.split(/[,\n\r]+/)).map(v=>v.trim().toUpperCase()).filter(Boolean).map(v=>[v.replace(/\s/g,''),v])).values()];}
 type Entry={memberNumber:string;email:string;vehicles:string[];history:{year:number;note:string}[]};
 export async function importMasterHistory(input:unknown,apply=false){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  const p=input as {source:string;members:Entry[]};
  if(!p||p.source!=='Senarai ahli_Oct2026.xlsx'||!Array.isArray(p.members)||p.members.length!==242)throw Error('Invalid master');
  const seen=new Set<string>();
@@ -23,7 +23,7 @@ export async function importMasterHistory(input:unknown,apply=false){
   if(!m||typeof m.memberNumber!=='string'||! /^[A-Za-z0-9-]{1,30}$/.test(m.memberNumber)||seen.has(m.memberNumber)||typeof m.email!=='string'||m.email.length>254||!Array.isArray(m.vehicles)||m.vehicles.length>30||m.vehicles.some(v=>typeof v!=='string'||v.length>80)||!Array.isArray(m.history)||m.history.length!==14)throw Error('Invalid member');seen.add(m.memberNumber);
   if(m.history.some((h,i)=>h.year!==2013+i||typeof h.note!=='string'||h.note.length>500))throw Error('Invalid annual history');
  }
- const raw=JSON.stringify(p),checksum=createHash('sha256').update('master-history-v1:'+raw).digest('hex');
+ const raw=JSON.stringify(p),checksum=createHash('sha256').update('master-history-v2-canvas-confirmed:'+raw).digest('hex');
  await adminRosterReady();
  return db().begin(async sql=>{
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
@@ -36,7 +36,7 @@ export async function importMasterHistory(input:unknown,apply=false){
    if(mapped.has(id))throw Error('Duplicate member');mapped.add(id);
    const existing=rows.filter(r=>r.member_number===id),latest=existing[0];if(!latest)throw Error('Unknown member');
    const current=JSON.parse(openRenewal(latest.payload));
-   const history=entry.history.map(h=>({...h,status:paymentMarker(h.note)}));
+   const history=entry.history.map(h=>id==='W-19-284'&&h.year===2025?{year:2025,note:'Paid — confirmed by club administrator',status:'paid' as const}:{...h,status:paymentMarker(h.note)});
    const lifeYears=[current.lifetimeSince,...history.filter(h=>h.status==='lifetime').map(h=>h.year)].filter(y=>Number.isInteger(y));
    const lifetimeSince=lifeYears.length?Math.min(...lifeYears):undefined;if(lifetimeSince)lifetime++;
    review+=history.filter(h=>h.status==='review').length;

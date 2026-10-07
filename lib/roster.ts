@@ -1,10 +1,11 @@
+import {annualStatus} from './annual-status';
 import {createHash,randomUUID} from 'node:crypto';
 import {db} from './shop';
 import {membershipReady,fingerprint,unseal} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
 export type PaymentHistory={year:number;note:string;status:'paid'|'new'|'sponsored'|'lifetime'|'inactive'|'review'};
-export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;identityType?:'mykad'|'passport';country?:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number;vehicles?:string[];lifetimeSince?:number;paymentHistory?:PaymentHistory[]};
+export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;identityType?:'mykad'|'passport';country?:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number;vehicles?:string[];joinedYear?:number;deceased?:boolean;lifetimeSince?:number;paymentHistory?:PaymentHistory[]};
 export type RosterImport={year:number;source:string;members:RosterMember[]};
 export function normalizeName(value:string){return value.normalize('NFKC').trim().replace(/\s+/gu,' ').toLocaleUpperCase('en-MY');}
 export function nameKey(value:string){return renewalHash('member-name:'+normalizeName(value));}
@@ -53,7 +54,7 @@ export async function importRoster(input:unknown){
 
 // Private online records stay encrypted. Only a bounded, server-side exact name comparison is made.
 // No matching names, IDs or other personal fields are returned to the public form.
-export async function lookupName(name:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean}>{
+export async function lookupName(name:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean;newMember?:boolean}>{
  await Promise.all([rosterReady(),membershipReady(),renewalsReady()]);
  const [roster,apps,renewals]=await Promise.all([
   db()`SELECT member_number,identity_hash,membership_year,active,status_override,payload FROM club_member_roster WHERE name_hash=${nameKey(name)}`,
@@ -61,6 +62,7 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
   db()`SELECT payload,review_status,renewal_year FROM club_renewals LIMIT 5001`
  ]);
  if(apps.length>5000||renewals.length>5000)throw Error('Name index requires maintenance');
+ if(roster.some(r=>r.payload&&JSON.parse(openRenewal(r.payload)).deceased))return {status:'ambiguous',year};
  const people=new Map<string,boolean>();
  for(const r of roster){const details=r.payload?JSON.parse(openRenewal(r.payload)):{};const lifetime=Number.isInteger(details.lifetimeSince)&&details.lifetimeSince<=year;people.set('member:'+r.member_number,(people.get('member:'+r.member_number)||false)||lifetime||(r.active&&r.membership_year===year));}
  const expected=normalizeName(name);
@@ -73,7 +75,8 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
   people.set(key,(people.get(key)||false)||row.active);
  }
  const lifetime=people.size===1&&roster.some(r=>{const m=r.payload?JSON.parse(openRenewal(r.payload)):{};return Number.isInteger(m.lifetimeSince)&&m.lifetimeSince<=year;});
- return {status:people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year,...(lifetime?{lifetime:true}:{})};
+ const newMember=people.size===1&&roster.some(r=>r.membership_year===year&&r.payload&&annualStatus({...JSON.parse(openRenewal(r.payload)),active:r.active},year)==='new');
+ return {...(newMember?{newMember:true}:{}),status:people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year,...(lifetime?{lifetime:true}:{})};
 }
 export async function renewalMemberMatches(name:string,key:string,currentYear:number){
  await rosterReady();

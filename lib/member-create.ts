@@ -11,7 +11,7 @@ export function nextMemberNumber(numbers:string[],prefix:string,year:number){
  return prefix+'-'+String(year).slice(-2)+'-'+String(max+BigInt(1)).padStart(3,'0');
 }
 export async function createMember(form:FormData){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  const details=validateApplicant(form,true),year=validYear(form.get('year'));
  const status=String(form.get('status')||''),reason=String(form.get('reason')||'').trim();
  if(!['active','inactive'].includes(status)||reason.length<3||reason.length>500)throw Error('Invalid details');
@@ -25,7 +25,7 @@ export async function createMember(form:FormData){
   if(duplicate.length)return {error:'This identification number already belongs to a member. Edit or reinstate the existing member instead. / Nombor pengenalan ini telah didaftarkan.'};
   const numbers=await sql`SELECT member_number AS number FROM club_member_roster UNION SELECT old_number AS number FROM club_member_id_history UNION SELECT new_number AS number FROM club_member_id_history`;
   const memberNumber=nextMemberNumber(numbers.map(r=>String(r.number)),prefix,year);
-  const member={...details,memberNumber,active:status==='active',sourceRow:2};
+  const member={...details,memberNumber,active:status==='active',joinedYear:year,sourceRow:2};
   const payload=sealRenewal(JSON.stringify(member));
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${memberNumber},${year},${nameKey(details.name)},${hash},${payload},${member.active},true)`;
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${memberNumber},${year},${sealRenewal('null')},${payload},${sealRenewal('Admin added member: '+reason)})`;

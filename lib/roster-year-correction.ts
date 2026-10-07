@@ -18,7 +18,7 @@ export function corrected2026Active(originalActive:boolean,currentActive:boolean
  return independentlyApproved||(!originalActive&&currentActive);
 }
 export async function correctRosterYear(input:unknown,apply=false){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(apply)throw Error('Superseded correction: 2026 status must be preserved');
  const p=validateYearCorrection(input),checksum=createHash('sha256').update('year-correction-v1:'+JSON.stringify(p)).digest('hex');
  await adminRosterReady();await membershipReady();await renewalsReady();
@@ -76,7 +76,7 @@ export async function correctRosterYear(input:unknown,apply=false){
 }
 
 export async function restore2026Statuses(apply=false){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  await adminRosterReady();
  return db().begin(async sql=>{
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;

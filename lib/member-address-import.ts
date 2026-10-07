@@ -26,7 +26,7 @@ export function addressPatch(previous:Record<string,unknown>,row:AddressRow){
  return {...previous,addressLine:row.addressLine,postcode:row.postcode,state:row.state,mailingCountry:row.mailingCountry,address:[row.addressLine,row.postcode+' '+row.state,row.mailingCountry].join('\n')};
 }
 export async function importAddresses(input:unknown){
- if(!(await isAdmin()))throw Error('Unauthorised');
+ if(!(await isAdmin('membership')))throw Error('Unauthorised');
  const data=validateAddressPlan(input);await adminRosterReady();
  return db().begin(async sql=>{
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
