@@ -9,7 +9,7 @@ function finish(result:string){const response=NextResponse.redirect(SITE_ORIGIN+
 export async function GET(request:Request){
  const jar=await cookies(),saved=jar.get('kpkmm-gmail-state')?.value;
  jar.set('kpkmm-gmail-state','',{httpOnly:true,secure:true,sameSite:'lax',path:'/api/gmail/callback',maxAge:0});
- if(!(await isAdmin())||!saved)return finish('expired');
+ if(!(await isAdmin('membership'))||!saved)return finish('expired');
  const query=new URL(request.url).searchParams,state=query.get('state')||'';
  const [expected,session]=saved.split('.');
  if(!/^[a-f0-9]{64}$/.test(state)||!expected||state.length!==expected.length||!timingSafeEqual(Buffer.from(state),Buffer.from(expected))||session!==digest(jar.get('kpkmm-admin')!.value))return finish('expired');
