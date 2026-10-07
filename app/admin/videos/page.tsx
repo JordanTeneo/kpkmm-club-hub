@@ -3,7 +3,7 @@ import {uiText} from '../../../lib/ui-text';
 import {getLanguage as getUiLanguage} from '../../language';
 import {randomUUID} from 'node:crypto';
 import {redirect} from 'next/navigation';
-import {revalidatePath} from 'next/cache';
+import {revalidatePath,updateTag} from 'next/cache';
 import {db,isAdmin,uuid} from '../../../lib/shop';
 import {videosReady,youtubeId,type ClubVideo} from '../../../lib/videos';
 import {getClubData} from '../../../lib/club-data';
@@ -33,7 +33,7 @@ async function save(_:Result,form:FormData):Promise<Result>{
       const changed=await db()`UPDATE club_videos SET deleted=${op==='delete'},updated_at=now() WHERE id=${id} AND updated_at=${String(form.get('version'))}::timestamptz RETURNING id`;
       if(!changed.length)return {error:'Video changed. Refresh and try again. / Video berubah. Muat semula dan cuba lagi.'};
     }
-    revalidatePath('/videos');revalidatePath('/admin/videos');return {success:'Saved. / Disimpan.'};
+    updateTag('public-videos');revalidatePath('/');revalidatePath('/videos');revalidatePath('/admin/videos');return {success:'Saved. / Disimpan.'};
   }catch{return {error:'Could not save. Please retry. / Tidak dapat disimpan. Sila cuba lagi.'};}
 }
 export default async function ManageVideos(){
