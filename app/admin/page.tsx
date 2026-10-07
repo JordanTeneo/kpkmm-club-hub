@@ -7,7 +7,7 @@ import {uiText} from '../../lib/ui-text';
 import {getLanguage as getUiLanguage} from '../language';
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { getClubData, saveClubData, savePhoto } from "../../lib/club-data";
 
@@ -16,7 +16,7 @@ import "./admin.css";
 import { AlbumManager } from "../album-ui";
 
 const cookieName = "kpkmm-admin";
-const refresh = () => { revalidatePath("/"); revalidatePath("/admin"); };
+const refresh = () => { updateTag("public-club"); revalidatePath("/"); revalidatePath("/admin"); };
 function same(a: string, b: string) { const x = Buffer.from(a); const y = Buffer.from(b); return x.length === y.length && timingSafeEqual(x, y); }
 function signature(value: string) { return createHmac("sha256", process.env.ADMIN_SESSION_SECRET || "missing").update(value).digest("hex"); }
 async function signedIn() { return isAdmin('content'); }

@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useUiLanguage} from '../ui-language';
 
@@ -22,10 +23,10 @@ export function AdminNavigation(){
  if(pathname==='/admin/sign-in')return null;
  const current=sections.find(([url])=>pathname===url||pathname.startsWith(url+'/'));
  return <nav className="admin-navigation" aria-label={bm?'Navigasi pentadbir':'Admin navigation'}>
-  <a className="dashboard-link" href="/admin">← {bm?'Papan pemuka':'Dashboard'}</a>
+  <Link prefetch={false} className="dashboard-link" href="/admin">← {bm?'Papan pemuka':'Dashboard'}</Link>
   <span className="current-section">{current?current[bm?2:1]:bm?'Pentadbiran kelab':'Club administration'}</span>
   <details key={pathname}><summary>{bm?'Menu pentadbir':'Admin menu'} <span aria-hidden="true">☰</span></summary>
-   <div className="admin-menu-links">{sections.map(([url,en,ms])=><a key={url} href={url} aria-current={pathname===url?'page':undefined} onClick={event=>event.currentTarget.closest('details')?.removeAttribute('open')}>{bm?ms:en}</a>)}</div>
+   <div className="admin-menu-links">{sections.map(([url,en,ms])=><Link prefetch={false} key={url} href={url} aria-current={pathname===url?'page':undefined} onClick={event=>event.currentTarget.closest('details')?.removeAttribute('open')}>{bm?ms:en}</Link>)}</div>
   </details>
   <style jsx>{`
    .admin-navigation{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:16px;padding:10px max(16px,calc((100vw - 1280px)/2));background:#fff8e9;border-bottom:1px solid #d5bd91;box-shadow:0 3px 12px #38261910;color:#35251c;}
