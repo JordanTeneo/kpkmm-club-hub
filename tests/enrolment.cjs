@@ -5,6 +5,9 @@ let admin=true,app,flow,mails,roster,audit,fail=false,sends=0,mailState='accepte
 const person={name:'Example Member',email:'example@example.com',phone:'0123456789',identityType:'mykad',identity:'900101101234',country:'Malaysia',state:'Selangor',mailingCountry:'Malaysia',addressLine:'Example street',postcode:'40000',address:'Example street'};
 const sql=async(p,...v)=>{const q=p.join('?').replace(/\s+/g,' ');
  if(q.startsWith('CREATE')||q.startsWith('LOCK'))return [];
+ if(q.startsWith('SELECT e.member_number'))return mails.find(m=>m.id===v[0])?.kind==='welcome'?[{member_number:flow.member_number}]:[];
+ if(q.startsWith('SELECT payload FROM club_member_roster'))return roster.filter(r=>r.member_number===v[0]);
+ if(q.startsWith("UPDATE club_enrolment_mail SET status='skipped'")){mails.find(m=>m.id===v[0]).status='skipped';return [];}
  if(q.startsWith('SELECT * FROM club_applications'))return app?[app]:[];
  if(q.startsWith('SELECT application_id FROM club_enrolments'))return flow?[flow]:[];
  if(q.startsWith('SELECT member_number FROM club_member_roster'))return roster.filter(r=>r.identity_hash===v[0]);
@@ -47,6 +50,7 @@ function reset(){app={id,status:'pending',payload:JSON.stringify(person),members
  assert.equal(await mod.approvePayment(id,proofVersion),'activated');assert.equal(roster.length,1);assert.equal(roster[0].member_number,'B-'+String(year).slice(-2)+'-106');assert.equal(app.membership_year,year);assert.equal(flow.stage,'active');assert.equal(audit,1);assert.equal(mails.filter(m=>m.kind==='welcome').length,1);
  assert.equal(await mod.approvePayment(id,proofVersion),'already');assert.equal(roster.length,1);assert.equal(audit,1);
  await mod.deliverEnrolment(id);assert.equal(sends,1);assert.equal(mails.find(m=>m.kind==='welcome').status,'accepted');await mod.deliverEnrolment(id);assert.equal(sends,1);
+ mails.find(m=>m.kind==='welcome').status='queued';roster[0].payload='sealed:'+JSON.stringify({...person,deceased:true});await mod.deliverEnrolment(id);assert.equal(sends,1);assert.equal(mails.find(m=>m.kind==='welcome').status,'skipped');
  reset();roster=[{identity_hash:'hash:mykad:malaysia:'+person.identity}];assert.equal(await mod.approveApplication(id,year,'pending'),'duplicate');assert.equal(flow,null);
  reset();app.payload=JSON.stringify({...person,state:'unconfigured'});assert.equal(await mod.approveApplication(id,year,'pending'),'prefix');assert.equal(flow,null);
  reset();fail=true;await assert.rejects(()=>mod.approveApplication(id,year,'pending'));assert.equal(app.status,'pending');assert.equal(flow,null);fail=false;
