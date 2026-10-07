@@ -11,7 +11,7 @@ export async function ApprovalDashboard({bm}:{bm:boolean}) {
   const items=[
     {count:queues.renewals,label:t('Pending renewals','Pembaharuan menunggu'),href:'/admin/renewals?status=pending'},
     {count:queues.applications,label:t('Applications to review','Permohonan untuk semakan'),href:'/admin/members?status=pending'},
-    {count:queues.awaitingPayment,label:t('Awaiting payment','Menunggu bayaran'),href:'/admin/members?status=approved&stage=awaiting_payment'},
+    {count:queues.awaitingPayment,label:t('Awaiting payment proof','Menunggu bukti bayaran'),href:'/admin/members?status=approved&stage=awaiting_payment'},
     {count:queues.awaitingApproval,label:t('Payments to approve','Bayaran untuk kelulusan'),href:'/admin/members?status=approved&stage=proof_submitted'},
   ];
   return <section className="admin-group" aria-label={t('Approvals','Kelulusan')}>
