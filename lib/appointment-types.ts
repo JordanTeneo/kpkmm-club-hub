@@ -4,4 +4,4 @@ export function appointmentTitle(item:{role:string;role_en:string;role_ms:string
  const preset=roles.find(r=>r[0]===item.role);
  return preset&&item.role!=='custom'?preset[bm?2:1]:bm?item.role_ms:item.role_en;
 }
-export type Appointment={id:string;member_number:string;display_name:string;role:string;role_en:string;role_ms:string;starts:string;ends:string;is_current:boolean;cancelled:boolean;version:number};
+export type Appointment={id:string;member_number:string;display_name:string;advisor_details?:string;role:string;role_en:string;role_ms:string;starts:string;ends:string;is_current:boolean;cancelled:boolean;version:number};

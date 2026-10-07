@@ -5,7 +5,9 @@ function flatten(n){return !n?[]:Array.isArray(n)?n.flatMap(flatten):typeof n===
 (async()=>{
  const nodes=flatten(await out.ApprovalDashboard({bm:false}));assert.equal(nodes.filter(n=>n.type==='a').length,4);
  assert(nodes.some(n=>n.props?.href==='/admin/members?status=approved&stage=proof_submitted'));
- assert.equal(flatten(await out.ApprovalDashboard({bm:true})).find(n=>n.type==='h2').props.children,'Papan pemuka kelulusan');
+ assert.equal(nodes.filter(n=>n.type==='h2').length,0);
+ assert.equal(nodes.filter(n=>n.type==='p').length,4);
+ assert.equal(flatten(await out.ApprovalDashboard({bm:true})).find(n=>n.type==='section').props['aria-label'],'Kelulusan');
  allowed=false;const before=calls;assert.equal(await out.ApprovalDashboard({bm:false}),null);assert.equal(calls,before);
  allowed=true;fail=true;assert(flatten(await out.ApprovalDashboard({bm:false})).some(n=>n.props?.role==='status'));
  assert(!fs.readFileSync('app/admin/members/roster/page.tsx','utf8').includes('memberDashboard'));
