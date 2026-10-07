@@ -27,10 +27,10 @@ function eligible(rows:any[],number:string,target:number,pending:any[]){
  return member;
 }
 export async function runReminders(now=new Date()){
- await remindersReady();const day=malaysiaDay(now),target=reminderYear(day);let attempted=0;
+ await remindersReady();const day=malaysiaDay(now),target=reminderYear(day),deadline=Date.now()+240000;let attempted=0;
  // Claim one message at a time under a global database lock. A sending/unknown
  // attempt consumes the daily allowance even if Gmail never confirms delivery.
- for(let slot=0;slot<20;slot++){
+ for(let slot=0;slot<20&&Date.now()<deadline;slot++){
   const claim=await db().begin(async sql=>{
    await sql`SELECT pg_advisory_xact_lock(hashtext('kpkmm-reminder-daily'))`;
    const settings=await sql`SELECT paused,start_date::text FROM club_reminder_settings WHERE id=1`;
