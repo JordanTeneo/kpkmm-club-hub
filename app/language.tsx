@@ -9,5 +9,5 @@ async function changeLanguage(form:FormData){
  (await cookies()).set('kpkmm-language',value,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/',maxAge:31536000});revalidatePath('/','layout');
 }
 export function LanguageBar({lang}:{lang:Language}){
- return <SiteNavigation bm={lang==='ms'}><form action={changeLanguage} aria-label={lang==='ms'?'Pilih bahasa':'Choose language'}><button name="language" value="en" lang="en" aria-label="English" aria-pressed={lang==='en'}>EN</button><button name="language" value="ms" lang="ms" aria-label="Bahasa Malaysia" aria-pressed={lang==='ms'}>BM</button></form></SiteNavigation>;
+ return <SiteNavigation bm={lang==='ms'}>{(['en','ms'] as const).map(language=><form key={language} action={changeLanguage} aria-label={language==='en'?'English':'Bahasa Malaysia'}><input type="hidden" name="language" value={language}/><button type="submit" lang={language} aria-label={language==='en'?'English':'Bahasa Malaysia'} aria-pressed={lang===language}>{language==='en'?'EN':'BM'}</button></form>)}</SiteNavigation>;
 }
