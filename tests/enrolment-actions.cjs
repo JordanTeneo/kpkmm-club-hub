@@ -12,6 +12,6 @@ function form(){const f=new FormData();f.set('token','a'.repeat(64));f.set('proo
  f=new FormData();f.set('id','00000000-0000-4000-8000-000000000001');f.set('decision','payment');assert.ok((await actions.reviewEnrolment({},f)).error);assert.equal(activated,0);
  admin=true;assert.ok((await actions.reviewEnrolment({},f)).error);assert.equal(activated,0);f.set('verified','yes');assert.ok((await actions.reviewEnrolment({},f)).success);assert.equal(activated,1);
  allowed=false;assert.ok((await actions.reviewEnrolment({},f)).error);assert.equal(activated,1);lang='ms';const result=await actions.reviewEnrolment({},f);assert.match(result.error,/Terlalu/);
- const route=fs.readFileSync('app/admin/members/proof/route.ts','utf8');assert.match(route,/if\(!\(await isAdmin\(\)\)\)/);assert.match(route,/private, no-store/);assert.match(route,/attachment;/);
+ const route=fs.readFileSync('app/admin/members/proof/route.ts','utf8');assert.match(route,/if\(!\(await isAdmin\('membership'\)\)\)/);assert.match(route,/private, no-store/);assert.match(route,/attachment;/);
  console.log('PASS: server auth, required payment verification, upload/token validation, rate limits, upload errors, EN/BM and private proof response safeguards.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
