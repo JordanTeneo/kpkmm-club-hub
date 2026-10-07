@@ -33,6 +33,9 @@ async function manage(form:FormData){
  if(!(await committeeEnabled()))throw Error('Activate individual accounts first');
  const session=await committeeSession();if(!session?.superAdmin)throw Error('Unauthorised');
  const auth=committeeAuth(),h=await headers(),operation=String(form.get('operation')),id=String(form.get('id')||'');
+ if(!['create','disable','enable','reset','permissions'].includes(operation))redirect('/admin/users?result=invalid-action');
+ let outcome='saved';
+ try{
  if(operation==='create'){
   const scopes=form.getAll('scope').map(String).filter(s=>['membership','content','shop'].includes(s));
   const result=await auth.api.createUser({headers:h,body:{email:String(form.get('email')||''),name:String(form.get('name')||''),password:String(form.get('password')||''),role:'user'}});
@@ -54,7 +57,12 @@ async function manage(form:FormData){
   }else throw Error('Invalid action');
   await committeeAudit(operation,id);
  }
+ }catch{
+  console.error('Committee account update failed; credentials omitted');
+  outcome='update-error';
+ }
  revalidatePath('/admin/users');
+ redirect('/admin/users?result='+(outcome==='saved'&&operation==='reset'?'password-reset':outcome));
 }
 export default async function Users({searchParams}:{searchParams:Promise<{result?:string}>}){
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
@@ -75,5 +83,5 @@ export default async function Users({searchParams}:{searchParams:Promise<{result
  }
  const rows=await db()`SELECT u.id,u.name,u.email,u.role,p.scopes,p.disabled FROM committee_user u LEFT JOIN club_committee_permissions p ON p.user_id=u.id ORDER BY u.name`;
  const scopes=(selected:string[]=[])=>['membership','content','shop'].map(s=><label key={s}><input type="checkbox" name="scope" value={s} defaultChecked={selected.includes(s)}/>{s}</label>);
- return <main className="shop"><a href="/admin">← Admin</a><h1>{t('Committee accounts','Akaun jawatankuasa')}</h1><section className="shop-card"><h2>{t('Create committee account','Cipta akaun jawatankuasa')}</h2><form action={manage}><input type="hidden" name="operation" value="create"/>{fields}{scopes()}<button>{t('Create account','Cipta akaun')}</button></form><p>{t('Share credentials privately. No invitation email is sent automatically.','Kongsi maklumat log masuk secara sulit. Tiada e-mel jemputan automatik dihantar.')}</p></section>{rows.map(u=><section className="shop-card" key={u.id}><h2>{u.name}</h2><p>{u.email} · {u.role==='admin'?'Super Admin':u.disabled?t('Disabled','Dinyahaktifkan'):t('Enabled','Diaktifkan')}</p>{u.role!=='admin'&&<><form action={manage}><input type="hidden" name="id" value={u.id}/><button name="operation" value={u.disabled?'enable':'disable'}>{u.disabled?t('Reactivate','Aktifkan semula'):t('Disable and revoke sessions','Nyahaktif dan tamatkan sesi')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/>{scopes(u.scopes)}<button name="operation" value="permissions">{t('Save permissions','Simpan kebenaran')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/><label>{t('New password','Kata laluan baharu')}<input name="password" type="password" required minLength={12} autoComplete="new-password"/></label><button name="operation" value="reset">{t('Reset password','Tetap semula kata laluan')}</button></form></>}</section>)}</main>;
+ return <main className="shop"><a href="/admin">← Admin</a><h1>{t('Committee accounts','Akaun jawatankuasa')}</h1>{result==='password-reset'&&<p role="status">{t('Password reset successfully. Previous sign-in sessions have been ended.','Kata laluan berjaya ditetapkan semula. Sesi log masuk terdahulu telah ditamatkan.')}</p>}{result==='saved'&&<p role="status">{t('Account updated successfully.','Akaun berjaya dikemas kini.')}</p>}{['invalid-action','update-error'].includes(result||'')&&<p role="alert">{t('The account update could not be completed. Refresh this page and try again. For passwords, use at least 12 characters.','Akaun tidak dapat dikemas kini. Muat semula halaman dan cuba lagi. Gunakan kata laluan sekurang-kurangnya 12 aksara.')}</p>}<section className="shop-card"><h2>{t('Create committee account','Cipta akaun jawatankuasa')}</h2><form action={manage}><input type="hidden" name="operation" value="create"/>{fields}{scopes()}<button>{t('Create account','Cipta akaun')}</button></form><p>{t('Share credentials privately. No invitation email is sent automatically.','Kongsi maklumat log masuk secara sulit. Tiada e-mel jemputan automatik dihantar.')}</p></section>{rows.map(u=><section className="shop-card" key={u.id}><h2>{u.name}</h2><p>{u.email} · {u.role==='admin'?'Super Admin':u.disabled?t('Disabled','Dinyahaktifkan'):t('Enabled','Diaktifkan')}</p>{u.role!=='admin'&&<><form action={manage}><input type="hidden" name="id" value={u.id}/><input type="hidden" name="operation" value={u.disabled?'enable':'disable'}/><button>{u.disabled?t('Reactivate','Aktifkan semula'):t('Disable and revoke sessions','Nyahaktif dan tamatkan sesi')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/>{scopes(u.scopes)}<input type="hidden" name="operation" value="permissions"/><button>{t('Save permissions','Simpan kebenaran')}</button></form><form action={manage}><input type="hidden" name="id" value={u.id}/><label>{t('New password','Kata laluan baharu')}<input name="password" type="password" required minLength={12} autoComplete="new-password"/></label><input type="hidden" name="operation" value="reset"/><button>{t('Reset password','Tetap semula kata laluan')}</button></form></>}</section>)}</main>;
 }
