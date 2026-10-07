@@ -82,6 +82,28 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
  const newMember=people.size===1&&roster.some(r=>r.membership_year===year&&r.payload&&annualStatus({...JSON.parse(openRenewal(r.payload)),active:r.active},year)==='new');
  return {...(newMember?{newMember:true}:{}),status:people.size>1?'ambiguous':[...people.values()].some(Boolean)?'active':'inactive',year,...(lifetime?{lifetime:true}:{})};
 }
+// Exact hashed MyKad match; no personal details leave this server-side lookup.
+export async function lookupMyKadRoster(key:string,year:number):Promise<{status:'active'|'inactive'|'ambiguous';year:number;lifetime?:boolean;newMember?:boolean}|null>{
+ if(!/^mykad:malaysia:\d{12}$/.test(key))throw Error('Invalid MyKad');
+ await rosterReady();
+ const rows=await db()`SELECT member_number,membership_year,active,status_override,payload FROM (
+  SELECT DISTINCT ON(member_number) member_number,membership_year,identity_hash,active,status_override,payload
+  FROM club_member_roster WHERE membership_year<=${year}
+  ORDER BY member_number,membership_year DESC
+ ) AS latest WHERE identity_hash=${renewalHash(key)} LIMIT 2`;
+ if(rows.length>1)return {status:'ambiguous',year};
+ if(!rows.length)return null;
+ const row=rows[0],details=JSON.parse(openRenewal(row.payload));
+ if(details.deceased)return {status:'ambiguous',year};
+ const lifetime=Number.isInteger(details.lifetimeSince)&&details.lifetimeSince<=year;
+ if(lifetime)return {status:'active',year,lifetime:true};
+ if(row.membership_year===year){
+  if(row.active)return {status:'active',year,...(annualStatus({...details,active:true},year)==='new'?{newMember:true}:{})};
+  if(row.status_override)return {status:'inactive',year};
+ }
+ // A historical roster alone must not hide a newer approved online renewal.
+ return null;
+}
 export async function renewalMemberMatches(name:string,key:string,currentYear:number){
  await rosterReady();
  // Match the latest registered details, not an old name or identification number.

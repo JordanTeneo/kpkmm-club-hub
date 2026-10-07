@@ -1,7 +1,7 @@
 import {db} from './shop';
 import {membershipReady,fingerprint} from './membership';
 import {renewalsReady,renewalHash} from './renewals';
-import {lookupName,normalizeName} from './roster';
+import {lookupName,normalizeName,lookupMyKadRoster} from './roster';
 // Keep older result names type-compatible during rolling deployments; only active/inactive are returned.
 export type MembershipStatus={status:'active'|'expired'|'pending'|'future'|'verification'|'inactive'|'unmatched'|'ambiguous';year?:number;pending?:boolean;lifetime?:boolean;newMember?:boolean};
 export type StatusRecord={status:string;year:number|null};
@@ -27,9 +27,11 @@ export async function lookupMembership(identityKeyOrEmail:string,legacyIdentityK
  await Promise.all([membershipReady(),renewalsReady()]);
  const year=malaysiaYear();
  // Only check approved current-year records. No personal payload is loaded or decrypted.
- const [applications,renewals]=await Promise.all([
+ const [applications,renewals,roster]=await Promise.all([
   db()`SELECT 1 FROM club_applications WHERE identity_hash=${fingerprint(identityKey)} AND status='approved' AND membership_year=${year} LIMIT 1`,
-  db()`SELECT 1 FROM club_renewals WHERE identity_hash=${renewalHash(identityKey)} AND review_status='approved' AND renewal_year=${year} LIMIT 1`
+  db()`SELECT 1 FROM club_renewals WHERE identity_hash=${renewalHash(identityKey)} AND review_status='approved' AND renewal_year=${year} LIMIT 1`,
+  lookupMyKadRoster(identityKey,year)
  ]);
+ if(roster)return roster;
  return {status:applications.length||renewals.length?'active':'inactive',year} as MembershipStatus;
 }
