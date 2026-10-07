@@ -1,4 +1,5 @@
 import {headers} from 'next/headers';
+import {cache} from 'react';
 import {db} from './shop';
 import {committeeAuth} from './committee-auth';
 export type CommitteeScope='membership'|'content'|'shop';
@@ -13,14 +14,19 @@ export async function committeeReady(){
  })().catch(error=>{ready=undefined;throw error;});
  await ready;
 }
-export async function committeeEnabled(){await committeeReady();return !!(await db()`SELECT enabled FROM club_committee_settings WHERE id=1`)[0]?.enabled;}
-export async function committeeSession(){
+async function readEnabled(){await committeeReady();return !!(await db()`SELECT enabled FROM club_committee_settings WHERE id=1`)[0]?.enabled;}
+// React memoization lives only for one render, never across visitors or requests.
+const renderEnabled=cache(readEnabled);
+export async function committeeEnabled(){return (await headers()).has('next-action')?readEnabled():renderEnabled();}
+async function readSession(){
  const session=await committeeAuth().api.getSession({headers:await headers()});
  if(!session)return null;
  const permissions=await db()`SELECT scopes,disabled FROM club_committee_permissions WHERE user_id=${session.user.id}`;
  if(permissions[0]?.disabled||session.user.banned)return null;
  return {...session,scopes:permissions[0]?.scopes||[],superAdmin:session.user.role==='admin'};
 }
+const renderSession=cache(readSession);
+export async function committeeSession(){return (await headers()).has('next-action')?readSession():renderSession();}
 export async function committeeAllowed(scope?:CommitteeScope){
  const session=await committeeSession();const allowed=!!session&&(session.superAdmin||(!scope?session.scopes.length>0:session.scopes.includes(scope)));
  const action=(await headers()).get('next-action');
