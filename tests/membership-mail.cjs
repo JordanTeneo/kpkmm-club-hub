@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript'),crypto=require('node:crypto');
 const env={GMAIL_ENCRYPTION_KEY:'test-only-long-key-for-membership-123456789'};
-function load(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),process:{env},Buffer,FormData});return exports;}
+function load(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n.endsWith('/roster')?{nameKey:v=>'name:'+v}:n in mocks?mocks[n]:require(n),process:{env},Buffer,FormData});return exports;}
 const applicant={name:'Test Member',email:'test@example.invalid',phone:'+60123456789',identityType:'passport',identity:'TEST12345',country:'Test Country',address:'Testing address only'};
 const member=load('lib/membership.ts',{'./shop':{db:()=>{throw Error('Unexpected DB');}}});
 const v2=member.seal(applicant);assert.ok(v2.startsWith('v2.'));assert.equal(member.unseal(v2).identity,applicant.identity);

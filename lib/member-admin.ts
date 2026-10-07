@@ -25,13 +25,13 @@ export async function adminRosterReady(){
  })().catch(error=>{ready=undefined;throw error;});
  await ready;
 }
-export async function listMembers(year:number):Promise<ManagedMember[]>{
+export async function listMembers(year:number,memberNumbers?:string[]):Promise<ManagedMember[]>{
  validYear(year);await Promise.all([adminRosterReady(),membershipReady(),renewalsReady()]);
  const [rows,apps,renewals,history]=await Promise.all([
-  db()`SELECT DISTINCT ON(member_number) member_number,membership_year,payload,active,status_override,updated_at::text AS revision FROM club_member_roster WHERE membership_year<=${year} ORDER BY member_number,membership_year DESC LIMIT 10001`,
+  db()`SELECT DISTINCT ON(member_number) member_number,membership_year,payload,active,status_override,updated_at::text AS revision FROM club_member_roster WHERE membership_year<=${year} AND (${memberNumbers===undefined} OR member_number=ANY(${memberNumbers||[]}::text[])) ORDER BY member_number,membership_year DESC LIMIT 10001`,
   db()`SELECT identity_hash FROM club_applications WHERE status='approved' AND membership_year=${year}`,
   db()`SELECT identity_hash FROM club_renewals WHERE review_status='approved' AND renewal_year=${year}`,
-  db()`SELECT member_number,membership_year,active,status_override FROM club_member_roster WHERE membership_year<=${year}`
+  db()`SELECT member_number,membership_year,active,status_override FROM club_member_roster WHERE membership_year<=${year} AND (${memberNumbers===undefined} OR member_number=ANY(${memberNumbers||[]}::text[]))`
  ]);
  if(rows.length>10000)throw Error('Roster too large');
  const appHashes=new Set(apps.map(r=>r.identity_hash)),renewHashes=new Set(renewals.map(r=>r.identity_hash));

@@ -1,3 +1,4 @@
+import {nameKey as searchNameKey} from './roster';
 import {randomUUID} from 'node:crypto';
 import {db,isAdmin,readImage} from './shop';
 import {adminRosterReady,validYear} from './member-admin';
@@ -24,7 +25,7 @@ export async function renewMemberByAdmin(form:FormData){
   const prior=await sql`SELECT id FROM club_renewals WHERE identity_hash=${hash} AND renewal_year=${year} LIMIT 1`;
   if(prior.length)return 'existing';
   const id=randomUUID(),details={...member,identityType:member.identityType||'mykad',country:member.country||'Malaysia',year,rosterMemberNumber:number,submittedByAdmin:true};
-  const inserted=await sql`INSERT INTO club_renewals(id,identity_hash,renewal_year,payload,proof,proof_type,review_status,mail_status) VALUES(${id},${hash},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type},'approved','queued') ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
+  const inserted=await sql`INSERT INTO club_renewals(id,identity_hash,name_hash,renewal_year,payload,proof,proof_type,review_status,mail_status) VALUES(${id},${hash},${searchNameKey(details.name)},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type},'approved','queued') ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
   if(!inserted.length)return 'existing';
   await sql`UPDATE club_renewals SET member_mail_status='queued' WHERE id=${id}`;
   const next={...member,active:true,renewalActivation:{id,active:row.membership_year===year?row.active:false,override:row.membership_year===year?row.status_override:false}};

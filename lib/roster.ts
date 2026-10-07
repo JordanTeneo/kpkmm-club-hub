@@ -30,6 +30,7 @@ export function validateRoster(input:unknown):RosterImport{
 }
 let ready:Promise<void>|undefined;
 export async function rosterReady(){
+ if(process.env.KPKMM_SCHEMA_VERSION==='performance-v1')return;
  if(!ready)ready=(async()=>{
  await db()`CREATE TABLE IF NOT EXISTS club_member_id_history(old_number text PRIMARY KEY,new_number text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
  await db()`CREATE TABLE IF NOT EXISTS club_member_roster(member_number text NOT NULL,membership_year integer NOT NULL CHECK(membership_year BETWEEN 2000 AND 2200),name_hash text NOT NULL,identity_hash text,payload text NOT NULL,active boolean NOT NULL,updated_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(member_number,membership_year))`;
@@ -62,8 +63,8 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
  await Promise.all([rosterReady(),membershipReady(),renewalsReady()]);
  const [roster,apps,renewals]=await Promise.all([
   db()`SELECT member_number,identity_hash,membership_year,active,status_override,payload FROM club_member_roster WHERE name_hash=${nameKey(name)}`,
-  db()`SELECT payload,status,membership_year FROM club_applications LIMIT 5001`,
-  db()`SELECT payload,review_status,renewal_year FROM club_renewals LIMIT 5001`
+  db()`SELECT payload,status,membership_year FROM club_applications WHERE name_hash=${nameKey(name)} OR name_hash IS NULL LIMIT 5001`,
+  db()`SELECT payload,review_status,renewal_year FROM club_renewals WHERE name_hash=${nameKey(name)} OR name_hash IS NULL LIMIT 5001`
  ]);
  if(apps.length>5000||renewals.length>5000)throw Error('Name index requires maintenance');
  if(roster.some(r=>r.payload&&JSON.parse(openRenewal(r.payload)).deceased))return {status:'ambiguous',year};

@@ -3,14 +3,14 @@ let admin=false,row,records,audits,writes,fail=false;
 const sql=async(p,...v)=>{const q=p.join('?');
  if(q.startsWith('SELECT *'))return row?[row]:[];
  if(q.startsWith('SELECT id'))return records;
- if(q.startsWith('INSERT INTO club_renewals')){records.push({id:v[0],proof:v[4],year:v[2],payload:v[3]});return [{id:v[0]}];}
+ if(q.startsWith('INSERT INTO club_renewals')){records.push({id:v[0],proof:v[5],year:v[3],payload:v[4]});assert.equal(v[2],'name:Example');return [{id:v[0]}];}
  if(q.startsWith('INSERT INTO club_roster_edits')){audits++;return [];}
  if(q.startsWith('INSERT INTO club_member_roster')){if(fail)throw Error('storage failure');writes++;row={...row,member_number:v[0],membership_year:v[1],payload:v[4],active:true};}
  return [];
 };
 sql.begin=async fn=>{const backup=JSON.stringify({row,records,audits,writes});try{return await fn(sql);}catch(e){({row,records,audits,writes}=JSON.parse(backup));throw e;}};
 const mocks={'./shop':{isAdmin:async()=>admin,db:()=>sql,readImage:async f=>{if(f.size>700*1024||f.type!=='image/png')throw Error('proof');return {bytes:Buffer.from(await f.arrayBuffer()),type:f.type};}},'./member-admin':{adminRosterReady:async()=>{},validYear:Number},'./renewals':{renewalsReady:async()=>{},renewalHash:s=>'hash:'+s,sealRenewal:s=>s,openRenewal:s=>s},'./member-status':{malaysiaYear:()=>2026}};
-const mod={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/admin-renewal.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:mod,require:n=>mocks[n]||require(n),File,Buffer});
+const mod={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/admin-renewal.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:mod,require:n=>n.endsWith('/roster')?{nameKey:v=>'name:'+v}:mocks[n]||require(n),File,Buffer});
 function reset(){row={member_number:'B-09-001',membership_year:2025,identity_hash:null,name_hash:'name',payload:JSON.stringify({name:'Example',memberNumber:'B-09-001',active:false,address:'Keep address'}),active:false,status_override:true};records=[];audits=writes=0;fail=false;}
 function form(){const f=new FormData();Object.entries({member:'B-09-001',year:'2026',verified:'yes',reason:'Committee verified payment'}).forEach(([k,v])=>f.set(k,v));f.set('proof',new File(['mock image'],'proof.png',{type:'image/png'}));return f;}
 (async()=>{reset();await assert.rejects(()=>mod.renewMemberByAdmin(form()));admin=true;

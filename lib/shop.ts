@@ -10,6 +10,7 @@ export function db() {
 }
 let ready: Promise<void> | undefined;
 export async function shopReady() {
+  if(process.env.KPKMM_SCHEMA_VERSION==='performance-v1')return;
   if (!ready) ready = (async () => {
     const sql = db();
     await sql`CREATE TABLE IF NOT EXISTS shop_products (id uuid PRIMARY KEY, name text NOT NULL, name_ms text NOT NULL DEFAULT '', description text NOT NULL DEFAULT '', description_ms text NOT NULL DEFAULT '', price integer NOT NULL CHECK(price > 0), stock integer NOT NULL CHECK(stock >= 0), active boolean NOT NULL DEFAULT false, image text NOT NULL DEFAULT '', updated_at timestamptz NOT NULL DEFAULT now())`;

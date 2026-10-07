@@ -21,3 +21,6 @@ export async function getPublicContent(){
  ]);
  return {homeBanner,data,videos:clubVideos};
 }
+
+// Public album endpoint uses only club content, not banner/video database reads.
+export async function getPublicAlbumData(){return club();}

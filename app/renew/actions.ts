@@ -1,4 +1,6 @@
 'use server';
+import {nameKey as searchNameKey} from '../../lib/roster';
+
 import {randomUUID} from 'node:crypto';
 import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
@@ -34,7 +36,7 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
    const current=await sql`SELECT payload,membership_year,active FROM club_member_roster WHERE member_number=${details.rosterMemberNumber!} ORDER BY membership_year DESC`;
    const latest=current[0]?JSON.parse(openRenewal(current[0].payload)):null;
    if(!latest||latest.deceased||latest.lifetimeSince<=year||current.some(r=>r.membership_year===year&&r.active))return null;
-   const saved=await sql<{id:string}[]>`INSERT INTO club_renewals(id,identity_hash,renewal_year,payload,proof,proof_type) VALUES(${randomUUID()},${identityHash},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type}) ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
+   const saved=await sql<{id:string}[]>`INSERT INTO club_renewals(id,identity_hash,name_hash,renewal_year,payload,proof,proof_type) VALUES(${randomUUID()},${identityHash},${searchNameKey(details.name)},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type}) ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
    return saved[0]?.id||null;
   });
   id=typeof rows==='string'?rows:undefined;

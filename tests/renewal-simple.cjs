@@ -1,5 +1,5 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
-function load(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),Buffer,FormData,File,Intl,Date});return exports;}
+function load(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n==='../../lib/roster'?{nameKey:v=>'name:'+v}:n in mocks?mocks[n]:require(n),Buffer,FormData,File,Intl,Date});return exports;}
 const normalizeName=s=>s.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase(),nameKey=s=>'name:'+normalizeName(s);
 let records=[],last=2026,online='review',dbFails=false;
 const person={memberNumber:'B-09-001',name:'Sample Member',identity:'900101101234',email:'saved@example.invalid',phone:'saved phone',address:'saved address',addressLine:'saved street',postcode:'12345',state:'Selangor',mailingCountry:'Malaysia'};
@@ -27,7 +27,7 @@ async function blocked(f,pattern){const before=[writes.length,mails,proofReads];
  records=[row(),row({...person,memberNumber:'B-09-002'})];await blocked(form(),/use your MyKad/);
  records=[row()];last=2024;await blocked(form(),/lapsed/);last=null;await blocked(form(),/last active year/);last=2026;
  let f=form();f.delete('consent');await blocked(f,/consent/);limited=true;await blocked(form(),/Too many/);limited=false;dbFails=true;await blocked(form(),/could not save/);dbFails=false;
- f=form();f.set('email','forged@example.invalid');f.set('name','Forged name');f.set('rosterMemberNumber','B-09-999');assert.ok((await action.requestRenewal({},f)).success);let details=JSON.parse(writes.at(-1)[3]);assert.equal(details.email,person.email);assert.equal(details.name,person.name);assert.equal(details.rosterMemberNumber,person.memberNumber);assert.equal(details.addressLine,person.addressLine);
+ f=form();f.set('email','forged@example.invalid');f.set('name','Forged name');f.set('rosterMemberNumber','B-09-999');assert.ok((await action.requestRenewal({},f)).success);let details=JSON.parse(writes.at(-1)[4]);assert.equal(details.email,person.email);assert.equal(details.name,person.name);assert.equal(details.rosterMemberNumber,person.memberNumber);assert.equal(details.addressLine,person.addressLine);
  assert.ok((await action.requestRenewal({},form('identity','900101-10-1234'))).success);assert.equal(writes.at(-1)[1],writes.at(-2)[1]);
  conflict=true;const before=mails;assert.ok((await action.requestRenewal({},form())).success);assert.equal(mails,before);
  records=[row({...person,lifetimeSince:2020})];last=2020;

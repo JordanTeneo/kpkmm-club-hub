@@ -30,9 +30,12 @@ export function unseal(value:string):Applicant{const v2=value.startsWith('v2.');
 let ready:Promise<void>|undefined;
 export async function membershipReady(){
  key();
+ if(process.env.KPKMM_SCHEMA_VERSION==='performance-v1')return;
  if(!ready)ready=(async()=>{
   await db()`CREATE TABLE IF NOT EXISTS club_applications(id uuid PRIMARY KEY, identity_hash text UNIQUE NOT NULL, payload text NOT NULL,status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),consent_version text NOT NULL DEFAULT '2026-10-05',created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now())`;
   await db()`ALTER TABLE club_applications ADD COLUMN IF NOT EXISTS membership_year integer CHECK(membership_year BETWEEN 2000 AND 2200)`;
+  await db()`ALTER TABLE club_applications ADD COLUMN IF NOT EXISTS name_hash text`;
+  await db()`CREATE INDEX IF NOT EXISTS club_applications_name ON club_applications(name_hash)`;
   await db()`CREATE TABLE IF NOT EXISTS membership_limits(key text PRIMARY KEY,count integer NOT NULL,expires_at timestamptz NOT NULL)`;
  })().catch(error=>{ready=undefined;throw error;});
  await ready;
