@@ -6,12 +6,13 @@ assert.equal(pricing.feeQuote(settings,'renewal').total,14000);
 assert.equal(pricing.feeQuote(settings,'new').total,21000);
 assert.equal(pricing.savedFee(null,'new').total,25000);
 assert.equal(pricing.savedFee(null,'renewal').total,15000);
+assert.equal(pricing.savedFee(JSON.stringify(pricing.feeQuote(settings,'new')),'new').total,21000);
 assert.throws(()=>pricing.feeQuote({...settings,annual:-1},'new'));
 assert.throws(()=>pricing.feeQuote({},'new'));
 assert.throws(()=>pricing.feeQuote({...settings,renewalDiscount:16000},'renewal'));
 assert.throws(()=>pricing.savedFee({annual:15000,administration:0,discount:500,total:15000},'renewal'));
 const hash=s=>crypto.createHmac('sha256','test-only-key').update(s).digest('hex');
-const sql=async(p,...v)=>p.join('').startsWith('SELECT settings')?[{settings,version:1}]:[];sql.begin=fn=>fn(sql);
+const sql=async(p,...v)=>p.join('').startsWith('SELECT settings')?[{settings:JSON.stringify(settings),version:1}]:[];sql.begin=fn=>fn(sql);
 const fees=load('lib/membership-fees.ts',{'./shop':{db:()=>sql},'./renewals':{renewalHash:hash,renewalsReady:async()=>{}},'./membership-pricing':pricing});
 (async()=>{
  const signed=await fees.renewalFeeToken();assert.equal(fees.readRenewalFee(signed.token).total,14000);

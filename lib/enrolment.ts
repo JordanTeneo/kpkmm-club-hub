@@ -58,7 +58,7 @@ export async function approveApplication(id:string,year:number,previous:string){
   if(duplicate.length)return 'duplicate';
   const raw=invitation(person,token,year,quote);
   await sql`INSERT INTO club_enrolments(application_id,stage,membership_year,token_hash,token_encrypted,expires_at) VALUES(${id},'awaiting_payment',${year},${renewalHash(token)},${sealRenewal(token)},now()+interval '30 days')`;
-  await sql`UPDATE club_enrolments SET fee_quote=${JSON.stringify(quote)}::jsonb WHERE application_id=${id}`;
+  await sql`UPDATE club_enrolments SET fee_quote=${JSON.stringify(quote)}::text::jsonb WHERE application_id=${id}`;
   // NULL is essential: existing status checks must not grant unpaid membership.
   await sql`UPDATE club_applications SET status='approved',membership_year=NULL,updated_at=now() WHERE id=${id}`;
   await queue(sql,id,'invitation',renewalHash(token),raw);

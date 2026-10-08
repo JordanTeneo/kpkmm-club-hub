@@ -9,7 +9,7 @@ export function feeQuote(s:FeeSettings,kind:'new'|'renewal'):FeeQuote{
 }
 export function savedFee(value:unknown,kind:'new'|'renewal'):FeeQuote{
  if(value==null)return feeQuote(defaultFees,kind);
- const q=value as FeeQuote;
+ const q=(typeof value==='string'?JSON.parse(value):value) as FeeQuote;
  if(![q.annual,q.administration,q.discount,q.total].every(n=>Number.isSafeInteger(n)&&n>=0)||q.total!==q.annual+q.administration-q.discount||q.total<1)throw Error('Invalid fee snapshot');
  return q;
 }

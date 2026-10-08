@@ -19,7 +19,7 @@ async function save(_:Result,form:FormData):Promise<Result>{
   const settings={} as FeeSettings;
   for(const key of ['annual','administration','renewalDiscount','joiningDiscount'] as const){const value=String(form.get(key)||'');if(!/^\d+(\.\d{1,2})?$/.test(value))throw Error();settings[key]=Math.round(Number(value)*100);}
   feeQuote(settings,'new');feeQuote(settings,'renewal');await getFees();const actor=await paymentActor();
-  const saved=await db().begin(async sql=>{const rows=await sql`UPDATE club_fee_settings SET settings=${JSON.stringify(settings)}::jsonb,version=version+1,updated_at=now() WHERE id=1 AND version=${Number(form.get('version'))} RETURNING id`;if(!rows.length)return false;await sql`INSERT INTO club_fee_audit(settings,actor) VALUES(${JSON.stringify(settings)}::jsonb,${sealRenewal(actor)})`;return true;});
+  const saved=await db().begin(async sql=>{const rows=await sql`UPDATE club_fee_settings SET settings=${JSON.stringify(settings)}::text::jsonb,version=version+1,updated_at=now() WHERE id=1 AND version=${Number(form.get('version'))} RETURNING id`;if(!rows.length)return false;await sql`INSERT INTO club_fee_audit(settings,actor) VALUES(${JSON.stringify(settings)}::text::jsonb,${sealRenewal(actor)})`;return true;});
   if(!saved)return {error:bm?'Tetapan telah berubah. Muat semula.':'Settings changed. Refresh before saving.'};
   for(const p of ['/join','/renew','/admin/fees','/admin/members','/admin/members/roster/renew'])revalidatePath(p);
   return {success:bm?'Yuran disimpan. Muat semula untuk melihat jumlah terkini.':'Fees saved. Refresh to view the latest totals.'};
