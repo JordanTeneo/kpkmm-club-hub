@@ -1,5 +1,5 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
-function load(file,mocks){const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,{exports:out,require:n=>n in mocks?mocks[n]:require(n),Buffer,process,Response,URL,Intl});return out;}
+function load(file,mocks){const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,{exports:out,require:n=>n.endsWith('/membership-fees')||n.endsWith('/membership-pricing')?require('./fee-fixture.cjs')(n):n in mocks?mocks[n]:require(n),Buffer,process,Response,URL,Intl});return out;}
 let authorised=true,stored,events=[],queries=[];
 const sql=async(parts,...v)=>{const q=parts.join('?').replace(/\s+/g,' ').trim();queries.push(q);
  if(q.startsWith('INSERT INTO club_membership_payments(')){if(stored)return [];stored={id:v[0],kind:v[1],source_id:v[2],membership_year:v[3],paid_on:v[4],amount:v[5],admin_fee:v[6],payload:v[7],proof:v[8],proof_type:v[9],token_hash:v[10],token_encrypted:v[11],voided_at:null};return [{id:stored.id}];}

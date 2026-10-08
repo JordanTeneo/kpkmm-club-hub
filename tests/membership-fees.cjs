@@ -1,0 +1,29 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+function load(file,mocks={},extra={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>mocks[n]||require(n),Buffer,Date,...extra});return exports;}
+const pricing=load('lib/membership-pricing.ts');
+const settings={annual:16000,administration:8000,renewalDiscount:2000,joiningDiscount:3000};
+assert.equal(pricing.feeQuote(settings,'renewal').total,14000);
+assert.equal(pricing.feeQuote(settings,'new').total,21000);
+assert.equal(pricing.savedFee(null,'new').total,25000);
+assert.equal(pricing.savedFee(null,'renewal').total,15000);
+assert.throws(()=>pricing.feeQuote({...settings,annual:-1},'new'));
+assert.throws(()=>pricing.feeQuote({},'new'));
+assert.throws(()=>pricing.feeQuote({...settings,renewalDiscount:16000},'renewal'));
+assert.throws(()=>pricing.savedFee({annual:15000,administration:0,discount:500,total:15000},'renewal'));
+const hash=s=>crypto.createHmac('sha256','test-only-key').update(s).digest('hex');
+const sql=async(p,...v)=>p.join('').startsWith('SELECT settings')?[{settings,version:1}]:[];sql.begin=fn=>fn(sql);
+const fees=load('lib/membership-fees.ts',{'./shop':{db:()=>sql},'./renewals':{renewalHash:hash,renewalsReady:async()=>{}},'./membership-pricing':pricing});
+(async()=>{
+ const signed=await fees.renewalFeeToken();assert.equal(fees.readRenewalFee(signed.token).total,14000);
+ settings.renewalDiscount=0;assert.equal(fees.readRenewalFee(signed.token).total,14000,'existing signed quotes keep their amount');
+ assert.equal((await fees.renewalFeeToken()).quote.total,16000,'new quotes use new fee');
+ assert.throws(()=>fees.readRenewalFee(signed.token+'tampered'));
+ assert.throws(()=>fees.readRenewalFee(signed.token+'.extra'));
+ const body=Buffer.from(JSON.stringify({quote:signed.quote,expires:Date.now()-1})).toString('base64url');assert.throws(()=>fees.readRenewalFee(body+'.'+hash('fee:'+body)));
+ const insert=[];const paySql=async(p,...v)=>{const q=p.join('?');if(q.startsWith('INSERT INTO club_membership_payments')){insert.push(v);return [{id:'payment'}];}if(q.startsWith('SELECT id,token_encrypted'))return [{id:'payment',token_encrypted:'token',voided_at:null}];return [];};
+ const payments=load('lib/membership-payments.ts',{'server-only':{},'./shop':{uuid:()=>true},'./committee-access':{},'./renewals':{sealRenewal:x=>x,openRenewal:x=>x,renewalHash:hash},'./gmail':{SITE_ORIGIN:'https://example.com'},'./membership-pricing':pricing});
+ await payments.recordMembershipPayment(paySql,{kind:'new',sourceId:'id',year:2026,paidOn:'2026-01-01',name:'Example',memberNumber:'B-26-123',actor:'Test',proof:'test',proofType:'application/pdf',quote:pricing.feeQuote(settings,'new')});
+ assert.equal(insert[0][5],21000);assert.equal(JSON.parse(insert[0][7]).quote.discount,3000);
+ const admin=fs.readFileSync('app/admin/fees/page.tsx','utf8');assert.match(admin,/isAdmin\('membership'\)/);assert.match(admin,/version=\$\{Number\(form.get\('version'\)\)\}/);assert.match(admin,/club_fee_audit/);
+ console.log('PASS: configurable fees, fixed-RM discounts, legacy amounts, invalid/over-discounts, signed quote tampering/expiry, locked amounts, discounted invoice snapshot, admin guard and audited versioned updates.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

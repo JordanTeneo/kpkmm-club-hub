@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
 const crypto=require('node:crypto');
 const env={GMAIL_ENCRYPTION_KEY:'test-only-renewal-secret-not-for-production-123456'};
-function load(path,mocks={},extra={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n.endsWith('/roster')?{nameKey:v=>'name:'+v}:n in mocks?mocks[n]:require(n),process:{env},Buffer,URLSearchParams,AbortSignal,FormData,File,Intl,...extra});return exports;}
+function load(path,mocks={},extra={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n.endsWith('/membership-fees')||n.endsWith('/membership-pricing')?require('./fee-fixture.cjs')(n):n.endsWith('/roster')?{nameKey:v=>'name:'+v}:n in mocks?mocks[n]:require(n),process:{env},Buffer,URLSearchParams,AbortSignal,FormData,File,Intl,...extra});return exports;}
 const uuid=v=>/^[0-9a-f-]{36}$/.test(v);
 let tokenFails=false,fetchMode='accepted',sends=0,claimed=false;
 const id=crypto.randomUUID();

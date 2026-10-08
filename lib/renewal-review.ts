@@ -1,3 +1,4 @@
+import {savedFee} from './membership-pricing';
 import {randomUUID} from 'node:crypto';
 import {db,isAdmin,uuid} from './shop';
 import {adminRosterReady,validYear} from './member-admin';
@@ -50,7 +51,7 @@ export async function reviewRenewal(id:string,status:string,paidOn=''){
    }
   }
   if(status==='approved'&&request.review_status!=='approved'&&row){
-   await recordMembershipPayment(sql,{kind:'renewal',sourceId:id,year,paidOn,name:JSON.parse(openRenewal(row.payload)).name,memberNumber:row.member_number,actor,proof:request.proof,proofType:request.proof_type});
+   await recordMembershipPayment(sql,{kind:'renewal',quote:savedFee(request.payload ? JSON.parse(openRenewal(request.payload)).feeQuote : undefined,'renewal'),sourceId:id,year,paidOn,name:JSON.parse(openRenewal(row.payload)).name,memberNumber:row.member_number,actor,proof:request.proof,proofType:request.proof_type});
    await sql`UPDATE club_renewals SET member_mail_status=CASE WHEN member_mail_status='not_queued' THEN 'queued' ELSE member_mail_status END WHERE id=${id}`;
   }else if(status!=='approved')await voidMembershipPayment(sql,'renewal',id,actor);
   await sql`UPDATE club_renewals SET review_status=${status} WHERE id=${id}`;

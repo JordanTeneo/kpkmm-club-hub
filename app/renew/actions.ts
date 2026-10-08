@@ -1,4 +1,5 @@
 'use server';
+import {readRenewalFee,renewalPricingReady} from '../../lib/membership-fees';
 import {nameKey as searchNameKey} from '../../lib/roster';
 
 import {randomUUID} from 'node:crypto';
@@ -28,6 +29,8 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
   if(match.status==='ambiguous')return {error:lookup.mode==='name'?t('This name cannot identify one member. Please use your MyKad/passport number instead, or contact the committee.','Nama ini tidak dapat mengenal pasti seorang ahli sahaja. Sila gunakan nombor MyKad/pasport atau hubungi jawatankuasa.'):t('These identification details cannot identify one member. Contact the committee before renewing.','Maklumat pengenalan ini tidak dapat mengenal pasti seorang ahli sahaja. Hubungi jawatankuasa sebelum memperbaharui.')};
   if(match.status!=='eligible')return {error:match.status==='reinstate'?'Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again. / Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi.':'Your last active year could not be verified. Contact the committee to update your record before renewing or paying. / Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar.'};
   const {details,identityHash}=match;
+  let quote;try{quote=readRenewalFee(form.get('feeToken'));}catch{return {error:t('Your fee quote expired or changed. Refresh before paying; if already paid, contact the committee.','Sebut harga tamat atau berubah. Muat semula sebelum membayar; jika sudah bayar, hubungi jawatankuasa.')};}
+  await renewalPricingReady();
   if(!(await renewalLimit('member:'+details.rosterMemberNumber,3)))return {error:'Too many requests. Please try again in an hour. / Terlalu banyak permintaan. Cuba lagi dalam sejam.'};
   const file=form.get('proof');if(!(file instanceof File))return {error:'Attach your payment proof. / Lampirkan bukti bayaran.'};
   let proof;try{proof=await readImage(file,true);}catch{return {error:'Use a JPG, PNG or PDF payment proof under 700 KB. / Gunakan bukti JPG, PNG atau PDF di bawah 700 KB.'};}
@@ -36,7 +39,8 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
    const current=await sql`SELECT payload,membership_year,active FROM club_member_roster WHERE member_number=${details.rosterMemberNumber!} ORDER BY membership_year DESC`;
    const latest=current[0]?JSON.parse(openRenewal(current[0].payload)):null;
    if(!latest||latest.deceased||latest.lifetimeSince<=year||current.some(r=>r.membership_year===year&&r.active))return null;
-   const saved=await sql<{id:string}[]>`INSERT INTO club_renewals(id,identity_hash,name_hash,renewal_year,payload,proof,proof_type) VALUES(${randomUUID()},${identityHash},${searchNameKey(details.name)},${year},${sealRenewal(JSON.stringify(details))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type}) ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
+   const saved=await sql<{id:string}[]>`INSERT INTO club_renewals(id,identity_hash,name_hash,renewal_year,payload,proof,proof_type) VALUES(${randomUUID()},${identityHash},${searchNameKey(details.name)},${year},${sealRenewal(JSON.stringify({...details,feeQuote:quote}))},${sealRenewal(proof.bytes.toString('base64'))},${proof.type}) ON CONFLICT(identity_hash,renewal_year) DO NOTHING RETURNING id`;
+   if(saved[0])await sql`UPDATE club_renewals SET amount=${quote.total} WHERE id=${saved[0].id}`;
    return saved[0]?.id||null;
   });
   id=typeof rows==='string'?rows:undefined;

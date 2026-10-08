@@ -22,7 +22,7 @@ function RenewalOutcome({result,bm}:{result:RenewalResult;bm:boolean}){
   <button type="button" autoFocus onClick={()=>dialog.current?.close()}>{result.error?t('Close and review','Tutup dan semak'):t('OK, understood','Baik, saya faham')}</button>
  </dialog>;
 }
-export function RenewalForm({bm,year}:{bm:boolean;year:number}){
+export function RenewalForm({bm,year,feeToken}:{bm:boolean;year:number;feeToken:string}){
  const ui = useUiText();
 
  const [validation,setValidation]=useState<RenewalResult|null>(null);
@@ -39,7 +39,7 @@ export function RenewalForm({bm,year}:{bm:boolean;year:number}){
   const form=e.currentTarget;
   if(e.target!==form.querySelector('input:invalid, select:invalid, textarea:invalid'))return;
   setValidation({error:t('Please enter your registered name or MyKad/passport number, attach a JPG, PNG or PDF payment proof under 700 KB, and tick the consent checkbox.','Sila masukkan nama berdaftar atau nombor MyKad/pasport, lampirkan bukti bayaran JPG, PNG atau PDF di bawah 700 KB, dan tandakan kotak persetujuan.')});
- }}><fieldset disabled={pending}>
+ }}><fieldset disabled={pending}><input type="hidden" name="feeToken" value={feeToken}/>
  <label>{t('Renewal year','Tahun pembaharuan')}<select name="year" defaultValue={year}><option value={year}>{year}</option><option value={year+1}>{year+1}</option></select></label>
  <label>{t('Find my membership using','Cari keahlian saya menggunakan')}<select name="lookupMode" value={mode} onChange={e=>setMode(e.target.value)}><option value="name">{t('Registered full name','Nama penuh berdaftar')}</option><option value="identity">{t('MyKad / passport number','Nombor MyKad / pasport')}</option></select></label>
  <label>{mode==='name'?t('Registered full name','Nama penuh berdaftar'):t('MyKad / passport number','Nombor MyKad / pasport')}<input key={mode} name="lookupValue" required minLength={mode==='name'?2:5} maxLength={mode==='name'?150:30} autoComplete="off"/></label>

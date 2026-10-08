@@ -1,4 +1,5 @@
 import 'server-only';
+import {savedFee,type FeeQuote} from './membership-pricing';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {db,isAdmin,uuid} from './shop';
 import {committeeEnabled,committeeSession} from './committee-access';
@@ -6,7 +7,7 @@ import {openRenewal,sealRenewal,renewalHash} from './renewals';
 import {SITE_ORIGIN} from './gmail';
 
 export type PaymentKind='new'|'renewal';
-export type PaymentSnapshot={name:string;memberNumber:string;actor:string};
+export type PaymentSnapshot={name:string;memberNumber:string;actor:string;quote?:FeeQuote};
 export type PaymentRecord={id:string;invoice_sequence:string;kind:PaymentKind;source_id:string;membership_year:number;paid_on:string;amount:number;admin_fee:number;payload:string;approved_at:Date;voided_at:Date|null;detail:PaymentSnapshot};
 export function malaysiaDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 export function validPaymentDate(value:string){const date=new Date(value+'T00:00:00Z');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&value>='2000-01-01'&&value<=malaysiaDate()&&Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value;}
@@ -33,11 +34,12 @@ export async function membershipPaymentsReady(){
  await ready;
 }
 // Called only inside the already-authorised approval transaction. No historical backfill.
-export async function recordMembershipPayment(sql:any,input:{kind:PaymentKind;sourceId:string;year:number;paidOn:string;name:string;memberNumber:string;actor:string;proof:string;proofType:string}){
+export async function recordMembershipPayment(sql:any,input:{quote?:FeeQuote;kind:PaymentKind;sourceId:string;year:number;paidOn:string;name:string;memberNumber:string;actor:string;proof:string;proofType:string}){
  if(!validPaymentDate(input.paidOn)||!uuid(input.sourceId)||!input.proof||!['image/jpeg','image/png','application/pdf'].includes(input.proofType))throw Error('Invalid payment record');
+ const quote=savedFee(input.quote,input.kind);
  const token=randomBytes(32).toString('hex');
  const rows=await sql`INSERT INTO club_membership_payments(id,kind,source_id,membership_year,paid_on,amount,admin_fee,payload,proof,proof_type,token_hash,token_encrypted)
- VALUES(${randomUUID()},${input.kind},${input.sourceId},${input.year},${input.paidOn},${input.kind==='new'?25000:15000},${input.kind==='new'?10000:0},${sealRenewal(JSON.stringify({name:input.name,memberNumber:input.memberNumber,actor:input.actor}))},${input.proof},${input.proofType},${renewalHash('invoice:'+token)},${sealRenewal(token)})
+ VALUES(${randomUUID()},${input.kind},${input.sourceId},${input.year},${input.paidOn},${quote.total},${Math.max(0,quote.administration-Math.max(0,quote.discount-quote.annual))},${sealRenewal(JSON.stringify({name:input.name,memberNumber:input.memberNumber,actor:input.actor,quote}))},${input.proof},${input.proofType},${renewalHash('invoice:'+token)},${sealRenewal(token)})
  ON CONFLICT(kind,source_id) DO NOTHING RETURNING id`;
  const saved=(await sql`SELECT id,token_encrypted,voided_at FROM club_membership_payments WHERE kind=${input.kind} AND source_id=${input.sourceId} FOR UPDATE`)[0];
  if(!saved)throw Error('Payment record unavailable');

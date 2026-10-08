@@ -1,0 +1,2 @@
+import {feeMoney,type FeeQuote} from '../lib/membership-pricing';
+export function MembershipPrice({quote,bm}:{quote:FeeQuote;bm:boolean}){return <div><p>{bm?'Yuran tahunan':'Annual fee'}: {feeMoney(quote.annual)}</p>{quote.administration>0&&<p>{bm?'Yuran pentadbiran sekali sahaja':'One-time administrative fee'}: {feeMoney(quote.administration)}</p>}{quote.discount>0&&<p>{bm?'Diskaun':'Discount'}: −{feeMoney(quote.discount)}</p>}<p><strong>{bm?'Jumlah perlu dibayar':'Total payable'}: {feeMoney(quote.total)}</strong></p></div>;}

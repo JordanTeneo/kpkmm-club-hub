@@ -4,7 +4,8 @@ const year=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Ku
 let admin=true,app,flow,mails,roster,audit,fail=false,sends=0,mailState='accepted';
 const person={name:'Example Member',email:'example@example.com',phone:'0123456789',identityType:'mykad',identity:'900101101234',country:'Malaysia',state:'Selangor',mailingCountry:'Malaysia',addressLine:'Example street',postcode:'40000',address:'Example street'};
 const sql=async(p,...v)=>{const q=p.join('?').replace(/\s+/g,' ');
- if(q.startsWith('CREATE')||q.startsWith('LOCK'))return [];
+ if(q.startsWith('CREATE')||q.startsWith('ALTER')||q.startsWith('LOCK'))return [];
+ if(q.startsWith('UPDATE club_enrolments SET fee_quote=')){flow.fee_quote=JSON.parse(v[0]);return [];}
  if(q.startsWith('SELECT e.member_number'))return mails.find(m=>m.id===v[0])?.kind==='welcome'?[{member_number:flow.member_number}]:[];
  if(q.startsWith('SELECT payload FROM club_member_roster'))return roster.filter(r=>r.member_number===v[0]);
  if(q.startsWith("UPDATE club_enrolment_mail SET status='skipped'")){mails.find(m=>m.id===v[0]).status='skipped';return [];}
@@ -30,7 +31,7 @@ const sql=async(p,...v)=>{const q=p.join('?').replace(/\s+/g,' ');
 };
 sql.begin=async fn=>{const backup=JSON.stringify({app,flow,mails,roster,audit});try{return await fn(sql);}catch(e){({app,flow,mails,roster,audit}=JSON.parse(backup));throw e;}};
 const mocks={'./membership-payments':{membershipPaymentsReady:async()=>{},paymentActor:async()=> 'Test admin',validPaymentDate:s=>s==='2026-01-01',recordMembershipPayment:async()=> 'https://example.com/membership-invoices/test',voidMembershipPayment:async()=>{}},'./shop':{db:()=>sql,isAdmin:async()=>admin,uuid:s=>/^[0-9a-f-]{36}$/.test(s)},'./membership':{membershipReady:async()=>{},unseal:JSON.parse},'./renewals':{renewalsReady:async()=>{},renewalHash:s=>'hash:'+s,sealRenewal:s=>'sealed:'+s,openRenewal:s=>s.slice(7),sendClubMessage:async raw=>{sends++;return {state:mailState,id:'gmail-id'};}},'./member-admin':{adminRosterReady:async()=>{},validYear:Number},'./roster':{nameKey:s=>'name:'+s},'./gmail':{CLUB_EMAIL:'club@example.com',SITE_ORIGIN:'https://example.com'}};
-function load(file){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Buffer,Intl,Date,require:n=>mocks[n]||require(n)});return exports;}
+function load(file){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Buffer,Intl,Date,require:n=>n.endsWith('/membership-fees')||n.endsWith('/membership-pricing')?require('./fee-fixture.cjs')(n):mocks[n]||require(n)});return exports;}
 mocks['./member-create']=load('lib/member-create.ts');const mod=load('lib/enrolment.ts');
 function reset(){person.vehicles=['ABC 1234','WXY 5678'];app={id,status:'pending',payload:JSON.stringify(person),membership_year:null};flow=null;mails=[];roster=[];audit=0;fail=false;sends=0;mailState='accepted';}
 (async()=>{

@@ -1,8 +1,9 @@
+import type {FeeQuote} from './membership-pricing';
 import {PDFDocument,rgb} from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-export type InvoiceData={number:string;name:string;memberNumber:string;year:number;paidOn:string;approvedAt:Date|string;amount:number;adminFee:number;voided:boolean};
+export type InvoiceData={quote?:FeeQuote;number:string;name:string;memberNumber:string;year:number;paidOn:string;approvedAt:Date|string;amount:number;adminFee:number;voided:boolean};
 // Assets are local and explicitly traced into the deployment; no remote fetches or customer URLs.
 export async function membershipInvoicePdf(d:InvoiceData,bm=false){
  const [fontBytes,logoBytes]=await Promise.all([
@@ -30,9 +31,10 @@ export async function membershipInvoicePdf(d:InvoiceData,bm=false){
  text(t('Payment approved: ','Bayaran diluluskan: ')+new Date(d.approvedAt).toLocaleDateString(bm?'ms-MY':'en-MY',{timeZone:'Asia/Kuala_Lumpur'}),45,470);
  page.drawRectangle({x:45,y:410,width:505,height:32,color:pale});
  text(t('Description','Butiran'),57,420);text(t('Amount (RM)','Amaun (RM)'),430,420);
- text(t('Annual membership fee','Yuran keahlian tahunan')+' '+d.year,57,384);text(((d.amount-d.adminFee)/100).toFixed(2),462,384);
- if(d.adminFee){text(t('One-time administrative fee','Yuran pentadbiran sekali sahaja'),57,350);text((d.adminFee/100).toFixed(2),462,350);}
- page.drawLine({start:{x:45,y:325},end:{x:550,y:325},thickness:1,color:accent});
+ text(t('Annual membership fee','Yuran keahlian tahunan')+' '+d.year,57,384);text(((d.quote?.annual??(d.amount-d.adminFee))/100).toFixed(2),462,384);
+ if(d.quote?.administration||d.adminFee){text(t('One-time administrative fee','Yuran pentadbiran sekali sahaja'),57,350);text(((d.quote?.administration??d.adminFee)/100).toFixed(2),462,350);}
+ if(d.quote?.discount){text(t('Discount','Diskaun'),57,326);text('-'+(d.quote.discount/100).toFixed(2),462,326);}
+ page.drawLine({start:{x:45,y:312},end:{x:550,y:312},thickness:1,color:accent});
  text(t('Total paid','Jumlah dibayar'),57,298,13);text('RM '+(d.amount/100).toFixed(2),429,298,13);
  text(d.voided?t('Approval reversed. This document is not proof of an approved payment.','Kelulusan dibatalkan. Dokumen ini bukan bukti bayaran diluluskan.'):t('Payment verified by the KPKMM committee. No further payment is due.','Bayaran disahkan jawatankuasa KPKMM. Tiada bayaran lanjut diperlukan.'),45,250,10);
  text(t('Payment method: Bank transfer - Maybank','Kaedah bayaran: Pindahan bank - Maybank'),45,204,10);

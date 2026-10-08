@@ -1,3 +1,5 @@
+import {getFees} from './membership-fees';
+import {feeQuote,savedFee,feeText,type FeeQuote} from './membership-pricing';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {db,isAdmin,uuid} from './shop';
 import {membershipPaymentsReady,paymentActor,recordMembershipPayment} from './membership-payments';
@@ -13,6 +15,7 @@ export async function enrolmentReady(){
  if(!ready)ready=(async()=>{
   await membershipReady();await renewalsReady();
   await db()`CREATE TABLE IF NOT EXISTS club_enrolments(application_id uuid PRIMARY KEY REFERENCES club_applications(id),stage text NOT NULL CHECK(stage IN ('awaiting_payment','proof_submitted','active')),membership_year integer NOT NULL,token_hash text UNIQUE NOT NULL,token_encrypted text NOT NULL,expires_at timestamptz NOT NULL,proof text,proof_type text,proof_version uuid,member_number text,updated_at timestamptz NOT NULL DEFAULT now())`;
+  await db()`ALTER TABLE club_enrolments ADD COLUMN IF NOT EXISTS fee_quote jsonb`;
   await db()`CREATE TABLE IF NOT EXISTS club_enrolment_mail(id uuid PRIMARY KEY,application_id uuid NOT NULL REFERENCES club_applications(id),kind text NOT NULL,context text NOT NULL,payload text NOT NULL,status text NOT NULL DEFAULT 'queued',attempt_at timestamptz,mail_id text,UNIQUE(application_id,kind,context))`;
  })().catch(e=>{ready=undefined;throw e;});
  await ready;
@@ -24,9 +27,9 @@ export function enrolmentMessage(to:string,subject:string,body:string){
  const b64=(text:string)=>Buffer.from(text).toString('base64');
  return Buffer.from(`From: KPKMM <${CLUB_EMAIL}>\r\nTo: ${to}\r\nSubject: =?UTF-8?B?${b64(subject)}?=\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(body).match(/.{1,76}/g)?.join('\r\n')||''}`).toString('base64url');
 }
-function invitation(person:Applicant,token:string,year:number){
+function invitation(person:Applicant,token:string,year:number,quote:FeeQuote){
  return enrolmentMessage(person.email,'KPKMM — application approved / Permohonan diluluskan',
-  `Dear / Salam ${person.name},\n\nYour application has been approved. Membership is not active yet. Please pay RM250 (RM100 one-time administrative fee + RM150 annual membership for ${year}).\nPermohonan anda diluluskan. Keahlian belum aktif. Sila bayar RM250 (RM100 yuran pentadbiran sekali sahaja + RM150 yuran tahunan ${year}).\n\nMaybank\nKelab Peminat Kereta Mini Malaysia\n5123 4360 5508\n\nUpload payment proof using your private link (valid for 30 days):\nMuat naik bukti bayaran melalui pautan sulit anda (sah 30 hari):\n${SITE_ORIGIN}/join/payment/${token}\n\nDo not forward this link. The committee will verify payment before assigning your membership number. Membership ends on 31 December ${year}.\nJangan kongsi pautan ini. Jawatankuasa akan mengesahkan bayaran sebelum memberikan nombor ahli. Keahlian tamat pada 31 Disember ${year}.\n\nKPKMM Committee / Jawatankuasa KPKMM`);
+  `Dear / Salam ${person.name},\n\nYour application has been approved. Membership is not active yet. Please pay ${feeText(quote)} (annual fee + administrative fee - discount; membership year ${year}).\nPermohonan anda diluluskan. Keahlian belum aktif. Sila bayar ${feeText(quote)} (yuran tahunan + pentadbiran - diskaun; tahun ${year}).\n\nMaybank\nKelab Peminat Kereta Mini Malaysia\n5123 4360 5508\n\nUpload payment proof using your private link (valid for 30 days):\nMuat naik bukti bayaran melalui pautan sulit anda (sah 30 hari):\n${SITE_ORIGIN}/join/payment/${token}\n\nDo not forward this link. The committee will verify payment before assigning your membership number. Membership ends on 31 December ${year}.\nJangan kongsi pautan ini. Jawatankuasa akan mengesahkan bayaran sebelum memberikan nombor ahli. Keahlian tamat pada 31 Disember ${year}.\n\nKPKMM Committee / Jawatankuasa KPKMM`);
 }
 function welcome(person:Applicant,number:string,year:number,invoiceLink:string){
  return enrolmentMessage(person.email,'Welcome to KPKMM / Selamat datang ke KPKMM',
@@ -42,7 +45,7 @@ export async function approveApplication(id:string,year:number,previous:string){
  if(!uuid(id)||!['pending','rejected'].includes(previous))throw Error('Invalid request');
  validYear(year);const current=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
  if(year!==current)throw Error('Use the current membership year');
- await enrolmentReady();await adminRosterReady();
+ await enrolmentReady();await adminRosterReady();const quote=feeQuote((await getFees()).settings,'new');
  return db().begin(async sql=>{
   const rows=await sql`SELECT * FROM club_applications WHERE id=${id} FOR UPDATE`;
   const row=rows[0];if(!row||row.status!==previous)return 'changed';
@@ -53,8 +56,9 @@ export async function approveApplication(id:string,year:number,previous:string){
   const identity=renewalHash(person.identityType+':'+person.country.toLowerCase()+':'+person.identity);
   const duplicate=await sql`SELECT member_number FROM club_member_roster WHERE identity_hash=${identity} LIMIT 1`;
   if(duplicate.length)return 'duplicate';
-  const raw=invitation(person,token,year);
+  const raw=invitation(person,token,year,quote);
   await sql`INSERT INTO club_enrolments(application_id,stage,membership_year,token_hash,token_encrypted,expires_at) VALUES(${id},'awaiting_payment',${year},${renewalHash(token)},${sealRenewal(token)},now()+interval '30 days')`;
+  await sql`UPDATE club_enrolments SET fee_quote=${JSON.stringify(quote)}::jsonb WHERE application_id=${id}`;
   // NULL is essential: existing status checks must not grant unpaid membership.
   await sql`UPDATE club_applications SET status='approved',membership_year=NULL,updated_at=now() WHERE id=${id}`;
   await queue(sql,id,'invitation',renewalHash(token),raw);
@@ -64,7 +68,7 @@ export async function approveApplication(id:string,year:number,previous:string){
 export async function paymentPage(token:string){
  if(!validPaymentToken(token))return null;
  await enrolmentReady();
- const rows=await db()`SELECT stage,membership_year,expires_at>now() AS valid FROM club_enrolments WHERE token_hash=${renewalHash(token)}`;
+ const rows=await db()`SELECT stage,membership_year,fee_quote,expires_at>now() AS valid FROM club_enrolments WHERE token_hash=${renewalHash(token)}`;
  return rows[0]??null;
 }
 export async function savePayment(token:string,proof:{bytes:Buffer;type:string}){
@@ -106,7 +110,7 @@ export async function approvePayment(id:string,version:string,paidOn=''){
   await sql`UPDATE club_enrolments SET stage='active',member_number=${number},updated_at=now() WHERE application_id=${id}`;
   await sql`UPDATE club_enrolment_mail SET status='superseded' WHERE application_id=${id} AND kind<>'welcome' AND status IN ('queued','failed','unknown')`;
   await sql`UPDATE club_applications SET membership_year=${year},updated_at=now() WHERE id=${id}`;
-  const invoiceLink=await recordMembershipPayment(sql,{kind:'new',sourceId:id,year,paidOn,name:person.name,memberNumber:number,actor,proof:row.proof,proofType:row.proof_type});
+  const invoiceLink=await recordMembershipPayment(sql,{kind:'new',quote:savedFee(row.fee_quote,'new'),sourceId:id,year,paidOn,name:person.name,memberNumber:number,actor,proof:row.proof,proofType:row.proof_type});
   await queue(sql,id,'welcome','active',welcome(person,number,year,invoiceLink));
   return 'activated';
  });
@@ -122,7 +126,7 @@ export async function reissuePayment(id:string,version:string){
   await sql`UPDATE club_enrolments SET stage='awaiting_payment',token_hash=${renewalHash(token)},token_encrypted=${sealRenewal(token)},expires_at=now()+interval '30 days',updated_at=now() WHERE application_id=${id}`;
   // Superseded links must not be retried after a replacement invitation.
   await sql`UPDATE club_enrolment_mail SET status='superseded' WHERE application_id=${id} AND kind='invitation' AND status IN ('queued','failed','unknown')`;
-  await queue(sql,id,'invitation',renewalHash(token),invitation(unseal(apps[0].payload),token,row.membership_year));
+  await queue(sql,id,'invitation',renewalHash(token),invitation(unseal(apps[0].payload),token,row.membership_year,savedFee(row.fee_quote,'new')));
   return 'saved';
  });
 }

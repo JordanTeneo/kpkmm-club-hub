@@ -2,7 +2,7 @@ export const defaultReminderSettings = {
   dailyLimit: 20,
   intervalMonths: 1,
   subject: 'KPKMM — membership renewal reminder',
-  message: 'Dear {name},\n\nYou are eligible to renew your KPKMM membership for {year}. The annual fee is RM150. If you have already paid, please contact the committee before paying again.\n\nSmall Cars, Big Spirit!\nKPKMM Committee',
+  message: 'Dear {name},\n\nYou are eligible to renew your KPKMM membership for {year}. Please check the renewal page for the current fee and any discount before paying. If you have already paid, please contact the committee before paying again.\n\nSmall Cars, Big Spirit!\nKPKMM Committee',
 };
 export function reminderConfig(value:unknown){
   const v=(value&&typeof value==='object'?value:{}) as Partial<typeof defaultReminderSettings>;
@@ -10,7 +10,7 @@ export function reminderConfig(value:unknown){
     dailyLimit:Number.isInteger(v.dailyLimit)&&v.dailyLimit!>=1&&v.dailyLimit!<=20?v.dailyLimit!:20,
     intervalMonths:Number.isInteger(v.intervalMonths)&&v.intervalMonths!>=1&&v.intervalMonths!<=12?v.intervalMonths!:1,
     subject:typeof v.subject==='string'&&v.subject.trim()?v.subject:defaultReminderSettings.subject,
-    message:typeof v.message==='string'&&v.message.trim()?v.message:defaultReminderSettings.message};
+    message:typeof v.message==='string'&&v.message.trim()?v.message.replace('The annual fee is RM150.','Please check the renewal page for the current fee and any discount before paying.'):defaultReminderSettings.message};
 }
 export function validateReminderSettings(form:FormData){
   const startDate=String(form.get('startDate')||''),dailyLimit=Number(form.get('dailyLimit')),intervalMonths=Number(form.get('intervalMonths'));

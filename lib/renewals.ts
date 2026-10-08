@@ -1,9 +1,10 @@
+import {savedFee,feeText,type FeeQuote} from './membership-pricing';
 import {createCipheriv,createDecipheriv,createHmac,hkdfSync,randomBytes} from 'node:crypto';
 import {db,uuid} from './shop';
 import {type Applicant} from './membership';
 import {CLUB_EMAIL,decryptToken,gmailReady,tokenRequest} from './gmail';
 
-export type RenewalDetails=Applicant & {year:number;rosterMemberNumber?:string};
+export type RenewalDetails=Applicant & {year:number;feeQuote?:FeeQuote;rosterMemberNumber?:string};
 export type MailState='queued'|'sending'|'accepted'|'failed'|'unknown';
 function key(){
  const secret=process.env.GMAIL_ENCRYPTION_KEY;
@@ -19,7 +20,7 @@ export async function renewalsReady(){
  key();
  if(process.env.KPKMM_SCHEMA_VERSION==='performance-v1')return;
  if(!ready)ready=(async()=>{
- await db()`CREATE TABLE IF NOT EXISTS club_renewals(id uuid PRIMARY KEY,identity_hash text NOT NULL,renewal_year integer NOT NULL,amount integer NOT NULL DEFAULT 15000 CHECK(amount=15000),payload text NOT NULL,proof text NOT NULL,proof_type text NOT NULL,review_status text NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending','approved','rejected')),mail_status text NOT NULL DEFAULT 'queued' CHECK(mail_status IN ('queued','sending','accepted','failed','unknown')),mail_id text,mail_attempt_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(identity_hash,renewal_year))`;
+ await db()`CREATE TABLE IF NOT EXISTS club_renewals(id uuid PRIMARY KEY,identity_hash text NOT NULL,renewal_year integer NOT NULL,amount integer NOT NULL DEFAULT 15000 CHECK(amount>0 AND amount<=2000000),payload text NOT NULL,proof text NOT NULL,proof_type text NOT NULL,review_status text NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending','approved','rejected')),mail_status text NOT NULL DEFAULT 'queued' CHECK(mail_status IN ('queued','sending','accepted','failed','unknown')),mail_id text,mail_attempt_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(identity_hash,renewal_year))`;
  await db()`ALTER TABLE club_renewals ADD COLUMN IF NOT EXISTS member_mail_status text NOT NULL DEFAULT 'not_queued'`;
  await db()`ALTER TABLE club_renewals ADD COLUMN IF NOT EXISTS name_hash text`;
  await db()`CREATE INDEX IF NOT EXISTS club_renewals_name ON club_renewals(name_hash)`;
@@ -61,7 +62,7 @@ export async function deliverRenewal(id:string,allowUncertain=false):Promise<Mai
  let raw:string;
  try{
   const d=JSON.parse(openRenewal(rows[0].payload)) as RenewalDetails;
-  const text=[`Membership renewal / Pembaharuan keahlian`, `Reference / Rujukan: ${id}`,`Year / Tahun: ${d.year}`,`Fee / Yuran: RM150`, `Name / Nama: ${d.name}`,`Identity type / Jenis pengenalan: ${d.identityType}`,`IC or passport / KP atau pasport: ${d.identity}`,`Country / Negara: ${d.country}`,`Email / E-mel: ${d.email}`,`Mobile / Telefon: ${d.phone}`,`Mailing address / Alamat: ${d.address}`,'','Payment proof is attached. Verify payment and membership before approving. / Bukti bayaran dilampirkan. Semak bayaran dan keahlian sebelum meluluskan.'].join('\n');
+  const text=[`Membership renewal / Pembaharuan keahlian`, `Reference / Rujukan: ${id}`,`Year / Tahun: ${d.year}`,`Fee / Yuran (annual + admin - discount / tahunan + pentadbiran - diskaun): ${feeText(savedFee(d.feeQuote,'renewal'))}`, `Name / Nama: ${d.name}`,`Identity type / Jenis pengenalan: ${d.identityType}`,`IC or passport / KP atau pasport: ${d.identity}`,`Country / Negara: ${d.country}`,`Email / E-mel: ${d.email}`,`Mobile / Telefon: ${d.phone}`,`Mailing address / Alamat: ${d.address}`,'','Payment proof is attached. Verify payment and membership before approving. / Bukti bayaran dilampirkan. Semak bayaran dan keahlian sebelum meluluskan.'].join('\n');
   raw=clubMessage(id,text,{bytes:Buffer.from(openRenewal(rows[0].proof),'base64'),type:rows[0].proof_type});
  }catch{await db()`UPDATE club_renewals SET mail_status='failed' WHERE id=${id}`;return 'failed';}
  const sent=await sendClubMessage(raw);
