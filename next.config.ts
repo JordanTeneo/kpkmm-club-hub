@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    '/shop/orders/*/invoice': ['./public/KPKMM-logo-transparent.png', './node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff'],
+    '/admin/payments/*': ['./public/KPKMM-logo-transparent.png', './node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff'],
+    '/membership-invoices/*': ['./public/KPKMM-logo-transparent.png', './node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff'],
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.fbcdn.net" },

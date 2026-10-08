@@ -1,5 +1,6 @@
 import {randomBytes,randomUUID} from 'node:crypto';
 import {db,isAdmin,uuid} from './shop';
+import {membershipPaymentsReady,paymentActor,recordMembershipPayment} from './membership-payments';
 import {membershipReady,unseal,type Applicant} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal,sendClubMessage} from './renewals';
 import {adminRosterReady,validYear} from './member-admin';
@@ -27,9 +28,9 @@ function invitation(person:Applicant,token:string,year:number){
  return enrolmentMessage(person.email,'KPKMM — application approved / Permohonan diluluskan',
   `Dear / Salam ${person.name},\n\nYour application has been approved. Membership is not active yet. Please pay RM250 (RM100 one-time administrative fee + RM150 annual membership for ${year}).\nPermohonan anda diluluskan. Keahlian belum aktif. Sila bayar RM250 (RM100 yuran pentadbiran sekali sahaja + RM150 yuran tahunan ${year}).\n\nMaybank\nKelab Peminat Kereta Mini Malaysia\n5123 4360 5508\n\nUpload payment proof using your private link (valid for 30 days):\nMuat naik bukti bayaran melalui pautan sulit anda (sah 30 hari):\n${SITE_ORIGIN}/join/payment/${token}\n\nDo not forward this link. The committee will verify payment before assigning your membership number. Membership ends on 31 December ${year}.\nJangan kongsi pautan ini. Jawatankuasa akan mengesahkan bayaran sebelum memberikan nombor ahli. Keahlian tamat pada 31 Disember ${year}.\n\nKPKMM Committee / Jawatankuasa KPKMM`);
 }
-function welcome(person:Applicant,number:string,year:number){
+function welcome(person:Applicant,number:string,year:number,invoiceLink:string){
  return enrolmentMessage(person.email,'Welcome to KPKMM / Selamat datang ke KPKMM',
-  `Dear / Salam ${person.name},\n\nWelcome to Kelab Peminat Kereta Mini Malaysia! Your payment has been verified and your membership is now active. We look forward to sharing many memorable drives and club activities with you.\n\nSelamat datang ke Kelab Peminat Kereta Mini Malaysia! Bayaran anda telah disahkan dan keahlian anda kini aktif. Kami menantikan penyertaan anda dalam konvoi dan aktiviti kelab.\n\nMembership number / Nombor ahli: ${number}\nValid until / Sah sehingga: 31 December / Disember ${year}\n\nPlease keep your membership number for future reference. / Sila simpan nombor ahli untuk rujukan.\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM`);
+  `Dear / Salam ${person.name},\n\nWelcome to Kelab Peminat Kereta Mini Malaysia! Your payment has been verified and your membership is now active. We look forward to sharing many memorable drives and club activities with you.\n\nSelamat datang ke Kelab Peminat Kereta Mini Malaysia! Bayaran anda telah disahkan dan keahlian anda kini aktif. Kami menantikan penyertaan anda dalam konvoi dan aktiviti kelab.\n\nMembership number / Nombor ahli: ${number}\nValid until / Sah sehingga: 31 December / Disember ${year}\n\nPlease keep your membership number for future reference. / Sila simpan nombor ahli untuk rujukan.\n\nPaid invoice / Invois berbayar (private / sulit):\n${invoiceLink}\nDo not forward this link. / Jangan kongsi pautan ini.\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM`);
 }
 // Save the message in the same transaction as the decision. Delivery can fail
 // independently without losing the decision or allocating another member ID.
@@ -78,10 +79,10 @@ export async function savePayment(token:string,proof:{bytes:Buffer;type:string})
   return row.application_id as string;
  });
 }
-export async function approvePayment(id:string,version:string){
+export async function approvePayment(id:string,version:string,paidOn=''){
  if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id)||!uuid(version))return 'invalid';
- await enrolmentReady();await adminRosterReady();
+ await enrolmentReady();await adminRosterReady();await membershipPaymentsReady();const actor=await paymentActor();
  return db().begin(async sql=>{
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
   const apps=await sql`SELECT * FROM club_applications WHERE id=${id} FOR UPDATE`;
@@ -105,7 +106,8 @@ export async function approvePayment(id:string,version:string){
   await sql`UPDATE club_enrolments SET stage='active',member_number=${number},updated_at=now() WHERE application_id=${id}`;
   await sql`UPDATE club_enrolment_mail SET status='superseded' WHERE application_id=${id} AND kind<>'welcome' AND status IN ('queued','failed','unknown')`;
   await sql`UPDATE club_applications SET membership_year=${year},updated_at=now() WHERE id=${id}`;
-  await queue(sql,id,'welcome','active',welcome(person,number,year));
+  const invoiceLink=await recordMembershipPayment(sql,{kind:'new',sourceId:id,year,paidOn,name:person.name,memberNumber:number,actor,proof:row.proof,proofType:row.proof_type});
+  await queue(sql,id,'welcome','active',welcome(person,number,year,invoiceLink));
   return 'activated';
  });
 }

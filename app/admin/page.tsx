@@ -110,6 +110,7 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
       ["/admin/members/roster", "Member listing & Excel", "Senarai ahli · Edit records, status and exports"],
       ["/admin/members", "New applications", "Permohonan baharu · Review requests to join"],
       ["/admin/renewals", "Membership renewals", "Pembaharuan · Review payments and renewals"],
+      ["/admin/payments", "Membership payments / Bayaran keahlian", "Annual totals, advance payments, receipts and invoices / Jumlah tahunan, bayaran awal, resit dan invois"],
       ["/admin/reminders", "Renewal reminders", "Pause or enable reminder emails and review sending history"],
     ] },
     { title: "Website", bm: "Laman web", links: [

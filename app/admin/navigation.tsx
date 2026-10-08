@@ -9,6 +9,7 @@ const sections=[
  ['/admin/members/roster','Member listing','Senarai ahli'],
  ['/admin/members','Applications','Permohonan'],
  ['/admin/renewals','Renewals','Pembaharuan'],
+ ['/admin/payments','Membership payments','Bayaran keahlian'],
  ['/admin?section=notices#workspace','Notices','Notis'],
  ['/admin?section=archive#workspace','Archive','Arkib'],
  ['/admin?section=photos#workspace','Photos','Foto'],

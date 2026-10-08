@@ -4,6 +4,8 @@ const fulfilment=load('lib/shop-fulfilment.ts');let allowed=true,order,queued=0,
 const sql=async(parts,...values)=>{const q=parts.join('?');if(q.includes('FOR UPDATE'))return order?[order]:[];if(q.includes('SET carrier=')){updated++;order.carrier=values[0];order.tracking_number=values[1];}return [];};
 sql.begin=async f=>f(sql);
 const actions=load('app/shop/actions.ts',{
+ '../../lib/shop-invoices':{shopInvoicesReady:async()=>{},recordShopInvoice:async()=>{}},
+ '../../lib/shop-settings':{shopSettingsReady:async()=>{}},
  '../../lib/shop-pricing':{},
  'next/headers':{},'next/cache':{revalidatePath:()=>{}},'next/navigation':{},
  '../../lib/shop':{db:()=>sql,shopReady:async()=>{},isAdmin:async()=>allowed,limit:async()=>{},uuid:s=>s==='00000000-0000-0000-0000-000000000001'},

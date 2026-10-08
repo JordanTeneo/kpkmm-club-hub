@@ -1,4 +1,5 @@
 import {orderPriceLines} from './shop-order-pricing';
+import {shopInvoice} from './shop-invoices';
 import {db,shopReady,uuid,money} from './shop';
 import {CLUB_EMAIL,SITE_ORIGIN} from './gmail';
 import {enrolmentMessage} from './enrolment';
@@ -6,7 +7,7 @@ import {sendClubMessage} from './renewals';
 
 export type ShopMailKind='received'|'purchase'|'completed'|'tracking';
 type MailOrder={id:string;customer_name:string;email:string;product_name:string;quantity:number;unit_price:number;original_unit_price?:number|null;discount_percent?:number;language?:string;fulfilment?:string|null;delivery_fee?:number;carrier?:string;tracking_number?:string};
-export function shopMessage(order:MailOrder,kind:ShopMailKind){
+export function shopMessage(order:MailOrder,kind:ShopMailKind,hasInvoice=false){
  if(!uuid(order.id))throw Error('Invalid order');
  const bm=order.language==='ms',t=(en:string,ms:string)=>bm?ms:en;
  const total=money(order.quantity*order.unit_price+(order.delivery_fee||0));
@@ -17,8 +18,9 @@ export function shopMessage(order:MailOrder,kind:ShopMailKind){
   `${t('Dear','Salam')} ${order.customer_name},\n\n${t('Your order has been dispatched.','Tempahan anda telah dihantar.')}\n\n${t('Order reference','Rujukan tempahan')}: ${order.id}\n${t('Item','Barangan')}: ${order.product_name}\n${t('Courier','Kurier')}: ${order.carrier}\n${t('Tracking number','Nombor penjejakan')}: ${order.tracking_number}\n\n${t('Use this number on the courier’s official tracking website.','Gunakan nombor ini di laman penjejakan rasmi kurier.')}\n\n${t('For any questions, contact','Untuk pertanyaan, hubungi')} ${CLUB_EMAIL} / 018-226 2000.\n\nSmall Cars, Big Spirit!\nKPKMM`);
  if(kind==='purchase')return enrolmentMessage(CLUB_EMAIL,'KPKMM — Purchase awaiting payment verification',
   `A marketplace purchase has been submitted with payment proof.\n\nOrder reference: ${order.id}\nItem: ${order.product_name}\n${orderPriceLines(order).map(([label,value])=>`${label}: ${value}`).join('\n')}\n\nSign in to review the customer details and payment slip:\n${SITE_ORIGIN}/admin/shop?order=${order.id}#order-${order.id}\n\nVerify the transfer in the KPKMM bank account before completing the purchase. The uploaded slip is not confirmation of payment.\n\nKPKMM Marketplace`);
+ const invoiceText=hasInvoice?`\n\n${t('Download your paid invoice','Muat turun invois berbayar')}:\n${SITE_ORIGIN}/shop/orders/${order.id}/invoice?lang=${bm?'ms':'en'}\n${t('Use the browser you ordered with. On another device, first open your order using the reference and private access code at','Gunakan pelayar asal. Pada peranti lain, buka tempahan dengan rujukan dan kod akses peribadi di')} ${SITE_ORIGIN}/shop`:'';
  return enrolmentMessage(order.email,t('KPKMM — Purchase completed','KPKMM — Pembelian selesai'),
-  `${t('Dear','Salam')} ${order.customer_name},\n\n${t('Thank you for supporting KPKMM. The club has verified your payment and your purchase is complete.','Terima kasih kerana menyokong KPKMM. Kelab telah mengesahkan bayaran anda dan pembelian anda telah selesai.')}\n\n${t('Order reference','Rujukan tempahan')}: ${order.id}\n${t('Item','Barangan')}: ${order.product_name}\n${t('Quantity','Kuantiti')}: ${order.quantity}\n${t('Total paid','Jumlah dibayar')}: ${total}\n\n${fulfilment}\n\n${t('For any questions, contact','Untuk pertanyaan, hubungi')} ${CLUB_EMAIL} / 018-226 2000.\n\nSmall Cars, Big Spirit!\nKPKMM`);
+  `${t('Dear','Salam')} ${order.customer_name},\n\n${t('Thank you for supporting KPKMM. The club has verified your payment and your purchase is complete.','Terima kasih kerana menyokong KPKMM. Kelab telah mengesahkan bayaran anda dan pembelian anda telah selesai.')}\n\n${t('Order reference','Rujukan tempahan')}: ${order.id}\n${t('Item','Barangan')}: ${order.product_name}\n${t('Quantity','Kuantiti')}: ${order.quantity}\n${t('Total paid','Jumlah dibayar')}: ${total}\n\n${fulfilment}${invoiceText}\n\n${t('For any questions, contact','Untuk pertanyaan, hubungi')} ${CLUB_EMAIL} / 018-226 2000.\n\nSmall Cars, Big Spirit!\nKPKMM`);
 }
 // Called inside the order transaction; a mail failure must never undo a purchase.
 export async function queueShopMail(sql:ReturnType<typeof db>,id:string,kind:ShopMailKind){
@@ -33,7 +35,7 @@ export async function deliverShopMail(id:string,kind:ShopMailKind,allowUncertain
  try{
   const order=claimed[0] as MailOrder;
   if(kind!=='purchase'&&!order.email)state='skipped';
-  else state=(await sendClubMessage(shopMessage(order,kind))).state;
+  else state=(await sendClubMessage(shopMessage(order,kind,kind==='completed'&&!!await shopInvoice(id)))).state;
  }catch{/* An uncertain send is never automatically retried. */}
  await db()`UPDATE shop_order_mail SET status=${state} WHERE order_id=${id} AND kind=${kind} AND status='sending'`;
  return state;

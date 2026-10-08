@@ -2,10 +2,15 @@ const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),asser
 let claimed=false,sends=0,outcome='accepted';const updates=[];
 const order={id:'00000000-0000-0000-0000-000000000001',customer_name:'Test Buyer',email:'buyer@example.invalid',product_name:'Club shirt',quantity:2,unit_price:2500,language:'en'};
 const sql=async(p,...v)=>{const q=p.join('?');updates.push({q,v});if(q.includes("SET status='sending'")){if(claimed)return [];claimed=true;return [order];}return [];};
-const mocks={'./shop':{db:()=>sql,shopReady:async()=>{},uuid:x=>/^[a-f0-9-]{36}$/.test(x),money:x=>'RM '+(x/100).toFixed(2)},'./gmail':{CLUB_EMAIL:'kelabpeminatkeretaminimalaysia@gmail.com',SITE_ORIGIN:'https://kpkmm-club-hub.vercel.app'},'./enrolment':{enrolmentMessage:(to,subject,body)=>({to,subject,body})},'./renewals':{sendClubMessage:async()=>{sends++;if(outcome==='throw')throw Error('timeout');return {state:outcome};}}};
+const mocks={'./shop-invoices':{shopInvoice:async()=>null},'./shop':{db:()=>sql,shopReady:async()=>{},uuid:x=>/^[a-f0-9-]{36}$/.test(x),money:x=>'RM '+(x/100).toFixed(2)},'./gmail':{CLUB_EMAIL:'kelabpeminatkeretaminimalaysia@gmail.com',SITE_ORIGIN:'https://kpkmm-club-hub.vercel.app'},'./enrolment':{enrolmentMessage:(to,subject,body)=>({to,subject,body})},'./renewals':{sendClubMessage:async()=>{sends++;if(outcome==='throw')throw Error('timeout');return {state:outcome};}}};
 const pricing={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/shop-order-pricing.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:pricing});mocks['./shop-order-pricing']=pricing;
 const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/shop-mail.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:out,require:n=>mocks[n]||require(n)});
 (async()=>{
+ for(const language of ['en','ms']){
+  const message=out.shopMessage({...order,language},'completed',true);
+  assert(message.body.includes('/shop/orders/'+order.id+'/invoice?lang='+language));
+  assert(!out.shopMessage({...order,language},'received',true).body.includes('/invoice'));
+ }
  const admin=out.shopMessage(order,'purchase');assert.equal(admin.to,'kelabpeminatkeretaminimalaysia@gmail.com');assert(admin.body.includes('/admin/shop?order='+order.id));assert(!admin.body.includes(order.email));assert(admin.body.includes('RM 50.00'));
  const discounted=out.shopMessage({...order,unit_price:8000,original_unit_price:10000,discount_percent:20,delivery_fee:800},'purchase');
  for(const line of ['Original unit price: RM 100.00','Discount: 20%','Subtotal before discount: RM 200.00','Total discount savings: RM 40.00','Item subtotal after discount: RM 160.00','Expected payment total: RM 168.00'])assert(discounted.body.includes(line),line);

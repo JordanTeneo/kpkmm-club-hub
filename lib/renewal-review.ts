@@ -2,17 +2,20 @@ import {randomUUID} from 'node:crypto';
 import {db,isAdmin,uuid} from './shop';
 import {adminRosterReady,validYear} from './member-admin';
 import {renewalsReady,openRenewal,sealRenewal} from './renewals';
+import {membershipPaymentsReady,paymentActor,recordMembershipPayment,voidMembershipPayment,validPaymentDate} from './membership-payments';
 
 // Approval and annual membership activation commit together, or neither does.
-export async function reviewRenewal(id:string,status:string){
+export async function reviewRenewal(id:string,status:string,paidOn=''){
  if(!(await isAdmin('membership')))throw Error('Unauthorised');
  if(!uuid(id)||!['pending','approved','rejected'].includes(status))return 'invalid';
- await adminRosterReady();await renewalsReady();
+ await adminRosterReady();await renewalsReady();await membershipPaymentsReady();
+ const actor=await paymentActor();
  return db().begin(async sql=>{
   // Same lock order as member edits/imports, protecting IDs and annual records.
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
-  const requests=await sql`SELECT id,identity_hash,renewal_year,review_status,payload FROM club_renewals WHERE id=${id} FOR UPDATE`;
+  const requests=await sql`SELECT id,identity_hash,renewal_year,review_status,payload,proof,proof_type FROM club_renewals WHERE id=${id} FOR UPDATE`;
   const request=requests[0];if(!request)return 'invalid';
+  if(status==='approved'&&request.review_status!=='approved'&&!validPaymentDate(paidOn))return 'invalid';
   const year=validYear(request.renewal_year);
   // New requests link to the member resolved on the server, including legacy records
   // with no identification number. Older requests keep their identity-based match.
@@ -46,7 +49,10 @@ export async function reviewRenewal(id:string,status:string){
     await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${row.member_number},${year},${row.name_hash},${row.identity_hash},${payload},${active},${override}) ON CONFLICT(member_number,membership_year) DO UPDATE SET payload=excluded.payload,active=excluded.active,status_override=excluded.status_override,updated_at=now()`;
    }
   }
-  if(status==='approved'&&request.review_status!=='approved')await sql`UPDATE club_renewals SET member_mail_status=CASE WHEN member_mail_status='not_queued' THEN 'queued' ELSE member_mail_status END WHERE id=${id}`;
+  if(status==='approved'&&request.review_status!=='approved'&&row){
+   await recordMembershipPayment(sql,{kind:'renewal',sourceId:id,year,paidOn,name:JSON.parse(openRenewal(row.payload)).name,memberNumber:row.member_number,actor,proof:request.proof,proofType:request.proof_type});
+   await sql`UPDATE club_renewals SET member_mail_status=CASE WHEN member_mail_status='not_queued' THEN 'queued' ELSE member_mail_status END WHERE id=${id}`;
+  }else if(status!=='approved')await voidMembershipPayment(sql,'renewal',id,actor);
   await sql`UPDATE club_renewals SET review_status=${status} WHERE id=${id}`;
   return status==='approved'?'activated':'saved';
  });

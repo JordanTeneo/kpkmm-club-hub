@@ -10,6 +10,8 @@ import {deliveryFeeCents,fulfilmentQuote,readTracking} from '../../lib/shop-fulf
 import {readShopCustomer} from '../../lib/shop-customer';
 import {queueShopMail,deliverShopMail,type ShopMailKind} from '../../lib/shop-mail';
 import {getLanguage} from '../language';
+import {shopSettingsReady} from '../../lib/shop-settings';
+import {shopInvoicesReady,recordShopInvoice,type ShopInvoiceSnapshot} from '../../lib/shop-invoices';
 
 export type Result = { error?: string; success?: string };
 const text = (form: FormData, key: string, max = 200) => String(form.get(key) || '').trim().slice(0,max);
@@ -24,6 +26,7 @@ export async function placeOrder(_: Result, form: FormData): Promise<Result> {
     const {name,phone,email,address}=readShopCustomer(form), quantity=Number(form.get('quantity')), price=Number(form.get('price'));
     if (name.length<2 || !/^[+0-9 ()-]{7,30}$/.test(phone) || !Number.isInteger(quantity) || quantity<1 || quantity>20 || form.get('consent')!=='yes') throw new Error('Check your name, phone number and quantity. / Semak nama, nombor telefon dan kuantiti.');
     await shopReady();
+    await shopSettingsReady();
     const ip=(await headers()).get('x-forwarded-for')?.split(',')[0] || 'unknown';
     await limit('orders:'+digest(ip),10);
     const language=await getLanguage();
@@ -31,6 +34,9 @@ export async function placeOrder(_: Result, form: FormData): Promise<Result> {
       await sql`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
       const existing=await sql`SELECT token_hash FROM shop_orders WHERE id=${id}`;
       if (existing.length) { if(existing[0].token_hash!==digest(token)) throw new Error('Please refresh the form.'); return; }
+      // Shared lock lets concurrent orders proceed, but serializes a closure with new orders.
+      const settings=await sql`SELECT enabled FROM shop_settings WHERE id=1 FOR SHARE`;
+      if(settings[0]?.enabled!==true)throw new Error('The marketplace is temporarily closed to new orders. / Kedai ditutup buat sementara waktu untuk tempahan baharu.');
       const rows=await sql`SELECT * FROM shop_products WHERE id=${product} FOR UPDATE`;
       const p=rows[0];
       if(!p || p.deleted || !p.active || p.stock<quantity) throw new Error('Not enough stock. Refresh the shop. / Stok tidak mencukupi. Muat semula kedai.');
@@ -117,14 +123,18 @@ export async function updateOrder(_: Result, form: FormData): Promise<Result> {
   try {
     if(!(await isAdmin('shop'))) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
     await shopReady(); const id=text(form,'id'), status=text(form,'status');
-    if(!uuid(id)||!['paid','cancelled','pending'].includes(status)) throw new Error('Invalid order status.');
+      if(!uuid(id)||!['paid','cancelled','pending'].includes(status)) throw new Error('Invalid order status.');
+      if(status==='paid')await shopInvoicesReady();
     await db().begin(async sql => {
       const rows=await sql`SELECT * FROM shop_orders WHERE id=${id} FOR UPDATE`; const order=rows[0];
       if(!order || ['paid','cancelled'].includes(order.status)) throw new Error('This order is already finalised. / Tempahan ini telah dimuktamadkan.');
       if(status==='paid' && (!order.receipt||order.status!=='review')) throw new Error('A newly submitted payment proof is required before confirmation. / Bukti bayaran yang dihantar semula diperlukan sebelum pengesahan.');
       if(status==='cancelled') await sql`UPDATE shop_products SET stock=stock+${order.quantity},updated_at=now() WHERE id=${order.product_id}`;
       await sql`UPDATE shop_orders SET status=${status},updated_at=now() WHERE id=${id}`;
-      if(status==='paid')await queueShopMail(sql as unknown as ReturnType<typeof db>,id,'completed');
+      if(status==='paid'){
+        await recordShopInvoice(sql,order as ShopInvoiceSnapshot);
+        await queueShopMail(sql as unknown as ReturnType<typeof db>,id,'completed');
+      }
     });
     if(status==='paid')try{await deliverShopMail(id,'completed');}catch{/* Purchase stays completed; notification is retryable. */}
     refresh(); revalidatePath('/shop/orders/'+id); return {success:'Order updated. / Tempahan dikemas kini.'};

@@ -29,27 +29,27 @@ const sql=async(p,...v)=>{const q=p.join('?').replace(/\s+/g,' ');
  throw Error('Unhandled SQL: '+q);
 };
 sql.begin=async fn=>{const backup=JSON.stringify({app,flow,mails,roster,audit});try{return await fn(sql);}catch(e){({app,flow,mails,roster,audit}=JSON.parse(backup));throw e;}};
-const mocks={'./shop':{db:()=>sql,isAdmin:async()=>admin,uuid:s=>/^[0-9a-f-]{36}$/.test(s)},'./membership':{membershipReady:async()=>{},unseal:JSON.parse},'./renewals':{renewalsReady:async()=>{},renewalHash:s=>'hash:'+s,sealRenewal:s=>'sealed:'+s,openRenewal:s=>s.slice(7),sendClubMessage:async raw=>{sends++;return {state:mailState,id:'gmail-id'};}},'./member-admin':{adminRosterReady:async()=>{},validYear:Number},'./roster':{nameKey:s=>'name:'+s},'./gmail':{CLUB_EMAIL:'club@example.com',SITE_ORIGIN:'https://example.com'}};
+const mocks={'./membership-payments':{membershipPaymentsReady:async()=>{},paymentActor:async()=> 'Test admin',validPaymentDate:s=>s==='2026-01-01',recordMembershipPayment:async()=> 'https://example.com/membership-invoices/test',voidMembershipPayment:async()=>{}},'./shop':{db:()=>sql,isAdmin:async()=>admin,uuid:s=>/^[0-9a-f-]{36}$/.test(s)},'./membership':{membershipReady:async()=>{},unseal:JSON.parse},'./renewals':{renewalsReady:async()=>{},renewalHash:s=>'hash:'+s,sealRenewal:s=>'sealed:'+s,openRenewal:s=>s.slice(7),sendClubMessage:async raw=>{sends++;return {state:mailState,id:'gmail-id'};}},'./member-admin':{adminRosterReady:async()=>{},validYear:Number},'./roster':{nameKey:s=>'name:'+s},'./gmail':{CLUB_EMAIL:'club@example.com',SITE_ORIGIN:'https://example.com'}};
 function load(file){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Buffer,Intl,Date,require:n=>mocks[n]||require(n)});return exports;}
 mocks['./member-create']=load('lib/member-create.ts');const mod=load('lib/enrolment.ts');
 function reset(){person.vehicles=['ABC 1234','WXY 5678'];app={id,status:'pending',payload:JSON.stringify(person),membership_year:null};flow=null;mails=[];roster=[];audit=0;fail=false;sends=0;mailState='accepted';}
 (async()=>{
- reset();admin=false;await assert.rejects(()=>mod.approveApplication(id,year,'pending'));await assert.rejects(()=>mod.approvePayment(id,version));admin=true;
+ reset();admin=false;await assert.rejects(()=>mod.approveApplication(id,year,'pending'));await assert.rejects(()=>mod.approvePayment(id,version,'2026-01-01'));admin=true;
  assert.equal(mod.validPaymentToken('bad'),false);assert.equal(mod.validPaymentToken('a'.repeat(64)),true);
  assert.throws(()=>mod.enrolmentMessage('a@example.com\r\nBcc: x@example.com','subject','body'));
  const message=Buffer.from(mod.enrolmentMessage('example@example.com','Welcome','hello'), 'base64url').toString();assert.match(message,/To: example@example.com/);assert.ok(message.endsWith(Buffer.from('hello').toString('base64')));
  assert.equal(await mod.approveApplication(id,year,'pending'),'saved');assert.equal(app.membership_year,null);assert.equal(roster.length,0);assert.equal(flow.stage,'awaiting_payment');assert.equal(mails.length,1);
  const token=flow.token_encrypted.slice(7);assert.equal(token.length,64);assert.equal(await mod.approveApplication(id,year,'pending'),'changed');assert.equal(mails.length,1);
- assert.equal(await mod.approvePayment(id,version),'changed');assert.equal(roster.length,0);
+ assert.equal(await mod.approvePayment(id,version,'2026-01-01'),'changed');assert.equal(roster.length,0);
  flow.valid=false;assert.equal(await mod.savePayment(token,{bytes:Buffer.from('proof'),type:'image/png'}),'invalid');flow.valid=true;
  assert.equal(await mod.savePayment('b'.repeat(64),{bytes:Buffer.from('proof'),type:'image/png'}),'invalid');
  assert.equal(await mod.savePayment(token,{bytes:Buffer.from('proof'),type:'image/png'}),id);assert.equal(flow.stage,'proof_submitted');assert.equal(roster.length,0);assert.equal(app.membership_year,null);
  assert.equal(await mod.savePayment(token,{bytes:Buffer.from('again'),type:'image/png'}),'invalid');
- assert.equal(await mod.approvePayment(id,version),'changed');const proofVersion=flow.proof_version;
- fail=true;await assert.rejects(()=>mod.approvePayment(id,proofVersion));assert.equal(roster.length,0);assert.equal(flow.stage,'proof_submitted');assert.equal(audit,0);fail=false;
- assert.equal(await mod.approvePayment(id,proofVersion),'activated');assert.equal(roster.length,1);assert.equal(roster[0].member_number,'B-'+String(year).slice(-2)+'-106');assert.equal(app.membership_year,year);assert.equal(flow.stage,'active');assert.equal(audit,1);assert.equal(mails.filter(m=>m.kind==='welcome').length,1);
+ assert.equal(await mod.approvePayment(id,version,'2026-01-01'),'changed');const proofVersion=flow.proof_version;
+ fail=true;await assert.rejects(()=>mod.approvePayment(id,proofVersion,'2026-01-01'));assert.equal(roster.length,0);assert.equal(flow.stage,'proof_submitted');assert.equal(audit,0);fail=false;
+ assert.equal(await mod.approvePayment(id,proofVersion,'2026-01-01'),'activated');assert.equal(roster.length,1);assert.equal(roster[0].member_number,'B-'+String(year).slice(-2)+'-106');assert.equal(app.membership_year,year);assert.equal(flow.stage,'active');assert.equal(audit,1);assert.equal(mails.filter(m=>m.kind==='welcome').length,1);
  assert.deepEqual(JSON.parse(roster[0].payload.slice(7)).vehicles,['ABC 1234','WXY 5678']);
- assert.equal(await mod.approvePayment(id,proofVersion),'already');assert.equal(roster.length,1);assert.equal(audit,1);
+ assert.equal(await mod.approvePayment(id,proofVersion,'2026-01-01'),'already');assert.equal(roster.length,1);assert.equal(audit,1);
  await mod.deliverEnrolment(id);assert.equal(sends,1);assert.equal(mails.find(m=>m.kind==='welcome').status,'accepted');await mod.deliverEnrolment(id);assert.equal(sends,1);
  mails.find(m=>m.kind==='welcome').status='queued';roster[0].payload='sealed:'+JSON.stringify({...person,deceased:true});await mod.deliverEnrolment(id);assert.equal(sends,1);assert.equal(mails.find(m=>m.kind==='welcome').status,'skipped');
  reset();roster=[{identity_hash:'hash:mykad:malaysia:'+person.identity}];assert.equal(await mod.approveApplication(id,year,'pending'),'duplicate');assert.equal(flow,null);

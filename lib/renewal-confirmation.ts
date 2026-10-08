@@ -1,8 +1,9 @@
 import {db,uuid} from './shop';
 import {renewalsReady,openRenewal,sendClubMessage} from './renewals';
 import {enrolmentMessage} from './enrolment';
-export function renewalConfirmation(email:string,name:string,number:string,year:number){
- return enrolmentMessage(email,'KPKMM — membership renewed / Keahlian diperbaharui',`Dear / Salam ${name},\n\nThank you for renewing your KPKMM membership. The committee has verified your payment.\nTerima kasih kerana memperbaharui keahlian KPKMM. Jawatankuasa telah mengesahkan bayaran anda.\n\nMembership number / Nombor ahli: ${number}\nMembership year / Tahun keahlian: ${year}\nValid until / Sah sehingga: 31 December / Disember ${year}\n\nYour membership number remains unchanged. We look forward to seeing you at our club activities!\nNombor ahli anda dikekalkan. Kami berharap dapat bertemu anda dalam aktiviti kelab!\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM`);
+import {paymentInvoiceLink} from './membership-payments';
+export function renewalConfirmation(email:string,name:string,number:string,year:number,invoiceLink?:string){
+ return enrolmentMessage(email,'KPKMM — membership renewed / Keahlian diperbaharui',`Dear / Salam ${name},\n\nThank you for renewing your KPKMM membership. The committee has verified your payment.\nTerima kasih kerana memperbaharui keahlian KPKMM. Jawatankuasa telah mengesahkan bayaran anda.\n\nMembership number / Nombor ahli: ${number}\nMembership year / Tahun keahlian: ${year}\nValid until / Sah sehingga: 31 December / Disember ${year}\n\nYour membership number remains unchanged. We look forward to seeing you at our club activities!\nNombor ahli anda dikekalkan. Kami berharap dapat bertemu anda dalam aktiviti kelab!${invoiceLink?"\n\nPaid invoice / Invois berbayar (private / sulit):\n"+invoiceLink+"\nDo not forward this link. / Jangan kongsi pautan ini.":""}\n\nSmall Cars, Big Spirit!\nKPKMM Committee / Jawatankuasa KPKMM`);
 }
 // Only newly approved renewals are queued. Historical imports never call this.
 export async function deliverRenewalConfirmation(id:string){
@@ -19,7 +20,8 @@ export async function deliverRenewalConfirmation(id:string){
    const member=JSON.parse(openRenewal(rows[0].payload));
    if(member.deceased||!member.email)state='skipped';
    else{
-    let raw;try{raw=renewalConfirmation(member.email,member.name,detail.rosterMemberNumber,claimed[0].renewal_year);}catch{state='skipped';}
+    const invoiceLink=await paymentInvoiceLink('renewal',id);
+    let raw;try{raw=renewalConfirmation(member.email,member.name,detail.rosterMemberNumber,claimed[0].renewal_year,invoiceLink);}catch{state='skipped';}
     if(raw)state=(await sendClubMessage(raw)).state;
    }
   }

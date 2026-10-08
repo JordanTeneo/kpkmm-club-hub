@@ -7,7 +7,7 @@ import {approveApplication,approvePayment,reissuePayment,deliverEnrolment,enrolm
 import {getLanguage} from '../language';
 type Result={error?:string;success?:string};
 async function translator(){const bm=(await getLanguage())==='ms';return (en:string,ms:string)=>bm?ms:en;}
-function refresh(id:string){for(const path of ['/admin/members','/admin/members/'+id,'/admin/members/roster','/membership-status'])revalidatePath(path);}
+function refresh(id:string){for(const path of ['/admin/payments','/admin/members','/admin/members/'+id,'/admin/members/roster','/membership-status'])revalidatePath(path);}
 export async function reviewEnrolment(_:Result,form:FormData):Promise<Result>{
  const t=await translator();if(!(await isAdmin('membership')))return {error:t('Please sign in again.','Sila log masuk semula.')};
  const id=String(form.get('id')||''),action=String(form.get('decision')||''),version=String(form.get('version')||'');
@@ -18,7 +18,7 @@ export async function reviewEnrolment(_:Result,form:FormData):Promise<Result>{
   if(action==='application')result=await approveApplication(id,Number(form.get('membershipYear')),String(form.get('previous')));
   else if(action==='payment'){
    if(form.get('verified')!=='yes')return {error:t('Confirm that the bank payment has been verified.','Sahkan bahawa bayaran bank telah disemak.')};
-   result=await approvePayment(id,version);
+   result=await approvePayment(id,version,String(form.get('paidOn')||''));
   }else if(action==='reissue')result=await reissuePayment(id,version);
   else if(action==='reject'){
    const rows=await db()`UPDATE club_applications SET status='rejected',membership_year=NULL,updated_at=now() WHERE id=${id} AND status='pending' AND NOT EXISTS(SELECT 1 FROM club_enrolments WHERE application_id=${id}) RETURNING id`;
