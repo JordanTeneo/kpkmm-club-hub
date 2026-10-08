@@ -1,3 +1,16 @@
+import type {PaymentHistory} from './roster';
+
+// Overlay verified renewals without modifying the imported historical evidence.
+export function renewalPaymentHistory(history:PaymentHistory[]|undefined, approvals:{year:number;approvedAt?:string}[]):PaymentHistory[]{
+ const result=new Map((history||[]).map(h=>[h.year,{...h}]));
+ for(const approval of approvals){
+  const prior=result.get(approval.year);
+  const preserve=prior&&['new','sponsored','lifetime'].includes(prior.status);
+  result.set(approval.year,{year:approval.year,status:preserve?prior.status:'paid',note:preserve||prior?.status==='paid'?prior?.note||'':'',approvedAt:approval.approvedAt});
+ }
+ return [...result.values()].sort((a,b)=>a.year-b.year);
+}
+
 type HistoryMember = {
   paymentHistory?: {year:number;status:string}[];
   lifetimeSince?: number;

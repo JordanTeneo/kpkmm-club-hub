@@ -1,0 +1,12 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+let state={};const e={};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/shop/forms.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText,{exports:e,require:n=>n==='react'?{...React,useActionState:()=>[state,()=>{},false]}:n==='../ui-language'?{useUiText:()=>x=>x}:require(n)});
+const render=()=>renderToStaticMarkup(React.createElement(e.ShopForm,{action:async()=>({}),label:'Save',children:'Fields'}));
+assert.doesNotMatch(render(),/Back to member listing/);
+state={error:'Failed',successHref:'/admin/members/roster?year=2027',successLabel:'Back to member listing'};assert.doesNotMatch(render(),/Back to member listing/);
+state={success:'Saved',successHref:'/admin/members/roster?year=2027',successLabel:'Back to member listing'};
+assert.match(render(),/href="\/admin\/members\/roster\?year=2027"/);assert.match(render(),/Back to member listing/);
+state.successLabel='Kembali ke senarai ahli';assert.match(render(),/Kembali ke senarai ahli/);
+const page=fs.readFileSync('app/admin/members/roster/renew/page.tsx','utf8');assert.match(page,/successHref:.*form.get\('year'\)/);assert.match(page,/successLabel:t\('← Back to member listing','← Kembali ke senarai ahli'\)/);
+console.log('PASS: post-renewal return link, submitted year, success-only display, EN/BM and unchanged generic forms.');

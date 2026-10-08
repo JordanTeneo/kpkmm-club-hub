@@ -24,7 +24,7 @@ async function renew(_: {error?:string;success?:string},form:FormData){
  try{await deliverRenewalConfirmation(result);}catch{}
  try{await deliverRenewal(result);}catch{/* Renewal and proof remain saved independently of email. */}
  for(const path of ['/admin/payments','/admin/members/roster','/admin/renewals','/membership-status'])revalidatePath(path);
- return {success:t('Renewal saved with payment proof. Membership is active for the selected year until 31 December. The existing membership number is unchanged. View the receipt under Renewals → Approved.','Pembaharuan dan bukti bayaran disimpan. Keahlian aktif untuk tahun dipilih sehingga 31 Disember. Nombor ahli dikekalkan. Lihat resit di Pembaharuan → Diluluskan.')};
+ return {success:t('Renewal saved with payment proof. Membership is active for the selected year until 31 December. The existing membership number is unchanged. View the receipt under Renewals → Approved.','Pembaharuan dan bukti bayaran disimpan. Keahlian aktif untuk tahun dipilih sehingga 31 Disember. Nombor ahli dikekalkan. Lihat resit di Pembaharuan → Diluluskan.'),successHref:'/admin/members/roster?year='+encodeURIComponent(String(form.get('year'))),successLabel:t('← Back to member listing','← Kembali ke senarai ahli')};
 }
 export default async function AdminRenew({searchParams}:{searchParams:Promise<{member?:string;year?:string}>}){
  if(!(await isAdmin('membership')))redirect('/admin');

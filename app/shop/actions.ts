@@ -13,7 +13,7 @@ import {getLanguage} from '../language';
 import {shopSettingsReady} from '../../lib/shop-settings';
 import {shopInvoicesReady,recordShopInvoice,type ShopInvoiceSnapshot} from '../../lib/shop-invoices';
 
-export type Result = { error?: string; success?: string };
+export type Result = { error?: string; success?: string; successHref?: string; successLabel?: string };
 const text = (form: FormData, key: string, max = 200) => String(form.get(key) || '').trim().slice(0,max);
 const refresh = () => { revalidatePath('/shop'); revalidatePath('/admin/shop'); };
 const failure = (e: unknown): Result => ({ error: e instanceof Error && !('severity' in e) ? e.message : 'Could not save. Please retry. / Tidak dapat disimpan. Sila cuba lagi.' });

@@ -4,7 +4,7 @@ import {db} from './shop';
 import {membershipReady,fingerprint,unseal} from './membership';
 import {renewalsReady,renewalHash,sealRenewal,openRenewal} from './renewals';
 
-export type PaymentHistory={year:number;note:string;status:'paid'|'new'|'sponsored'|'lifetime'|'inactive'|'review'};
+export type PaymentHistory={year:number;note:string;status:'paid'|'new'|'sponsored'|'lifetime'|'inactive'|'review';approvedAt?:string};
 export type RosterMember={memberNumber:string;name:string;active:boolean;identity:string;identityType?:'mykad'|'passport';country?:string;phone:string;email:string;address:string;addressLine?:string;postcode?:string;state?:string;mailingCountry?:string;sourceRow:number;vehicles?:string[];joinedYear?:number;deceased?:boolean;lifetimeSince?:number;paymentHistory?:PaymentHistory[]};
 export type RosterImport={year:number;source:string;members:RosterMember[]};
 export function normalizeName(value:string){return value.normalize('NFKC').trim().replace(/\s+/gu,' ').toLocaleUpperCase('en-MY');}
