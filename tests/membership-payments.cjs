@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 function load(file,mocks){const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,{exports:out,require:n=>n.endsWith('/membership-fees')||n.endsWith('/membership-pricing')?require('./fee-fixture.cjs')(n):n in mocks?mocks[n]:require(n),Buffer,process,Response,URL,Intl});return out;}
 let authorised=true,stored,events=[],queries=[],registerRows=[];
 const sql=async(parts,...v)=>{const q=parts.join('?').replace(/\s+/g,' ').trim();queries.push(q);
- if(q.startsWith('SELECT id,invoice_sequence'))return registerRows.filter(r=>q.includes('WHERE membership_year=')?r.membership_year===v[0]:r.paid_on>=v[0]&&r.paid_on<v[1]);
+ if(q.startsWith('SELECT id,invoice_sequence'))return registerRows.filter(r=>q.includes('WHERE membership_year>')?r.membership_year>v[0]&&r.paid_on<v[1]&&!r.voided_at:q.includes('WHERE membership_year=')?r.membership_year===v[0]:r.paid_on>=v[0]&&r.paid_on<v[1]);
  if(q.startsWith('INSERT INTO club_membership_payments(')){if(stored)return [];stored={id:v[0],kind:v[1],source_id:v[2],membership_year:v[3],paid_on:v[4],amount:v[5],admin_fee:v[6],payload:v[7],proof:v[8],proof_type:v[9],token_hash:v[10],token_encrypted:v[11],voided_at:null};return [{id:stored.id}];}
  if(q.startsWith('SELECT id,token_encrypted'))return stored?[{...stored}]:[];
  if(q.startsWith('INSERT INTO club_membership_payment_events')){events.push(v);return [];}
@@ -24,7 +24,11 @@ const payments=load('lib/membership-payments.ts',mocks);
  registerRows=['online','admin'].flatMap(channel=>['new','renewal'].map((kind,index)=>({...stored,kind,membership_year:2027,paid_on:index?'2027-01-01':'2026-12-20',amount:kind==='new'?25000:15000,admin_fee:kind==='new'?10000:0,payload:'sealed:'+JSON.stringify({name:'Sample',memberNumber:'B-26-001',channel})})));
  assert.equal((await payments.paymentRegister(2027,'membership')).length,4,'all four routes for the membership year, including advance payments');assert.equal(payments.paymentTotals(await payments.paymentRegister(2027,'membership'))[0].total,80000);
  assert.equal((await payments.paymentRegister(2026,'payment')).length,2,'bank-year reconciliation stays separate');assert.equal((await payments.paymentRegister(2026,'membership')).length,0);await assert.rejects(()=>payments.paymentRegister(NaN,'membership'));
- authorised=false;await assert.rejects(()=>payments.paymentRegister(2026));
+ assert.equal((await payments.advancePaymentRegister(2026)).length,2);assert.equal((await payments.advancePaymentRegister(2027)).length,0);
+ registerRows.push({...registerRows[0],voided_at:new Date()},{...registerRows[0],membership_year:2028,paid_on:'2026-01-01'});
+ assert.equal((await payments.advancePaymentRegister(2026)).length,3);assert.equal((await payments.advancePaymentRegister(2027)).length,1,'earlier advances remain held until applicable year');
+ assert.ok(queries.some(q=>q.includes('membership_year>')&&q.includes('voided_at IS NULL')));await assert.rejects(()=>payments.advancePaymentRegister(2025));
+ authorised=false;await assert.rejects(()=>payments.paymentRegister(2026));await assert.rejects(()=>payments.advancePaymentRegister(2026));
  const route=load('app/admin/payments/[id]/route.ts',{'../../../../lib/shop':mocks['./shop'],'../../../../lib/membership-payments':payments,'../../../../lib/renewals':mocks['./renewals'],'../../../../lib/membership-invoice-response':{paymentPrivateHeaders:{'Cache-Control':'private, no-store'}}});
  assert.equal((await route.GET(new Request('https://example.invalid/admin/payments/id'),{params:Promise.resolve({id:input.sourceId})})).status,403);
  const publicRoute=load('app/membership-invoices/[token]/route.ts',{'../../../lib/shop':mocks['./shop'],'../../../lib/membership-payments':payments,'../../../lib/renewals':mocks['./renewals'],'../../../lib/membership-invoice-response':{paymentPrivateHeaders:{'Cache-Control':'private, no-store'}}});

@@ -66,6 +66,13 @@ export async function paymentIdsForSources(kind:PaymentKind,ids:string[]){
  return Object.fromEntries(rows.map(r=>[r.source_id,r.id])) as Record<string,string>;
 }
 export function paymentYear(value:unknown){const n=Number(value);return Number.isInteger(n)&&n>=2000&&n<=2200?n:Number(malaysiaDate().slice(0,4));}
+export async function advancePaymentRegister(year:number){
+ if(!await isAdmin('membership'))throw Error('Unauthorised');
+ if(!Number.isInteger(year)||year<2026||year>2200)throw Error('Invalid year');
+ await membershipPaymentsReady();
+ const rows=await db()`SELECT id,invoice_sequence,kind,source_id,membership_year,paid_on::text,amount,admin_fee,payload,approved_at,voided_at FROM club_membership_payments WHERE membership_year>${year} AND paid_on<${(year+1)+'-01-01'}::date AND voided_at IS NULL ORDER BY membership_year,paid_on`;
+ return rows.map(row=>({...row,detail:JSON.parse(openRenewal(row.payload)) as PaymentSnapshot})) as PaymentRecord[];
+}
 export async function paymentRegister(year:number,basis:'payment'|'membership'='payment'){
  if(!await isAdmin('membership'))throw Error('Unauthorised');
  await membershipPaymentsReady();

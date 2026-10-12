@@ -1,6 +1,7 @@
 import 'server-only';
+import {historicalRegister} from './historical-membership';
 import {db,isAdmin,shopReady,uuid} from './shop';
-import {paymentRegister,invoiceNumber,malaysiaDate,validPaymentDate,paymentActor} from './membership-payments';
+import {paymentRegister,advancePaymentRegister,invoiceNumber,malaysiaDate,validPaymentDate,paymentActor} from './membership-payments';
 import {shopInvoicesReady} from './shop-invoices';
 import {sealRenewal} from './renewals';
 
@@ -14,14 +15,15 @@ export function financeTotals(rows:FinanceRow[]){
 export async function financialSummary(year:number){
  if(!await financeAllowed())throw Error('Unauthorised');financeYear(year);
  await shopReady();await shopInvoicesReady();
- const [members,orders]=await Promise.all([paymentRegister(year,'payment'),db()`SELECT o.id,o.customer_name,o.quantity,o.unit_price,o.original_unit_price,o.delivery_fee,o.status,i.sequence,i.issued_at,d.paid_on::text
+ const [members,advances,history,legacy,orders]=await Promise.all([paymentRegister(year,'membership'),advancePaymentRegister(year),historicalRegister(year,'membership'),historicalRegister(2026,'payment'),db()`SELECT o.id,o.customer_name,o.quantity,o.unit_price,o.original_unit_price,o.delivery_fee,o.status,i.sequence,i.issued_at,d.paid_on::text
  FROM shop_orders o LEFT JOIN shop_invoices i ON i.order_id=o.id LEFT JOIN shop_payment_dates d ON d.order_id=o.id
  WHERE (d.paid_on>=${year+'-01-01'}::date AND d.paid_on<${(year+1)+'-01-01'}::date)
  OR (d.paid_on IS NULL AND o.status='paid' AND o.created_at>=TIMESTAMPTZ '2026-01-01 00:00:00+08') ORDER BY o.created_at DESC`]);
  const rows:FinanceRow[]=members.map(r=>({id:r.id,category:r.kind,name:r.detail.name,reference:invoiceNumber(r),paidOn:r.paid_on,membershipYear:r.membership_year,gross:r.detail.quote?r.detail.quote.annual+r.detail.quote.administration:r.amount,discount:r.detail.quote?.discount||0,delivery:0,adminFee:r.admin_fee,total:r.amount,excluded:!!r.voided_at,invoice:`/admin/payments/${r.id}?file=invoice`,receipt:`/admin/payments/${r.id}?file=receipt`,approvedAt:new Date(r.approved_at).toISOString()}));
  for(const o of orders){const gross=(o.original_unit_price??o.unit_price)*o.quantity,net=o.unit_price*o.quantity;rows.push({id:o.id,category:'marketplace',name:o.customer_name,reference:o.id,paidOn:o.paid_on||null,membershipYear:null,gross,discount:gross-net,delivery:o.delivery_fee||0,adminFee:0,total:net+(o.delivery_fee||0),excluded:o.status!=='paid',invoice:o.sequence?`/shop/orders/${o.id}/invoice`:'',receipt:`/shop/orders/${o.id}/proof`,approvedAt:o.issued_at?new Date(o.issued_at).toISOString():''});}
  rows.sort((a,b)=>(b.paidOn||'').localeCompare(a.paidOn||'')||a.reference.localeCompare(b.reference));
- return {rows,totals:financeTotals(rows),undated:rows.filter(r=>!r.paidOn)};
+ const floating=[...advances.filter(r=>!r.voided_at&&r.membership_year>year&&Number(r.paid_on.slice(0,4))<=year).map(r=>({reference:invoiceNumber(r),name:r.detail.name,year:r.membership_year,amount:r.amount,paidOn:r.paid_on,receipt:`/admin/payments/${r.id}?file=receipt`})),...legacy.filter(r=>r.membershipYear>year&&r.collectionYear<=year).map(r=>({reference:r.id,name:r.name,year:r.membershipYear,amount:r.amount,paidOn:null,receipt:r.receipt}))];
+ return {rows,totals:financeTotals(rows),undated:rows.filter(r=>!r.paidOn),history,floating};
 }
 // Reconcile only a missing date. The original confirmation/invoice is never rewritten.
 export async function reconcileShopDate(id:string,paidOn:string,reason:string){
