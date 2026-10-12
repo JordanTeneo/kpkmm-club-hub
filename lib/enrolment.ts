@@ -110,7 +110,7 @@ export async function approvePayment(id:string,version:string,paidOn=''){
   await sql`UPDATE club_enrolments SET stage='active',member_number=${number},updated_at=now() WHERE application_id=${id}`;
   await sql`UPDATE club_enrolment_mail SET status='superseded' WHERE application_id=${id} AND kind<>'welcome' AND status IN ('queued','failed','unknown')`;
   await sql`UPDATE club_applications SET membership_year=${year},updated_at=now() WHERE id=${id}`;
-  const invoiceLink=await recordMembershipPayment(sql,{kind:'new',quote:savedFee(row.fee_quote,'new'),sourceId:id,year,paidOn,name:person.name,memberNumber:number,actor,proof:row.proof,proofType:row.proof_type});
+  const invoiceLink=await recordMembershipPayment(sql,{kind:'new',channel:'online',quote:savedFee(row.fee_quote,'new'),sourceId:id,year,paidOn,name:person.name,memberNumber:number,actor,proof:row.proof,proofType:row.proof_type});
   await queue(sql,id,'welcome','active',welcome(person,number,year,invoiceLink));
   return 'activated';
  });

@@ -1,5 +1,7 @@
 import {randomUUID} from 'node:crypto';
-import {db,isAdmin} from './shop';
+import {readRenewalFee} from './membership-fees';
+import {membershipPaymentsReady,paymentActor,recordMembershipPayment,validPaymentDate} from './membership-payments';
+import {db,isAdmin,readImage} from './shop';
 import {validateApplicant} from './membership';
 import {adminRosterReady,validYear} from './member-admin';
 import {nameKey} from './roster';
@@ -18,6 +20,13 @@ export async function createMember(form:FormData){
  const prefix=memberPrefixes[details.state!.toLowerCase()];
  if(details.mailingCountry!.toLowerCase()!=='malaysia'||!prefix)return {error:'The club has not configured an ID prefix for this state/country. Contact the committee; do not use an incorrect address. / Awalan nombor ahli bagi negeri/negara ini belum ditetapkan.'};
  const hash=renewalHash(details.identityType+':'+details.country.toLowerCase()+':'+details.identity);
+ let payment: {quote:ReturnType<typeof readRenewalFee>;paidOn:string;proof:{bytes:Buffer;type:string};actor:string}|undefined;
+ if(status==='active'){
+  const paidOn=String(form.get('paidOn')||''),file=form.get('proof');
+  if(!validPaymentDate(paidOn)||form.get('verified')!=='yes'||!(file instanceof File)||!file.size)throw Error('Verified payment proof and date required');
+  const quote=readRenewalFee(form.get('feeToken'),'new'),proof=await readImage(file,true);
+  await membershipPaymentsReady();payment={quote,paidOn,proof,actor:await paymentActor()};
+ }
  await adminRosterReady();
  return db().begin(async sql=>{
   await sql`LOCK TABLE club_member_roster IN SHARE ROW EXCLUSIVE MODE`;
@@ -29,6 +38,7 @@ export async function createMember(form:FormData){
   const payload=sealRenewal(JSON.stringify(member));
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${memberNumber},${year},${nameKey(details.name)},${hash},${payload},${member.active},true)`;
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${memberNumber},${year},${sealRenewal('null')},${payload},${sealRenewal('Admin added member: '+reason)})`;
+  if(payment)await recordMembershipPayment(sql,{kind:'new',channel:'admin',sourceId:randomUUID(),year,paidOn:payment.paidOn,name:details.name,memberNumber,actor:payment.actor,quote:payment.quote,proof:sealRenewal(payment.proof.bytes.toString('base64')),proofType:payment.proof.type});
   return {memberNumber};
  });
 }

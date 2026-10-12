@@ -123,6 +123,7 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
       ["/admin/videos", "Videos", "Video · Manage YouTube links"],
     ] },
     { title: "Shop & settings", bm: "Kedai & tetapan", links: [
+      ["/admin/finance", language==='ms'?'Ringkasan kewangan':'Financial summary', language==='ms'?'Kutipan tahunan mulai 2026: ahli baharu, pembaharuan dan kedai':'Annual collections from 2026: new members, renewals and marketplace'],
       ["/admin/shop", "Marketplace", "Kedai · Manage products, stock and orders"],
       ["/admin/email", "Club email", "E-mel kelab · Manage notification connection"],
       ...(canManageAccounts ? [["/admin/users", language==='ms'?'Akaun jawatankuasa':'Committee accounts', language==='ms'?'Cipta akaun, tetapkan akses dan urus kata laluan jawatankuasa':'Create accounts, set access and manage committee passwords']] : []),

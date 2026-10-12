@@ -17,10 +17,12 @@ export async function feesReady(){
  })().catch(e=>{ready=undefined;throw e;});await ready;
 }
 export async function getFees(){await feesReady();const rows=await db()`SELECT settings,version FROM club_fee_settings WHERE id=1`;if(!rows[0])throw Error('Fees unavailable');const settings=(typeof rows[0].settings==='string'?JSON.parse(rows[0].settings):rows[0].settings) as FeeSettings;feeQuote(settings,'new');feeQuote(settings,'renewal');return {settings,version:Number(rows[0].version)};}
-export async function renewalFeeToken(){const {settings}=await getFees();const quote=feeQuote(settings,'renewal'),body=Buffer.from(JSON.stringify({quote,expires:Date.now()+86400000})).toString('base64url');return {quote,token:body+'.'+renewalHash('fee:'+body)};}
-export function readRenewalFee(token:unknown){
+export async function joiningFeeToken(){return renewalFeeToken('new');}
+export async function renewalFeeToken(kind:'new'|'renewal'='renewal'){const {settings}=await getFees();const quote=feeQuote(settings,kind),body=Buffer.from(JSON.stringify({quote,kind,expires:Date.now()+86400000})).toString('base64url');return {quote,token:body+'.'+renewalHash('fee:'+body)};}
+export function readRenewalFee(token:unknown,kind:'new'|'renewal'='renewal'){
  if(typeof token!=='string'||token.length>1500)throw Error('Refresh the fee quote');
  const [body,signature,extra]=token.split('.');if(!body||extra!==undefined||signature!==renewalHash('fee:'+body))throw Error('Invalid fee quote');
  const parsed=JSON.parse(Buffer.from(body,'base64url').toString());if(!Number.isFinite(parsed.expires)||parsed.expires<Date.now())throw Error('Fee quote expired');
- return savedFee(parsed.quote,'renewal');
+ if((parsed.kind||'renewal')!==kind)throw Error('Wrong fee quote');
+ return savedFee(parsed.quote,kind);
 }

@@ -7,7 +7,7 @@ import {openRenewal,sealRenewal,renewalHash} from './renewals';
 import {SITE_ORIGIN} from './gmail';
 
 export type PaymentKind='new'|'renewal';
-export type PaymentSnapshot={name:string;memberNumber:string;actor:string;quote?:FeeQuote};
+export type PaymentSnapshot={name:string;memberNumber:string;actor:string;channel?:'online'|'admin';quote?:FeeQuote};
 export type PaymentRecord={id:string;invoice_sequence:string;kind:PaymentKind;source_id:string;membership_year:number;paid_on:string;amount:number;admin_fee:number;payload:string;approved_at:Date;voided_at:Date|null;detail:PaymentSnapshot};
 export function malaysiaDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 export function validPaymentDate(value:string){const date=new Date(value+'T00:00:00Z');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&value>='2000-01-01'&&value<=malaysiaDate()&&Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value;}
@@ -29,17 +29,18 @@ export async function membershipPaymentsReady(){
    approved_at timestamptz NOT NULL DEFAULT now(),voided_at timestamptz,
    UNIQUE(kind,source_id))`;
   await db()`CREATE INDEX IF NOT EXISTS club_membership_payments_year ON club_membership_payments(paid_on,membership_year)`;
+  await db()`CREATE INDEX IF NOT EXISTS club_membership_payments_membership_year ON club_membership_payments(membership_year,paid_on)`;
   await db()`CREATE TABLE IF NOT EXISTS club_membership_payment_events(id bigserial PRIMARY KEY,payment_id uuid NOT NULL REFERENCES club_membership_payments(id),action text NOT NULL,actor text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`;
  })().catch(e=>{ready=undefined;throw e;});
  await ready;
 }
 // Called only inside the already-authorised approval transaction. No historical backfill.
-export async function recordMembershipPayment(sql:any,input:{quote?:FeeQuote;kind:PaymentKind;sourceId:string;year:number;paidOn:string;name:string;memberNumber:string;actor:string;proof:string;proofType:string}){
+export async function recordMembershipPayment(sql:any,input:{channel?:'online'|'admin';quote?:FeeQuote;kind:PaymentKind;sourceId:string;year:number;paidOn:string;name:string;memberNumber:string;actor:string;proof:string;proofType:string}){
  if(!validPaymentDate(input.paidOn)||!uuid(input.sourceId)||!input.proof||!['image/jpeg','image/png','application/pdf'].includes(input.proofType))throw Error('Invalid payment record');
  const quote=savedFee(input.quote,input.kind);
  const token=randomBytes(32).toString('hex');
  const rows=await sql`INSERT INTO club_membership_payments(id,kind,source_id,membership_year,paid_on,amount,admin_fee,payload,proof,proof_type,token_hash,token_encrypted)
- VALUES(${randomUUID()},${input.kind},${input.sourceId},${input.year},${input.paidOn},${quote.total},${Math.max(0,quote.administration-Math.max(0,quote.discount-quote.annual))},${sealRenewal(JSON.stringify({name:input.name,memberNumber:input.memberNumber,actor:input.actor,quote}))},${input.proof},${input.proofType},${renewalHash('invoice:'+token)},${sealRenewal(token)})
+ VALUES(${randomUUID()},${input.kind},${input.sourceId},${input.year},${input.paidOn},${quote.total},${Math.max(0,quote.administration-Math.max(0,quote.discount-quote.annual))},${sealRenewal(JSON.stringify({name:input.name,memberNumber:input.memberNumber,actor:input.actor,channel:input.channel,quote}))},${input.proof},${input.proofType},${renewalHash('invoice:'+token)},${sealRenewal(token)})
  ON CONFLICT(kind,source_id) DO NOTHING RETURNING id`;
  const saved=(await sql`SELECT id,token_encrypted,voided_at FROM club_membership_payments WHERE kind=${input.kind} AND source_id=${input.sourceId} FOR UPDATE`)[0];
  if(!saved)throw Error('Payment record unavailable');
@@ -65,9 +66,14 @@ export async function paymentIdsForSources(kind:PaymentKind,ids:string[]){
  return Object.fromEntries(rows.map(r=>[r.source_id,r.id])) as Record<string,string>;
 }
 export function paymentYear(value:unknown){const n=Number(value);return Number.isInteger(n)&&n>=2000&&n<=2200?n:Number(malaysiaDate().slice(0,4));}
-export async function paymentRegister(year:number){
+export async function paymentRegister(year:number,basis:'payment'|'membership'='payment'){
  if(!await isAdmin('membership'))throw Error('Unauthorised');
  await membershipPaymentsReady();
+ if(!Number.isInteger(year)||year<2000||year>2200)throw Error('Invalid year');
+ if(basis==='membership'){
+  const rows=await db()`SELECT id,invoice_sequence,kind,source_id,membership_year,paid_on::text,amount,admin_fee,payload,approved_at,voided_at FROM club_membership_payments WHERE membership_year=${year} ORDER BY paid_on DESC,invoice_sequence DESC`;
+  return rows.map(row=>({...row,detail:JSON.parse(openRenewal(row.payload)) as PaymentSnapshot})) as PaymentRecord[];
+ }
  // One bounded-year query; do not load receipt bytes into the page or export.
  const rows=await db()`SELECT id,invoice_sequence,kind,source_id,membership_year,paid_on::text,amount,admin_fee,payload,approved_at,voided_at FROM club_membership_payments WHERE paid_on>=${year+'-01-01'}::date AND paid_on<${(year+1)+'-01-01'}::date ORDER BY membership_year,paid_on DESC,invoice_sequence DESC`;
  return rows.map(row=>({...row,detail:JSON.parse(openRenewal(row.payload)) as PaymentSnapshot})) as PaymentRecord[];

@@ -37,7 +37,7 @@ export async function renewMemberByAdmin(form:FormData){
   const payload=sealRenewal(JSON.stringify(next));
   await sql`INSERT INTO club_roster_edits(id,member_number,membership_year,before_payload,after_payload,reason) VALUES(${randomUUID()},${number},${year},${sealRenewal(JSON.stringify(row))},${payload},${sealRenewal('Admin verified renewal '+id+': '+reason)})`;
   await sql`INSERT INTO club_member_roster(member_number,membership_year,name_hash,identity_hash,payload,active,status_override) VALUES(${number},${year},${row.name_hash},${row.identity_hash},${payload},true,false) ON CONFLICT(member_number,membership_year) DO UPDATE SET payload=excluded.payload,active=true,status_override=false,updated_at=now()`;
-  await recordMembershipPayment(sql,{kind:'renewal',quote,sourceId:id,year,paidOn,name:member.name,memberNumber:number,actor,proof:sealRenewal(proof.bytes.toString('base64')),proofType:proof.type});
+  await recordMembershipPayment(sql,{kind:'renewal',channel:'admin',quote,sourceId:id,year,paidOn,name:member.name,memberNumber:number,actor,proof:sealRenewal(proof.bytes.toString('base64')),proofType:proof.type});
   return id;
  });
 }

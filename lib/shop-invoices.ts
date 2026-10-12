@@ -6,6 +6,8 @@ let ready:Promise<void>|undefined;
 export async function shopInvoicesReady(){
  if(!ready)ready=(async()=>{
   await db()`CREATE TABLE IF NOT EXISTS shop_invoices(order_id uuid PRIMARY KEY REFERENCES shop_orders(id),sequence bigserial UNIQUE,payload text NOT NULL,issued_at timestamptz NOT NULL DEFAULT now())`;
+  await db()`CREATE TABLE IF NOT EXISTS shop_payment_dates(order_id uuid PRIMARY KEY REFERENCES shop_orders(id),paid_on date NOT NULL,recorded_at timestamptz NOT NULL DEFAULT now(),recorded_by text,note text)`;
+  await db()`CREATE INDEX IF NOT EXISTS shop_payment_dates_year ON shop_payment_dates(paid_on)`;
  })().catch(e=>{ready=undefined;throw e;});
  await ready;
 }

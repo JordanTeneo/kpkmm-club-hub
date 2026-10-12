@@ -124,7 +124,12 @@ export async function updateOrder(_: Result, form: FormData): Promise<Result> {
     if(!(await isAdmin('shop'))) throw new Error('Please sign in as admin. / Sila log masuk sebagai pentadbir.');
     await shopReady(); const id=text(form,'id'), status=text(form,'status');
       if(!uuid(id)||!['paid','cancelled','pending'].includes(status)) throw new Error('Invalid order status.');
-      if(status==='paid')await shopInvoicesReady();
+      const paidOn=text(form,'paidOn');
+      if(status==='paid'){
+        const {validPaymentDate}=await import('../../lib/membership-payments');
+        if(!validPaymentDate(paidOn))throw Error('Enter the bank payment date shown on the receipt. / Masukkan tarikh bayaran bank pada resit.');
+        await shopInvoicesReady();
+      }
     await db().begin(async sql => {
       const rows=await sql`SELECT * FROM shop_orders WHERE id=${id} FOR UPDATE`; const order=rows[0];
       if(!order || ['paid','cancelled'].includes(order.status)) throw new Error('This order is already finalised. / Tempahan ini telah dimuktamadkan.');
@@ -133,6 +138,7 @@ export async function updateOrder(_: Result, form: FormData): Promise<Result> {
       await sql`UPDATE shop_orders SET status=${status},updated_at=now() WHERE id=${id}`;
       if(status==='paid'){
         await recordShopInvoice(sql,order as ShopInvoiceSnapshot);
+        await sql`INSERT INTO shop_payment_dates(order_id,paid_on) VALUES(${id},${paidOn}::date) ON CONFLICT(order_id) DO NOTHING`;
         await queueShopMail(sql as unknown as ReturnType<typeof db>,id,'completed');
       }
     });

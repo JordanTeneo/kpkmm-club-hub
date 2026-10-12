@@ -11,6 +11,7 @@ const sections=[
  ['/admin/renewals','Renewals','Pembaharuan'],
  ['/admin/fees','Membership fees & discounts','Yuran & diskaun keahlian'],
  ['/admin/payments','Membership payments','Bayaran keahlian'],
+ ['/admin/finance','Financial summary','Ringkasan kewangan'],
  ['/admin?section=notices#workspace','Notices','Notis'],
  ['/admin?section=archive#workspace','Archive','Arkib'],
  ['/admin?section=photos#workspace','Photos','Foto'],

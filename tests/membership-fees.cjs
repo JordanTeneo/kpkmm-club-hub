@@ -15,7 +15,9 @@ const hash=s=>crypto.createHmac('sha256','test-only-key').update(s).digest('hex'
 const sql=async(p,...v)=>p.join('').startsWith('SELECT settings')?[{settings:JSON.stringify(settings),version:1}]:[];sql.begin=fn=>fn(sql);
 const fees=load('lib/membership-fees.ts',{'./shop':{db:()=>sql},'./renewals':{renewalHash:hash,renewalsReady:async()=>{}},'./membership-pricing':pricing});
 (async()=>{
+ const joining=await fees.joiningFeeToken();assert.equal(fees.readRenewalFee(joining.token,'new').total,21000);assert.throws(()=>fees.readRenewalFee(joining.token));
  const signed=await fees.renewalFeeToken();assert.equal(fees.readRenewalFee(signed.token).total,14000);
+ assert.throws(()=>fees.readRenewalFee(signed.token,'new'));
  settings.renewalDiscount=0;assert.equal(fees.readRenewalFee(signed.token).total,14000,'existing signed quotes keep their amount');
  assert.equal((await fees.renewalFeeToken()).quote.total,16000,'new quotes use new fee');
  assert.throws(()=>fees.readRenewalFee(signed.token+'tampered'));
