@@ -1,0 +1,24 @@
+const fs=require('fs'),ts=require('typescript'),assert=require('node:assert/strict'),{renderToStaticMarkup}=require('react-dom/server');
+function load(file,mocks={}){const out={};new Function('exports','require',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText)(out,n=>n in mocks?mocks[n]:require(n));return out;}
+let allowed=true,queries=[];
+const roster=(number,status,extra={})=>({member_number:number,identity_hash:number,detail:{name:'Sample '+number,paymentHistory:[{year:2025,status:'paid'},{year:2026,status}],...extra}});
+const renewal=(id,number,year=2026,amount=15000)=>({id,identity_hash:number,renewal_year:year,amount,detail:{name:'Sample '+number,rosterMemberNumber:number}});
+const records=[roster('B-20-001','paid'),roster('B-26-002','new'),roster('B-20-003','sponsored'),roster('B-20-004','lifetime',{lifetimeSince:2020}),roster('B-20-005','inactive'),roster('B-20-006','paid'),roster('B-20-007','paid'),roster('B-20-008','paid',{deceased:true})];
+const renewals=[renewal('legacy','B-20-001'),renewal('advance','B-20-001',2027),renewal('sponsored','B-20-003'),renewal('covered','B-20-006')];
+const ledger=[{kind:'renewal',source_id:'covered',membership_year:2026,detail:{memberNumber:'B-20-006'}},{kind:'renewal',source_id:'voided',membership_year:2026,voided_at:'2026-10-01',detail:{memberNumber:'B-20-007'}}];
+const sql=async(parts,...values)=>{const q=parts.join('?');queries.push(q);if(q.includes('DISTINCT ON'))return records.map(r=>({...r,payload:JSON.stringify(r.detail)}));if(q.includes('FROM club_renewals'))return renewals.map(r=>({...r,payload:JSON.stringify(r.detail)}));if(q.includes('FROM club_membership_payments'))return ledger.map(r=>({...r,payload:JSON.stringify(r.detail)}));return [];};
+const mod=load('lib/historical-membership.ts',{'server-only':{},'./shop':{db:()=>sql,isAdmin:async()=>allowed},'./roster':{rosterReady:async()=>{}},'./renewals':{renewalsReady:async()=>{},openRenewal:JSON.parse.bind(JSON)},'./membership-payments':{membershipPaymentsReady:async()=>{}}});
+// Decryption returns plaintext, not a parsed object.
+const api=load('lib/historical-membership.ts',{'server-only':{},'./shop':{db:()=>sql,isAdmin:async()=>allowed},'./roster':{rosterReady:async()=>{}},'./renewals':{renewalsReady:async()=>{},openRenewal:s=>s},'./membership-payments':{membershipPaymentsReady:async()=>{}}});
+(async()=>{
+ const rows=api.historicalPayments(records,renewals,ledger);assert.equal(rows.length,4);assert.equal(rows.reduce((s,r)=>s+r.amount,0),70000);assert.equal(rows.find(r=>r.kind==='new').adminFee,10000);assert.equal(rows.filter(r=>r.memberNumber==='B-20-001').length,2,'separate advance year');assert.ok(rows.some(r=>r.memberNumber==='B-20-008'),'death does not erase an earlier payment');assert.ok(rows.every(r=>!('paidOn' in r)),'never manufacture bank dates');assert.ok(rows.every(r=>!('invoice' in r)));
+ assert.equal(api.historicalPayments([roster('B-20-009','paid')],[],[{...ledger[0],detail:{memberNumber:'B-20-099'}}],[{old_number:'B-20-099',new_number:'B-20-009'}]).length,0,'corrected IDs deduplicated');
+ assert.equal(api.historicalPayments([roster('B-20-009','review')],[],[]).length,0,'active or ambiguous status is not payment evidence');
+ const cash=await api.historicalRegister(2026);assert.equal(cash.length,4);assert.equal((await api.historicalRegister(2027,'membership')).length,1);assert.equal((await api.historicalRegister(2026,'membership')).length,3);assert.equal((await api.historicalRegister(2027,'payment')).length,0);assert.equal((await api.historicalRegister(2025)).length,0);assert.ok(queries.some(q=>q.includes("2026-10-12 00:00:00+08")));assert.ok(queries.every(q=>!/^\s*(UPDATE|INSERT|DELETE)/.test(q)),'read-only overlay');
+ const sheet=api.historicalSheet(rows);assert.equal(sheet.rows.length,5);assert.equal(sheet.rows.find(r=>r[0]==='roster:B-26-002:2026')[6],250);assert.equal(sheet.rows[1][8],'Unknown');
+ const component=load('app/admin/historical-payments.tsx',{'../../lib/shop':{money:n=>'RM '+(n/100).toFixed(2)}});
+ const en=renderToStaticMarkup(component.HistoricalPayments({rows,bm:false}));assert.match(en,/RM 700.00/);assert.match(en,/exact date unavailable/);assert.match(en,/\/admin\/renewals\/proof\?id=legacy/);assert.doesNotMatch(en,/\/membership-invoices\//);
+ const bm=renderToStaticMarkup(component.HistoricalPayments({rows,bm:true}));assert.match(bm,/Bayaran sejarah/);assert.doesNotMatch(bm,/Historical payments/);
+ allowed=false;await assert.rejects(()=>api.historicalRegister(2026),/Unauthorised/);
+ console.log('PASS historical payment overlay: owner-approved 2026 rates, stored renewals, waiver/lifetime exclusions, no guessed dates/invoices, deduplication, corrected IDs, reversals, advance years, permissions, EN/BM and export.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

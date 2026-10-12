@@ -1,3 +1,5 @@
+import {historicalRegister} from '../../../lib/historical-membership';
+import {HistoricalPayments} from '../historical-payments';
 import {MembershipPrice} from '../../membership-price';
 import {redirect} from 'next/navigation';
 import {db,isAdmin,money} from '../../../lib/shop';
@@ -11,17 +13,18 @@ export default async function Payments({searchParams}:{searchParams:Promise<{bas
  if(!await isAdmin('membership'))redirect('/admin');
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
  const q=await searchParams,year=paymentYear(q.year),basis=q.basis==='payment'?'payment':'membership',page=Math.max(1,Math.min(10000,Math.floor(Number(q.page)||1)));
- let rows,pending;
+ let rows,pending,history;
  try{
-  rows=await paymentRegister(year,basis);await enrolmentReady();
+  rows=await paymentRegister(year,basis);history=await historicalRegister(year,basis);await enrolmentReady();
   pending=(await db()`SELECT (SELECT count(*) FROM club_renewals WHERE review_status='pending') AS renewals,(SELECT count(*) FROM club_enrolments WHERE stage='proof_submitted') AS applications`)[0];
  }catch{return <main className="shop"><h1>{t('Membership payments','Bayaran keahlian')}</h1><p role="alert">{t('Payment records could not be loaded. Please try again. No records have been changed.','Rekod bayaran tidak dapat dimuatkan. Sila cuba lagi. Tiada rekod diubah.')}</p></main>;}
  const groups=paymentTotals(rows),filtered=q.membershipYear?rows.filter(r=>r.membership_year===Number(q.membershipYear)):rows;
  const shown=filtered.slice((page-1)*50,page*50),base=`?basis=${basis}&year=${year}${q.membershipYear?'&membershipYear='+encodeURIComponent(q.membershipYear):''}`;
  return <main className="shop"><h1>{t('Membership payments','Bayaran keahlian')}</h1>
-  <p>{t('Verified online and admin-entered new memberships and renewals are consolidated here. Choose membership year to include advance payments made in other calendar years, or payment year to reconcile bank receipts. Unrecorded historical payments are not automatically backfilled.','Keahlian baharu dan pembaharuan dalam talian serta kemasukan pentadbir yang disahkan digabungkan di sini. Pilih tahun keahlian untuk menyertakan bayaran awal dari tahun kalendar lain, atau tahun bayaran untuk menyelaraskan resit bank. Bayaran sejarah yang belum direkodkan tidak diisi secara automatik.')}</p>
+  <p>{t('Verified online and admin-entered new memberships and renewals are consolidated here. Choose membership year to include advance payments made in other calendar years, or payment year to reconcile bank receipts. Owner-approved 2026 historical payments are shown separately below.','Keahlian baharu dan pembaharuan dalam talian serta kemasukan pentadbir yang disahkan digabungkan di sini. Pilih tahun keahlian untuk menyertakan bayaran awal dari tahun kalendar lain, atau tahun bayaran untuk menyelaraskan resit bank. Bayaran sejarah 2026 yang diluluskan pemilik dipaparkan berasingan di bawah.')}</p>
   <form method="get" className="shop-actions"><label>{t('Report by','Laporan mengikut')}<select name="basis" defaultValue={basis}><option value="membership">{t('Membership year','Tahun keahlian')}</option><option value="payment">{t('Bank payment year','Tahun bayaran bank')}</option></select></label><label>{t('Year','Tahun')}<input type="number" name="year" min="2000" max="2200" defaultValue={year} required/></label><button>{t('View year','Lihat tahun')}</button></form>
   <section className="shop-note"><h2>{year}: {money(groups.reduce((sum,g)=>sum+g.total,0))}</h2><p>{t('Verified payments only. Reversed approvals are excluded; they do not represent a bank refund.','Bayaran disahkan sahaja. Kelulusan dibatalkan tidak termasuk; ini bukan bayaran balik bank.')}</p></section>
+  <section className="shop-note"><h2>{t('Combined total including historical payments','Jumlah termasuk bayaran sejarah')}: {money(groups.reduce((s,g)=>s+g.total,0)+history.reduce((s,r)=>s+r.amount,0))}</h2></section><HistoricalPayments rows={history} bm={bm}/>
   <h2>{t('By membership year','Mengikut tahun keahlian')}</h2>
   {!groups.length&&<p>{t('No verified payments recorded for this selection.','Tiada bayaran disahkan direkodkan bagi pilihan ini.')}</p>}
   {groups.map(g=><section className="shop-card" key={g.year}><h3>{g.year} {basis==='payment'&&g.year>year?t('(Advance payments)','(Bayaran awal)'):basis==='payment'&&g.year<year?t('(Earlier membership year)','(Tahun keahlian terdahulu)'):''}</h3><p>{g.count} {t('payments','bayaran')} · <strong>{money(g.total)}</strong></p><p>{t('New-member annual fees','Yuran tahunan ahli baharu')}: {money(g.newFees)} · {t('One-time admin fees','Yuran pentadbiran sekali sahaja')}: {money(g.adminFees)} · {t('Renewals','Pembaharuan')}: {money(g.renewalFees)}</p><a href={`?basis=${basis}&year=${year}&membershipYear=${g.year}`}>{t('View these payments','Lihat bayaran ini')}</a></section>)}
