@@ -111,7 +111,7 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
       ["/admin/members", "New applications", "Permohonan baharu · Review requests to join"],
       ["/admin/renewals", "Membership renewals", "Pembaharuan · Review payments and renewals"],
       ["/admin/fees", language==='ms'?'Yuran & diskaun keahlian':'Membership fees & discounts', language==='ms'?'Tetapkan yuran dan diskaun RM':'Set fees and fixed RM discounts'],
-      ["/admin/payments", "Membership payments / Bayaran keahlian", "Annual totals, advance payments, receipts and invoices / Jumlah tahunan, bayaran awal, resit dan invois"],
+      ["/admin/payments", language==='ms'?'Bayaran keahlian':'Membership payments', language==='ms'?'Jumlah tahunan, bayaran awal, resit dan invois':'Annual totals, advance payments, receipts and invoices'],
       ["/admin/reminders", "Renewal reminders", "Pause or enable reminder emails and review sending history"],
     ] },
     { title: "Website", bm: "Laman web", links: [
@@ -153,3 +153,4 @@ async function manageAlbum(formData: FormData): Promise<{ error?: string }> {
     <p className="admin-footnote">{ui("KPKMM administration · Changes become visible on the website after saving.")}</p>
   </main>;
 }
+

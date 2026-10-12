@@ -9,7 +9,7 @@ import {db,readImage} from '../../lib/shop';
 import {findRenewalMember,renewalLookup} from '../../lib/renewal-member';
 import {renewalsReady,renewalLimit,sealRenewal,openRenewal,deliverRenewal} from '../../lib/renewals';
 import {getLanguage} from '../language';
-export type RenewalResult={error?:string;success?:string;reference?:string};
+export type RenewalResult={error?:string;success?:string;reference?:string;kind?:'lifetime';eligible?:boolean};
 export async function requestRenewal(_:RenewalResult,form:FormData):Promise<RenewalResult>{
  if(form.get('consent')!=='yes'||form.get('website'))return {error:'Check the form and consent checkbox. / Semak borang dan persetujuan.'};
  const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
@@ -24,7 +24,7 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
   const match=await findRenewalMember(lookup,currentYear,year);
   if(match.status==='already-active')return {error:t('Membership is already valid for the selected year. Choose next year if you wish to renew in advance. Do not pay again for this year.','Keahlian sudah sah untuk tahun dipilih. Pilih tahun depan untuk pembaharuan awal. Jangan bayar lagi bagi tahun ini.')};
   if(match.status==='deceased')return {error:t('Please contact the committee to review this membership record.','Sila hubungi jawatankuasa untuk menyemak rekod keahlian ini.')};
-  if(match.status==='lifetime')return {success:t('You are a lifetime member. Your membership remains active; no annual renewal or payment is required.','Anda ialah ahli seumur hidup. Keahlian anda kekal aktif; pembaharuan atau bayaran tahunan tidak diperlukan.')};
+  if(match.status==='lifetime')return {kind:'lifetime',success:t('You are a lifetime member. Your membership remains active; no annual renewal or payment is required.','Anda ialah ahli seumur hidup. Keahlian anda kekal aktif; pembaharuan atau bayaran tahunan tidak diperlukan.')};
   if(match.status==='missing')return {error:t('No matching registered member was found. Renewal is not allowed. Check your full registered name or MyKad/passport number, or contact the committee.','Tiada ahli berdaftar yang sepadan ditemui. Pembaharuan tidak dibenarkan. Semak nama penuh berdaftar atau nombor MyKad/pasport, atau hubungi jawatankuasa.')};
   if(match.status==='ambiguous')return {error:lookup.mode==='name'?t('This name cannot identify one member. Please use your MyKad/passport number instead, or contact the committee.','Nama ini tidak dapat mengenal pasti seorang ahli sahaja. Sila gunakan nombor MyKad/pasport atau hubungi jawatankuasa.'):t('These identification details cannot identify one member. Contact the committee before renewing.','Maklumat pengenalan ini tidak dapat mengenal pasti seorang ahli sahaja. Hubungi jawatankuasa sebelum memperbaharui.')};
   if(match.status!=='eligible')return {error:match.status==='reinstate'?'Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again. / Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi.':'Your last active year could not be verified. Contact the committee to update your record before renewing or paying. / Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar.'};
@@ -50,3 +50,30 @@ export async function requestRenewal(_:RenewalResult,form:FormData):Promise<Rene
  revalidatePath('/admin/renewals');
  return {reference:id,success:status==='accepted'?'Your renewal and payment proof were saved, and Gmail accepted the email to the club. Membership remains pending verification. / Permohonan dan bukti bayaran disimpan, dan Gmail menerima e-mel kepada kelab. Keahlian masih menunggu pengesahan.':'Your renewal and payment proof were saved for the club to review, but email delivery is not confirmed. Do not submit or pay again. / Permohonan dan bukti bayaran disimpan untuk semakan kelab, tetapi penghantaran e-mel belum disahkan. Jangan hantar atau bayar lagi.'};
 }
+export async function checkRenewalEligibility(_:RenewalResult,form:FormData):Promise<RenewalResult>{
+ const bm=(await getLanguage())==='ms',t=(en:string,ms:string)=>bm?ms:en;
+ const currentYear=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Kuala_Lumpur'}).format(new Date()));
+ const year=Number(form.get('year'));
+ let lookup;
+ try{lookup=renewalLookup(form);if(!Number.isInteger(year)||year<currentYear||year>currentYear+1)throw Error('year');}
+ catch{return {error:t('Enter your registered name or MyKad/passport number and choose a valid renewal year.','Masukkan nama berdaftar atau nombor MyKad/pasport dan pilih tahun pembaharuan yang sah.')};}
+ try{
+  await renewalsReady();
+  const h=await headers(),ip=h.get('x-vercel-forwarded-for')?.split(',')[0]||h.get('x-forwarded-for')?.split(',')[0]||'unknown';
+  if(!(await renewalLimit('eligibility:ip:'+ip,10))||!(await renewalLimit('eligibility:all',100)))return {error:t('Too many checks. Please try again in an hour.','Terlalu banyak semakan. Cuba lagi dalam sejam.')};
+  const match=await findRenewalMember(lookup,currentYear,year);
+  if(match.status==='already-active')return {error:t('Membership is already valid for the selected year. Choose next year if you wish to renew in advance. Do not pay again for this year.','Keahlian sudah sah untuk tahun dipilih. Pilih tahun depan untuk pembaharuan awal. Jangan bayar lagi bagi tahun ini.')};
+  if(match.status==='deceased')return {error:t('Please contact the committee to review this membership record.','Sila hubungi jawatankuasa untuk menyemak rekod keahlian ini.')};
+  if(match.status==='lifetime')return {kind:'lifetime',success:t('You are a lifetime member. Your membership remains active; no annual renewal or payment is required.','Anda ialah ahli seumur hidup. Keahlian anda kekal aktif; pembaharuan atau bayaran tahunan tidak diperlukan.')};
+  if(match.status==='missing')return {error:t('No matching registered member was found. Renewal is not allowed. Check your full registered name or MyKad/passport number, or contact the committee.','Tiada ahli berdaftar yang sepadan ditemui. Pembaharuan tidak dibenarkan. Semak nama penuh berdaftar atau nombor MyKad/pasport, atau hubungi jawatankuasa.')};
+  if(match.status==='ambiguous')return {error:lookup.mode==='name'?t('This name cannot identify one member. Please use your MyKad/passport number instead, or contact the committee.','Nama ini tidak dapat mengenal pasti seorang ahli sahaja. Sila gunakan nombor MyKad/pasport atau hubungi jawatankuasa.'):t('These identification details cannot identify one member. Contact the committee before renewing.','Maklumat pengenalan ini tidak dapat mengenal pasti seorang ahli sahaja. Hubungi jawatankuasa sebelum memperbaharui.')};
+  if(match.status!=='eligible')return {error:match.status==='reinstate'?'Membership has lapsed for more than one year. Online renewal is unavailable. Contact the committee for manual reinstatement; your membership number is retained. Do not pay again. / Keahlian tidak aktif melebihi setahun. Hubungi jawatankuasa untuk pengaktifan semula secara manual. Nombor ahli dikekalkan. Jangan bayar lagi.':'Your last active year could not be verified. Contact the committee to update your record before renewing or paying. / Tahun aktif terakhir tidak dapat disahkan. Hubungi jawatankuasa untuk mengemas kini rekod sebelum memperbaharui atau membayar.'};
+
+  const pending=await db()`SELECT id FROM club_renewals WHERE identity_hash=${match.identityHash} AND renewal_year=${year} LIMIT 1`;
+  if(pending.length)return {error:t('A renewal request is already on file for this year. Contact the committee; do not pay again.','Permohonan pembaharuan sudah direkodkan bagi tahun ini. Hubungi jawatankuasa; jangan bayar lagi.')};
+  readRenewalFee(form.get('feeToken'));
+  return {eligible:true};
+ }catch{return {error:t('Eligibility could not be checked. Refresh and try again, or contact the committee before paying.','Kelayakan tidak dapat disemak. Muat semula dan cuba lagi, atau hubungi jawatankuasa sebelum membayar.')};}
+}
+
+
