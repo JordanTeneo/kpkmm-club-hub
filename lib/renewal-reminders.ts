@@ -22,6 +22,7 @@ export async function remindersReady(){
  await db()`ALTER TABLE club_reminder_settings ADD COLUMN IF NOT EXISTS config jsonb NOT NULL DEFAULT '{}'::jsonb`;
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_preferences(member_number text PRIMARY KEY,opt_out boolean NOT NULL DEFAULT false,undeliverable boolean NOT NULL DEFAULT false,token text UNIQUE NOT NULL)`;
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_mail(id uuid PRIMARY KEY,member_number text NOT NULL,target_year integer NOT NULL,attempt_day date NOT NULL,status text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(member_number,attempt_day))`;
+ await db()`ALTER TABLE club_reminder_mail ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'renewal'`;
 }
 export function eligible(rows:any[],number:string,target:number,pending:any[]){
  const person=rows.find(r=>r.member_number===number);if(!person)return null;
@@ -51,12 +52,12 @@ export async function runReminders(now=new Date(),deadline=Date.now()+240000){
     sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster ORDER BY membership_year DESC`,
     sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${target}`,
     sql`SELECT * FROM club_reminder_preferences`,
-    sql`SELECT member_number,max(attempt_day)::text AS last_day,bool_or(status IN ('sending','unknown')) AS uncertain FROM club_reminder_mail GROUP BY member_number`
+    sql`SELECT member_number,max(attempt_day) FILTER(WHERE category='renewal')::text AS last_day,bool_or(status IN ('sending','unknown')) AS uncertain,bool_or(attempt_day=${day}::date) AS today FROM club_reminder_mail GROUP BY member_number`
    ]);
    const candidates=[...new Set(rows.map(r=>String(r.member_number)))].sort((a,b)=>(history.find(h=>h.member_number===a)?.last_day||'').localeCompare(history.find(h=>h.member_number===b)?.last_day||'')||a.localeCompare(b));
    for(const number of candidates){
     const pref=prefs.find(p=>p.member_number===number),last=history.find(h=>h.member_number===number)?.last_day;
-    if(pref?.opt_out||pref?.undeliverable||history.find(h=>h.member_number===number)?.uncertain||last&&!monthDue(last,day,config.intervalMonths))continue;
+    if(pref?.opt_out||pref?.undeliverable||history.find(h=>h.member_number===number)?.today||history.find(h=>h.member_number===number)?.uncertain||last&&!monthDue(last,day,config.intervalMonths))continue;
     const member=eligible(rows,number,target,pending);if(!member)continue;
     const token=pref?.token||randomBytes(32).toString('hex');
     await sql`INSERT INTO club_reminder_preferences(member_number,token) VALUES(${number},${token}) ON CONFLICT DO NOTHING`;

@@ -8,7 +8,7 @@ const mocks={'react/jsx-runtime':{jsx,jsxs:jsx},'next/navigation':{redirect:x=>{
 const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/admin/reminders/page.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText,{exports:out,require:n=>mocks[n]||{},process:processMock,Date});
 (async()=>{
  const render=result=>out.default({searchParams:Promise.resolve({result})});let tree=await render(),all=nodes(tree),copy=text(tree);
- for(const s of ['One-time reminder','Automatic reminders','Sending history','Turn on automatic reminders','Shared by both reminder types','No sending attempts yet.'])assert.ok(copy.includes(s),s);
+ for(const s of ['One-time reminder','Automatic reminders','Sending history','Turn on automatic reminders','Shared by reminders and announcements','No sending attempts yet.'])assert.ok(copy.includes(s),s);
  assert.equal(all.filter(n=>n.type==='details').every(n=>!n.props.open),true);
  assert.ok(all.some(n=>n.type==='a'&&n.props.href==='/admin/reminders/campaigns'&&text(n)==='Create one-time reminder'));
  for(const name of ['targetYear','startDate','dailyLimit','intervalMonths','subject','message'])assert.equal(all.filter(n=>n.props?.name===name).length,1,name);

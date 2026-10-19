@@ -71,7 +71,7 @@ function fixture(size=1){
  f=fixture();await f.queue();f.state.outcome='throw';await f.lib.runCampaigns();await f.lib.runCampaigns(new Date('2026-10-20'));assert.equal(f.state.sent.length,1);assert.equal(f.state.mail[0].status,'unknown');
  f=fixture();await f.queue();await f.lib.runCampaigns(new Date('2027-01-01'));assert.equal(f.state.sent.length,0);assert.equal(f.state.recipients[0].status,'skipped');
  f=fixture();await f.queue();await f.lib.runCampaigns(new Date('2026-12-15'));assert.equal(f.state.mail[0].target_year,2026,'fixed year even after seasonal switch');
- let calls=0;const route=load('app/api/renewal-reminders/route.ts',{'../../../lib/renewal-reminders':{runReminders:async()=>{calls++;return {};}},'../../../lib/reminder-campaigns':{runCampaigns:async()=>{calls++;return {};}}});
+ let calls=0;const route=load('app/api/renewal-reminders/route.ts',{'../../../lib/member-announcements':{runAnnouncements:async()=>({})},'../../../lib/renewal-reminders':{runReminders:async()=>{calls++;return {};}},'../../../lib/reminder-campaigns':{runCampaigns:async()=>{calls++;return {};}}});
  assert.equal((await route.GET(new Request('https://example.com'))).status,401);assert.equal(calls,0);
  console.log('PASS: ad hoc preview/confirmation, authorization, eligibility, null identity, cancellation, shared 20/day cap, concurrent workers, second-day continuation, send-time rechecks, fixed year and uncertain delivery. Mock database and mail only.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

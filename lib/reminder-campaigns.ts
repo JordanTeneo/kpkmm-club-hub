@@ -21,7 +21,7 @@ export async function campaignsReady(){
 export function campaignCandidates(rows:any[],pending:any[],prefs:any[],history:any[],year:number,day:string,months:number):CampaignRecipient[]{
  return [...new Set<string>(rows.map(r=>String(r.member_number)))].sort().flatMap(number=>{
   const pref=prefs.find(p=>p.member_number===number),last=history.find(h=>h.member_number===number);
-  if(pref?.opt_out||pref?.undeliverable||last?.uncertain||last?.last_day&&!monthDue(last.last_day,day,months))return [];
+  if(pref?.opt_out||pref?.undeliverable||last?.uncertain||last?.today||last?.last_day&&!monthDue(last.last_day,day,months))return [];
   const member=eligible(rows,number,year,pending);
   return member?[{number,name:member.name,email:member.email}]:[];
  });
@@ -31,7 +31,7 @@ async function candidates(sql:ReturnType<typeof db>,year:number,day:string,month
   sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster ORDER BY membership_year DESC`,
   sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${year}`,
   sql`SELECT * FROM club_reminder_preferences`,
-  sql`SELECT member_number,max(attempt_day)::text AS last_day,bool_or(status IN ('sending','unknown')) AS uncertain FROM club_reminder_mail GROUP BY member_number`
+  sql`SELECT member_number,max(attempt_day) FILTER(WHERE category='renewal')::text AS last_day,bool_or(status IN ('sending','unknown')) AS uncertain,bool_or(attempt_day=${day}::date) AS today FROM club_reminder_mail GROUP BY member_number`
  ]);
  return campaignCandidates(rows,pending,prefs,history,year,day,months);
 }

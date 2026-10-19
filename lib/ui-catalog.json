@@ -1,4 +1,6 @@
 {
+  "Member announcements": ["Member announcements", "Pengumuman ahli"],
+  "Send club updates and review announcement delivery": ["Send club updates and review announcement delivery", "Hantar kemas kini kelab dan semak penghantaran pengumuman"],
   "Enter a whole-number discount from 0 to 99%. / Masukkan diskaun nombor bulat dari 0 hingga 99%.": ["Enter a whole-number discount from 0 to 99%.", "Masukkan diskaun nombor bulat dari 0 hingga 99%."],
   "The discounted price must be at least RM 0.01. / Harga selepas diskaun mestilah sekurang-kurangnya RM 0.01.": ["The discounted price must be at least RM 0.01.", "Harga selepas diskaun mestilah sekurang-kurangnya RM 0.01."],
   "Enter a delivery fee from RM 0 to RM 10,000. / Masukkan caj penghantaran antara RM 0 hingga RM 10,000.": ["Enter a delivery fee from RM 0 to RM 10,000.", "Masukkan caj penghantaran antara RM 0 hingga RM 10,000."],
