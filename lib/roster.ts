@@ -71,12 +71,15 @@ export async function lookupName(name:string,year:number):Promise<{status:'activ
  const people=new Map<string,boolean>();
  for(const r of roster){const details=r.payload?JSON.parse(openRenewal(r.payload)):{};const lifetime=Number.isInteger(details.lifetimeSince)&&details.lifetimeSince<=year;people.set('member:'+r.member_number,(people.get('member:'+r.member_number)||false)||lifetime||(r.active&&r.membership_year===year));}
  const expected=normalizeName(name);
- for(const row of [...apps.map(r=>({details:unseal(r.payload),active:r.status==='approved'&&r.membership_year===year})),...renewals.map(r=>({details:JSON.parse(openRenewal(r.payload)),active:r.review_status==='approved'&&r.renewal_year===year}))]){
+ for(const row of [...apps.map(r=>({details:unseal(r.payload),renewal:false,active:r.status==='approved'&&r.membership_year===year})),...renewals.map(r=>({details:JSON.parse(openRenewal(r.payload)),renewal:true,active:r.review_status==='approved'&&r.renewal_year===year}))]){
   if(normalizeName(row.details.name)!==expected)continue;
-  const hash=renewalHash(row.details.identityType+':'+row.details.country.toLowerCase()+':'+row.details.identity);
-  const matches=roster.filter(r=>r.identity_hash===hash);
+  // Renewals carry a server-assigned permanent member link, including when an
+  // admin renews a record without MyKad/passport. Do not count it as a new person.
+  const linkedNumber=row.renewal&&typeof row.details.rosterMemberNumber==='string'&&/^[A-Za-z0-9-]{1,30}$/.test(row.details.rosterMemberNumber)?row.details.rosterMemberNumber:null;
+  const hash=linkedNumber?null:renewalHash(row.details.identityType+':'+row.details.country.toLowerCase()+':'+row.details.identity);
+  const matches=roster.filter(r=>linkedNumber?r.member_number===linkedNumber:r.identity_hash===hash);
   if(matches.some(r=>r.membership_year===year&&r.status_override))continue;
-  const key=matches.length?'member:'+matches[0].member_number:'identity:'+hash;
+  const key=linkedNumber?'member:'+linkedNumber:matches.length?'member:'+matches[0].member_number:'identity:'+hash;
   people.set(key,(people.get(key)||false)||row.active);
  }
  const lifetime=people.size===1&&roster.some(r=>{const m=r.payload?JSON.parse(openRenewal(r.payload)):{};return Number.isInteger(m.lifetimeSince)&&m.lifetimeSince<=year;});

@@ -19,17 +19,17 @@ export async function remindersReady(){
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_preferences(member_number text PRIMARY KEY,opt_out boolean NOT NULL DEFAULT false,undeliverable boolean NOT NULL DEFAULT false,token text UNIQUE NOT NULL)`;
  await db()`CREATE TABLE IF NOT EXISTS club_reminder_mail(id uuid PRIMARY KEY,member_number text NOT NULL,target_year integer NOT NULL,attempt_day date NOT NULL,status text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(member_number,attempt_day))`;
 }
-function eligible(rows:any[],number:string,target:number,pending:any[]){
+export function eligible(rows:any[],number:string,target:number,pending:any[]){
  const person=rows.find(r=>r.member_number===number);if(!person)return null;
  const member=JSON.parse(openRenewal(person.payload));
  if(member.deceased||member.lifetimeSince<=target||!member.email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.email))return null;
  if(rows.some(r=>r.member_number===number&&r.membership_year===target&&r.active))return null;
  if(!rows.some(r=>r.member_number===number&&r.membership_year===target-1&&r.active))return null;
- if(pending.some(r=>r.renewal_year===target&&(r.identity_hash===person.identity_hash||JSON.parse(openRenewal(r.payload)).rosterMemberNumber===number)))return null;
+ if(pending.some(r=>r.renewal_year===target&&((person.identity_hash&&r.identity_hash===person.identity_hash)||JSON.parse(openRenewal(r.payload)).rosterMemberNumber===number)))return null;
  return member;
 }
-export async function runReminders(now=new Date()){
- await remindersReady();const day=malaysiaDay(now),target=reminderYear(day),deadline=Date.now()+240000;let attempted=0;
+export async function runReminders(now=new Date(),deadline=Date.now()+240000){
+ await remindersReady();const day=malaysiaDay(now),target=reminderYear(day);let attempted=0;
  // Claim one message at a time under a global database lock. A sending/unknown
  // attempt consumes the daily allowance even if Gmail never confirms delivery.
  for(let slot=0;slot<20&&Date.now()<deadline;slot++){

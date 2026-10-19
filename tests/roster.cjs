@@ -33,5 +33,25 @@ assert.throws(()=>m.validateRoster({...input,members:[{...person,active:'yes'}]}
  roster[0].payload=JSON.stringify({...person,deceased:true});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');
  roster.push({...roster[0],member_number:'B-09-002'});assert.equal((await m.lookupMyKadRoster(key,2026)).status,'ambiguous');
  roster=[];assert.equal(await m.lookupMyKadRoster(key,2026),null);await assert.rejects(()=>m.lookupMyKadRoster('bad',2026));
- console.log('PASS: roster/name validation plus MyKad imported active, inactive override, historical fallback, lifetime, deceased, duplicate and unknown lookups.');
+ // Admin renewal without identification must merge by its permanent member link.
+ const linked={...person,identityType:'mykad',country:'Malaysia',rosterMemberNumber:person.memberNumber};
+ roster=[{member_number:person.memberNumber,identity_hash:null,membership_year:2026,active:true,payload:JSON.stringify(person)}];
+ renewals=[{payload:JSON.stringify(linked),review_status:'approved',renewal_year:2026}];
+ assert.equal((await m.lookupName(person.name,2026)).status,'active');
+ assert.deepEqual(Object.keys(await m.lookupName(person.name,2026)).sort(),['status','year']);
+ roster[0].active=false;roster[0].status_override=true;
+ assert.equal((await m.lookupName(person.name,2026)).status,'inactive','manual override remains authoritative');
+ roster[0].status_override=false;renewals[0].renewal_year=2027;
+ assert.equal((await m.lookupName(person.name,2026)).status,'inactive','future payment must not activate current year');
+ renewals[0].renewal_year=2026;renewals[0].review_status='pending';
+ assert.equal((await m.lookupName(person.name,2026)).status,'inactive','pending is not approval');
+ renewals[0].review_status='approved';
+ assert.equal((await m.lookupName(person.name,2026)).status,'active');
+ renewals[0].payload=JSON.stringify({...linked,identity:'900101101234'});
+ assert.equal((await m.lookupName(person.name,2026)).status,'active','member link survives identification edits');
+ roster.push({...roster[0],member_number:'B-09-002'});
+ assert.equal((await m.lookupName(person.name,2026)).status,'ambiguous','genuine same-name members remain private');
+ roster.pop();roster[0].payload=JSON.stringify({...person,deceased:true});
+ assert.equal((await m.lookupName(person.name,2026)).status,'ambiguous','deceased privacy retained');
+ console.log('PASS: roster/name/MyKad lookups and linked admin renewal without ID; overrides, pending/future renewals, duplicate names and deceased privacy retained.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
