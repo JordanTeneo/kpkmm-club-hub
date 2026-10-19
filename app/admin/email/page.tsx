@@ -4,7 +4,8 @@ import {getLanguage as getUiLanguage} from '../../language';
 import {randomBytes} from 'node:crypto';
 import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
-import {isAdmin,digest} from '../../../lib/shop';
+import {isAdmin} from '../../../lib/shop';
+import {gmailSessionBinding} from '../../../lib/gmail-session';
 import {CLUB_EMAIL,CALLBACK,SEND_SCOPE,googleConfig,connection} from '../../../lib/gmail';
 import '../../shop/shop.css';
 
@@ -12,10 +13,10 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Club email connection | KPKMM',robots:{index:false,follow:false}};
 async function connect(){
  'use server';
- if(!(await isAdmin('membership')))redirect('/admin');
+ const session=await gmailSessionBinding();
+ if(!session)redirect('/admin/email?result=expired');
  let id;try{id=googleConfig().id;}catch{redirect('/admin/email?result=settings');}
  const jar=await cookies(),state=randomBytes(32).toString('hex');
- const session=digest(jar.get('kpkmm-admin')!.value);
  jar.set('kpkmm-gmail-state',state+'.'+session,{httpOnly:true,secure:true,sameSite:'lax',path:'/api/gmail/callback',maxAge:600});
  const query=new URLSearchParams({client_id:id,redirect_uri:CALLBACK,response_type:'code',scope:'openid email '+SEND_SCOPE,access_type:'offline',prompt:'consent',login_hint:CLUB_EMAIL,state});
  redirect('https://accounts.google.com/o/oauth2/v2/auth?'+query);

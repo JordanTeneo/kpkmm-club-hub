@@ -1,7 +1,8 @@
 import {timingSafeEqual} from 'node:crypto';
 import {cookies} from 'next/headers';
 import {NextResponse} from 'next/server';
-import {db,isAdmin,digest} from '../../../../lib/shop';
+import {db} from '../../../../lib/shop';
+import {gmailSessionBinding} from '../../../../lib/gmail-session';
 import {CLUB_EMAIL,SITE_ORIGIN,CALLBACK,SEND_SCOPE,tokenRequest,gmailReady,encryptToken} from '../../../../lib/gmail';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -9,10 +10,11 @@ function finish(result:string){const response=NextResponse.redirect(SITE_ORIGIN+
 export async function GET(request:Request){
  const jar=await cookies(),saved=jar.get('kpkmm-gmail-state')?.value;
  jar.set('kpkmm-gmail-state','',{httpOnly:true,secure:true,sameSite:'lax',path:'/api/gmail/callback',maxAge:0});
- if(!(await isAdmin('membership'))||!saved)return finish('expired');
+ const currentSession=await gmailSessionBinding();
+ if(!currentSession||!saved)return finish('expired');
  const query=new URL(request.url).searchParams,state=query.get('state')||'';
  const [expected,session]=saved.split('.');
- if(!/^[a-f0-9]{64}$/.test(state)||!expected||state.length!==expected.length||!timingSafeEqual(Buffer.from(state),Buffer.from(expected))||session!==digest(jar.get('kpkmm-admin')!.value))return finish('expired');
+ if(!/^[a-f0-9]{64}$/.test(state)||!expected||state.length!==expected.length||!timingSafeEqual(Buffer.from(state),Buffer.from(expected))||session!==currentSession)return finish('expired');
  if(query.has('error'))return finish('denied');
  const code=query.get('code');if(!code||code.length>4096)return finish('failed');
  let stage='token-exchange';
