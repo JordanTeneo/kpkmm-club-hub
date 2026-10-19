@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
 const instant='2026-10-19T04:00:00Z';
 class Clock extends Date{constructor(...args){super(...(args.length?args:[instant]));}static now(){return Date.parse(instant);}}
-function load(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),Date:Clock,Intl,FormData,process:{env:{CRON_SECRET:'test-only-not-a-real-secret-value-123'}},Response,Buffer});return exports;}
+function load(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),Date:Clock,Intl,FormData,Blob,process:{env:{CRON_SECRET:'test-only-not-a-real-secret-value-123'}},Response,Buffer});return exports;}
 const settings=load('lib/reminder-settings.ts');
 const reminders=load('lib/renewal-reminders.ts',{'./shop':{},'./roster':{},'./renewals':{openRenewal:x=>x},'./enrolment':{},'./reminder-settings':settings});
 const row=(number,year=2025,extra={})=>({member_number:number,membership_year:year,active:true,identity_hash:null,payload:JSON.stringify({name:'Test '+number,email:number+'@example.com',...extra})});
@@ -13,6 +13,8 @@ function fixture(size=1){
   if(q.startsWith('SELECT status,attempt_day'))return state.mail.filter(m=>m.member_number===v[0]);
   if(q.startsWith('SELECT member_number FROM club_reminder_preferences'))return [];
   if(q.startsWith('SELECT config'))return [{config:{dailyLimit:state.dailyLimit,intervalMonths:1}}];
+  if(q.startsWith('SELECT payload,target_year FROM club_announcement_campaigns'))return state.campaigns.filter(c=>c.id===v[0]);
+  if(q.startsWith('SELECT id FROM club_reminder_mail'))return state.mail.filter(m=>m.member_number===v[0]&&m.attempt_day===v[1]);
   if(q.startsWith('SELECT count'))return [{count:state.mail.filter(m=>m.attempt_day===v[0]).length}];
   if(q.startsWith('SELECT member_number,membership_year'))return state.rows.filter(r=>!q.includes('WHERE')||r.member_number===v[0]).sort((a,b)=>b.membership_year-a.membership_year);
   if(q.startsWith('SELECT identity_hash'))return state.pending.filter(r=>r.renewal_year===v[0]);
@@ -46,7 +48,7 @@ function fixture(size=1){
  };
  // Serialize transactions as the production advisory lock does; external sends mocked.
  let serial=Promise.resolve();sql.begin=fn=>{const result=serial.then(()=>fn(sql));serial=result.catch(()=>{});return result;};
- const lib=load('lib/member-announcements.ts',{'./shop':{db:()=>sql,isAdmin:async()=>state.admin,uuid:x=>/^[a-f0-9-]{36}$/.test(x)},'./membership-payments':{paymentActor:async()=>'test-admin'},'./renewals':{sealRenewal:x=>'sealed:'+x,openRenewal:x=>x.startsWith('sealed:')?x.slice(7):x,sendClubMessage:async raw=>{state.sent.push(raw);if(state.outcome==='throw')throw Error('uncertain');return {state:state.outcome};}},'./enrolment':{enrolmentMessage:(to,subject,body)=>({to,subject,body})},'./renewal-reminders':{...reminders,remindersReady:async()=>{}},'./reminder-settings':settings});
+ const lib=load('lib/member-announcements.ts',{'./announcement-email':{ecardMessage:(to,subject,body,card)=>({to,subject,body,card})},'./shop':{readImage:async file=>{if(file.size>700*1024||file.type!=='image/png')throw Error('Invalid image');return {type:file.type,bytes:Buffer.from(await file.arrayBuffer())};},db:()=>sql,isAdmin:async()=>state.admin,uuid:x=>/^[a-f0-9-]{36}$/.test(x)},'./membership-payments':{paymentActor:async()=>'test-admin'},'./renewals':{sealRenewal:x=>'sealed:'+x,openRenewal:x=>x.startsWith('sealed:')?x.slice(7):x,sendClubMessage:async raw=>{state.sent.push(raw);if(state.outcome==='throw')throw Error('uncertain');return {state:state.outcome};}},'./enrolment':{enrolmentMessage:(to,subject,body)=>({to,subject,body})},'./renewal-reminders':{...reminders,remindersReady:async()=>{}},'./reminder-settings':settings});
  const form=()=>{const f=new FormData();for(const [k,v] of Object.entries({audience:'all',year:'2026',subject:'Renew {year}',message:'Dear {name}, renew for {year}.'}))f.set(k,v);return f;};
  return {state,lib,form,queue:async()=>{const id=await lib.draftAnnouncement(form());await lib.confirmAnnouncement(id,true);return id;}};
 }
@@ -71,5 +73,8 @@ function fixture(size=1){
  for(const change of ['email','deceased','optout','cancel']){f=fixture();await f.queue();f.state.beforeSend=s=>{if(change==='email')s.rows[0].payload=JSON.stringify({name:'Test',email:'changed@example.com'});if(change==='deceased')s.rows[0].payload=JSON.stringify({name:'Test',email:'B-000@example.com',deceased:true});if(change==='optout')s.prefs[0].opt_out=true;if(change==='cancel')s.campaigns[0].status='cancelled';};await f.lib.runAnnouncements();assert.equal(f.state.sent.length,0,change);assert.equal(f.state.mail[0].status,'skipped');}
  f=fixture();await f.queue();f.state.outcome='throw';await f.lib.runAnnouncements();await f.lib.runAnnouncements(new Date('2026-10-20'));assert.equal(f.state.sent.length,1);assert.equal(f.state.mail[0].status,'unknown');
  const form=f.form();form.set('audience','invalid');await assert.rejects(f.lib.draftAnnouncement(form));form.set('audience','all');form.set('subject','bad\nheader');await assert.rejects(f.lib.draftAnnouncement(form));
+ f=fixture();let cardForm=f.form();cardForm.set('ecard',new Blob([Buffer.from([137,80,78,71,13,10,26,10])],{type:'image/png'}),'card.png');cardForm.set('message','');id=await f.lib.draftAnnouncement(cardForm);assert.ok(JSON.parse(f.state.campaigns[0].payload.slice(7)).card);assert.equal(f.state.sent.length,0);
+ assert.equal(await f.lib.testAnnouncement(id,'test@example.com'),'accepted');assert.equal(f.state.sent.length,1);assert.ok(f.state.sent[0].card);assert.equal(f.state.campaigns[0].status,'draft');await assert.rejects(f.lib.testAnnouncement(id,'test@example.com'));f.state.admin=false;await assert.rejects(f.lib.testAnnouncement(id,'other@example.com'));f.state.admin=true;f.state.dailyLimit=1;await assert.rejects(f.lib.testAnnouncement(id,'other@example.com'));
+ f=fixture();cardForm=f.form();cardForm.set('ecard',new Blob(['bad'],{type:'text/html'}),'card.png');await assert.rejects(f.lib.draftAnnouncement(cardForm));assert.equal(f.state.campaigns.length,0);
  console.log('PASS: announcements audience, deduplication, encrypted drafts, confirmation, auth, cancel, concurrent daily cap, shared allowance, next-day continuation, send-time checks, uncertainty and separate unsubscribe. No real email sent.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

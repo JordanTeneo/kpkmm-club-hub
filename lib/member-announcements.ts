@@ -1,10 +1,12 @@
-import {randomUUID,randomBytes} from 'node:crypto';
-import {db,isAdmin,uuid} from './shop';
+import {randomUUID,randomBytes,createHash} from 'node:crypto';
+import {db,isAdmin,uuid,readImage} from './shop';
 import {paymentActor} from './membership-payments';
 import {sealRenewal,openRenewal,sendClubMessage} from './renewals';
 import {enrolmentMessage} from './enrolment';
 import {remindersReady,malaysiaDay} from './renewal-reminders';
 import {reminderConfig,reminderText,validateReminderSettings} from './reminder-settings';
+
+import {ecardMessage,type ECard} from './announcement-email';
 
 export type AnnouncementRecipient={number:string;name:string;email:string};
 export function campaignYear(value:unknown,now=new Date()){
@@ -41,13 +43,16 @@ export async function draftAnnouncement(form:FormData){
  if(!await isAdmin('membership'))throw Error('Unauthorised');
  const year=campaignYear(form.get('year')),day=malaysiaDay(),audience=String(form.get('audience')||'');
  if(!['all','active'].includes(audience))throw Error('Choose audience');
- const validation=new FormData();for(const [key,value] of Object.entries({startDate:day,dailyLimit:'20',intervalMonths:'1',subject:String(form.get('subject')||''),message:String(form.get('message')||'')}))validation.set(key,value);
+ const upload=form.get('ecard');let card:ECard|undefined;
+ if(upload&&typeof upload!=='string'&&upload.size){const image=await readImage(upload);card={type:image.type,data:image.bytes.toString('base64')};}
+ const supplied=String(form.get('message')||'').trim();
+ const validation=new FormData();for(const [key,value] of Object.entries({startDate:day,dailyLimit:'20',intervalMonths:'1',subject:String(form.get('subject')||''),message:supplied||(card?'Greetings from KPKMM.':'')}))validation.set(key,value);
  const {subject,message}=validateReminderSettings(validation).config;
  await announcementsReady();const actor=await paymentActor();
  return db().begin(async sql=>{
   const recipients=await candidates(sql as unknown as ReturnType<typeof db>,year,audience);
   const id=randomUUID();
-  await sql`INSERT INTO club_announcement_campaigns(id,target_year,status,payload,actor) VALUES(${id},${year},'draft',${sealRenewal(JSON.stringify({subject,message,audience}))},${sealRenewal(actor)})`;
+  await sql`INSERT INTO club_announcement_campaigns(id,target_year,status,payload,actor) VALUES(${id},${year},'draft',${sealRenewal(JSON.stringify({subject,message,audience,...(card?{card}:{})}))},${sealRenewal(actor)})`;
   for(const person of recipients)await sql`INSERT INTO club_announcement_campaign_recipients(campaign_id,member_number,payload) VALUES(${id},${person.number},${sealRenewal(JSON.stringify(person))})`;
   return id;
  });
@@ -109,7 +114,7 @@ export async function runAnnouncements(now=new Date(),deadline=Date.now()+240000
       const id=randomUUID();
       await sql`INSERT INTO club_reminder_mail(id,member_number,target_year,attempt_day,status,category) VALUES(${id},${member.number},${campaign.target_year},${day}::date,'sending','announcement')`;
       await sql`UPDATE club_announcement_campaign_recipients SET status='sending',attempt_id=${id} WHERE campaign_id=${campaign.id} AND member_number=${member.number}`;
-      return {id,campaign:campaign.id,year:campaign.target_year,member,token,content:JSON.parse(openRenewal(campaign.payload)) as {subject:string;message:string;audience:string}};
+      return {id,campaign:campaign.id,year:campaign.target_year,member,token,content:JSON.parse(openRenewal(campaign.payload)) as {subject:string;message:string;audience:string;card?:ECard}};
      }
     }
     await sql`UPDATE club_announcement_campaigns SET status='completed' WHERE id=${campaign.id} AND NOT EXISTS(SELECT 1 FROM club_announcement_campaign_recipients WHERE campaign_id=${campaign.id} AND status IN ('pending','sending'))`;
@@ -125,7 +130,8 @@ export async function runAnnouncements(now=new Date(),deadline=Date.now()+240000
    const prefs=await sql`SELECT opt_out,undeliverable FROM club_announcement_preferences WHERE member_number=${claim.member.number} FOR UPDATE`;
    const member=members.find(m=>m.number===claim.member.number);
    if(campaign[0]?.status!=='queued'||!member||member.email!==claim.member.email||prefs[0]?.opt_out||prefs[0]?.undeliverable)return 'skipped';
-   return (await sendClubMessage(enrolmentMessage(member.email,reminderText(claim.content.subject,member.name,claim.year).replace(/[\r\n]/g,' '),announcementBody(claim.content.message,member.name,claim.year,claim.token)))).state;
+   const subject=reminderText(claim.content.subject,member.name,claim.year).replace(/[\r\n]/g,' '),body=announcementBody(claim.content.message,member.name,claim.year,claim.token);
+   return (await sendClubMessage(claim.content.card?ecardMessage(member.email,subject,body,claim.content.card):enrolmentMessage(member.email,subject,body))).state;
   });}catch{}
   await db().begin(async sql=>{
    await sql`UPDATE club_reminder_mail SET status=${status} WHERE id=${claim.id}`;
@@ -135,3 +141,28 @@ export async function runAnnouncements(now=new Date(),deadline=Date.now()+240000
  }
  return {attempted,day};
 }
+
+// Explicit admin-only test; consumes the same daily allowance and never queues members.
+export async function testAnnouncement(id:string,email:string){
+ if(!await isAdmin('membership')||!uuid(id))throw Error('Unauthorised');
+ email=email.trim().toLowerCase();enrolmentMessage(email,'Test','Test');
+ await announcementsReady();
+ const day=malaysiaDay(),key='announcement-test:'+createHash('sha256').update(email).digest('hex');
+ const claim=await db().begin(async sql=>{
+  await sql`SELECT pg_advisory_xact_lock(hashtext('kpkmm-reminder-daily'))`;
+  const rows=await sql`SELECT payload,target_year FROM club_announcement_campaigns WHERE id=${id}`;
+  if(!rows.length)throw Error('Missing preview');
+  const config=await sql`SELECT config FROM club_reminder_settings WHERE id=1`;
+  const count=await sql`SELECT count(*)::integer AS count FROM club_reminder_mail WHERE attempt_day=${day}::date`;
+  const prior=await sql`SELECT id FROM club_reminder_mail WHERE member_number=${key} AND attempt_day=${day}::date`;
+  if(count[0].count>=reminderConfig(config[0].config).dailyLimit||prior.length)throw Error('Daily test limit');
+  const content=JSON.parse(openRenewal(rows[0].payload)),subject='[TEST] '+reminderText(content.subject,'Test recipient',rows[0].target_year),body=reminderText(content.message,'Test recipient',rows[0].target_year)+'\n\nKPKMM test preview — no member mailing was started.';
+  const raw=content.card?ecardMessage(email,subject,body,content.card):enrolmentMessage(email,subject,body),attempt=randomUUID();
+  await sql`INSERT INTO club_reminder_mail(id,member_number,target_year,attempt_day,status,category) VALUES(${attempt},${key},${rows[0].target_year},${day}::date,'sending','announcement_test')`;
+  return {attempt,raw};
+ });
+ let state='unknown';try{state=(await sendClubMessage(claim.raw)).state;}catch{}
+ await db()`UPDATE club_reminder_mail SET status=${state} WHERE id=${claim.attempt}`;
+ return state;
+}
+
