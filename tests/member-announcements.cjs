@@ -14,7 +14,7 @@ function fixture(size=1){
   if(q.startsWith('SELECT member_number FROM club_reminder_preferences'))return [];
   if(q.startsWith('SELECT config'))return [{config:{dailyLimit:state.dailyLimit,intervalMonths:1}}];
   if(q.startsWith('SELECT payload,target_year FROM club_announcement_campaigns'))return state.campaigns.filter(c=>c.id===v[0]);
-  if(q.startsWith('SELECT id FROM club_reminder_mail'))return state.mail.filter(m=>m.member_number===v[0]&&m.attempt_day===v[1]);
+  if(q.startsWith('SELECT id,status FROM club_reminder_mail'))return state.mail.filter(m=>(m.member_number===v[0]||m.member_number.startsWith(v[0]+':'))&&m.attempt_day===v[2]);
   if(q.startsWith('SELECT count'))return [{count:state.mail.filter(m=>m.attempt_day===v[0]).length}];
   if(q.startsWith('SELECT member_number,membership_year'))return state.rows.filter(r=>!q.includes('WHERE')||r.member_number===v[0]).sort((a,b)=>b.membership_year-a.membership_year);
   if(q.startsWith('SELECT identity_hash'))return state.pending.filter(r=>r.renewal_year===v[0]);
@@ -75,6 +75,11 @@ function fixture(size=1){
  const form=f.form();form.set('audience','invalid');await assert.rejects(f.lib.draftAnnouncement(form));form.set('audience','all');form.set('subject','bad\nheader');await assert.rejects(f.lib.draftAnnouncement(form));
  f=fixture();let cardForm=f.form();cardForm.set('ecard',new Blob([Buffer.from([137,80,78,71,13,10,26,10])],{type:'image/png'}),'card.png');cardForm.set('message','');id=await f.lib.draftAnnouncement(cardForm);assert.ok(JSON.parse(f.state.campaigns[0].payload.slice(7)).card);assert.equal(f.state.sent.length,0);
  assert.equal(await f.lib.testAnnouncement(id,'test@example.com'),'accepted');assert.equal(f.state.sent.length,1);assert.ok(f.state.sent[0].card);assert.equal(f.state.campaigns[0].status,'draft');await assert.rejects(f.lib.testAnnouncement(id,'test@example.com'));f.state.admin=false;await assert.rejects(f.lib.testAnnouncement(id,'other@example.com'));f.state.admin=true;f.state.dailyLimit=1;await assert.rejects(f.lib.testAnnouncement(id,'other@example.com'));
+ f=fixture();id=await f.lib.draftAnnouncement(f.form());f.state.outcome='failed';assert.equal(await f.lib.testAnnouncement(id,'test@example.com'),'failed');
+ const failedId=f.state.mail[0].id;f.state.outcome='accepted';await f.lib.testAnnouncement(id,'TEST@example.com');assert.equal(f.state.mail.length,2);assert.equal(f.state.mail[0].id,failedId);assert.equal(f.state.mail[0].status,'failed');await assert.rejects(f.lib.testAnnouncement(id,'test@example.com'));
+ for(const outcome of ['unknown','throw']){f=fixture();id=await f.lib.draftAnnouncement(f.form());f.state.outcome=outcome;await f.lib.testAnnouncement(id,'test@example.com');await assert.rejects(f.lib.testAnnouncement(id,'test@example.com'));assert.equal(f.state.sent.length,1);}
+ f=fixture();id=await f.lib.draftAnnouncement(f.form());f.state.outcome='failed';await f.lib.testAnnouncement(id,'test@example.com');f.state.dailyLimit=1;await assert.rejects(f.lib.testAnnouncement(id,'test@example.com'));assert.equal(f.state.mail.length,1);
+ f=fixture();id=await f.lib.draftAnnouncement(f.form());f.state.outcome='failed';await f.lib.testAnnouncement(id,'test@example.com');f.state.outcome='accepted';const retries=await Promise.allSettled([f.lib.testAnnouncement(id,'test@example.com'),f.lib.testAnnouncement(id,'test@example.com')]);assert.equal(retries.filter(r=>r.status==='fulfilled').length,1);assert.equal(f.state.sent.length,2);
  f=fixture();cardForm=f.form();cardForm.set('ecard',new Blob(['bad'],{type:'text/html'}),'card.png');await assert.rejects(f.lib.draftAnnouncement(cardForm));assert.equal(f.state.campaigns.length,0);
  console.log('PASS: announcements audience, deduplication, encrypted drafts, confirmation, auth, cancel, concurrent daily cap, shared allowance, next-day continuation, send-time checks, uncertainty and separate unsubscribe. No real email sent.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

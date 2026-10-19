@@ -154,11 +154,14 @@ export async function testAnnouncement(id:string,email:string){
   if(!rows.length)throw Error('Missing preview');
   const config=await sql`SELECT config FROM club_reminder_settings WHERE id=1`;
   const count=await sql`SELECT count(*)::integer AS count FROM club_reminder_mail WHERE attempt_day=${day}::date`;
-  const prior=await sql`SELECT id FROM club_reminder_mail WHERE member_number=${key} AND attempt_day=${day}::date`;
-  if(count[0].count>=reminderConfig(config[0].config).dailyLimit||prior.length)throw Error('Daily test limit');
+  // Include legacy claims and retry claims; never retry an accepted or ambiguous send.
+  const prior=await sql`SELECT id,status FROM club_reminder_mail WHERE (member_number=${key} OR member_number LIKE ${key+':%'}) AND attempt_day=${day}::date`;
+  if(count[0].count>=reminderConfig(config[0].config).dailyLimit||prior.some(p=>p.status!=='failed'))throw Error('Daily test limit');
   const content=JSON.parse(openRenewal(rows[0].payload)),subject='[TEST] '+reminderText(content.subject,'Test recipient',rows[0].target_year),body=reminderText(content.message,'Test recipient',rows[0].target_year)+'\n\nKPKMM test preview — no member mailing was started.';
   const raw=content.card?ecardMessage(email,subject,body,content.card):enrolmentMessage(email,subject,body),attempt=randomUUID();
-  await sql`INSERT INTO club_reminder_mail(id,member_number,target_year,attempt_day,status,category) VALUES(${attempt},${key},${rows[0].target_year},${day}::date,'sending','announcement_test')`;
+  // A separate claim preserves the failed record and counts every retry in the daily cap.
+  const attemptKey=prior.length?key+':'+attempt:key;
+  await sql`INSERT INTO club_reminder_mail(id,member_number,target_year,attempt_day,status,category) VALUES(${attempt},${attemptKey},${rows[0].target_year},${day}::date,'sending','announcement_test')`;
   return {attempt,raw};
  });
  let state='unknown';try{state=(await sendClubMessage(claim.raw)).state;}catch{}
