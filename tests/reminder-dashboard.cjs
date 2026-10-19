@@ -6,5 +6,5 @@ const catalog=JSON.parse(fs.readFileSync('lib/ui-catalog.json','utf8'));
 assert.deepEqual(catalog['Renewal reminders'],['Renewal reminders','Peringatan pembaharuan']);
 assert.ok(catalog['Pause or enable reminder emails and review sending history'][1]);
 const controls=fs.readFileSync('app/admin/reminders/page.tsx','utf8');
-assert.match(controls,/isAdmin\('membership'\)/);assert.match(controls,/Enable reminders/);assert.match(controls,/Pause reminders/);assert.match(controls,/Recent delivery attempts/);
+assert.match(controls,/isAdmin\('membership'\)/);assert.match(controls,/Turn on automatic reminders/);assert.match(controls,/Turn off automatic reminders/);assert.match(controls,/Sending history/);
 console.log('PASS: Reminder dashboard shortcut, translations and existing protected management controls.');
