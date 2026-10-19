@@ -11,7 +11,10 @@ const out={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/admin/re
  for(const s of ['One-time reminder','Automatic reminders','Sending history','Turn on automatic reminders','Shared by both reminder types','No sending attempts yet.'])assert.ok(copy.includes(s),s);
  assert.equal(all.filter(n=>n.type==='details').every(n=>!n.props.open),true);
  assert.ok(all.some(n=>n.type==='a'&&n.props.href==='/admin/reminders/campaigns'&&text(n)==='Create one-time reminder'));
- for(const name of ['startDate','dailyLimit','intervalMonths','subject','message'])assert.equal(all.filter(n=>n.props?.name===name).length,1,name);
+ for(const name of ['targetYear','startDate','dailyLimit','intervalMonths','subject','message'])assert.equal(all.filter(n=>n.props?.name===name).length,1,name);
+ assert.ok(all.some(n=>n.type==='select'&&n.props.name==='targetYear'&&n.props.defaultValue==='automatic'));
+ assert.ok(all.some(n=>n.type==='option'&&n.props.value===2026));
+ assert.ok(all.some(n=>n.type==='option'&&n.props.value===2027));
  assert.ok(copy.includes('start date applies only to automatic reminders'));
  assert.ok(copy.includes('does not cancel one-time campaigns'));
  tree=await render('invalid');assert.ok(nodes(tree).some(n=>n.type==='details'&&n.props.open));

@@ -6,6 +6,10 @@ import {enrolmentMessage} from './enrolment';
 import {reminderConfig,reminderText} from './reminder-settings';
 export function malaysiaDay(now=new Date()){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);}
 export function reminderYear(day:string){const [y,m,d]=day.split('-').map(Number);return m===12&&d>=15?y+1:y;}
+export function scheduledReminderYear(day:string,config:{targetYear?:number|null}){
+ const year=Number(day.slice(0,4)),target=config.targetYear;
+ return target==null?reminderYear(day):Number.isInteger(target)&&target>=year&&target<=year+1?target:null;
+}
 export function monthDue(last:string,day:string,months=1){
  const [y,m,d]=last.slice(0,10).split('-').map(Number),next=new Date(Date.UTC(y,m-1+months,1));
  const lastDay=new Date(Date.UTC(next.getUTCFullYear(),next.getUTCMonth()+1,0)).getUTCDate();
@@ -29,7 +33,7 @@ export function eligible(rows:any[],number:string,target:number,pending:any[]){
  return member;
 }
 export async function runReminders(now=new Date(),deadline=Date.now()+240000){
- await remindersReady();const day=malaysiaDay(now),target=reminderYear(day);let attempted=0;
+ await remindersReady();const day=malaysiaDay(now);let target:number|null=reminderYear(day),attempted=0;
  // Claim one message at a time under a global database lock. A sending/unknown
  // attempt consumes the daily allowance even if Gmail never confirms delivery.
  for(let slot=0;slot<20&&Date.now()<deadline;slot++){
@@ -37,6 +41,8 @@ export async function runReminders(now=new Date(),deadline=Date.now()+240000){
    await sql`SELECT pg_advisory_xact_lock(hashtext('kpkmm-reminder-daily'))`;
    const settings=await sql`SELECT paused,start_date::text,config FROM club_reminder_settings WHERE id=1 FOR SHARE`;
    const config=reminderConfig(settings[0].config);
+   target=scheduledReminderYear(day,config);
+   if(target===null)return null;
    if(settings[0].paused||day<settings[0].start_date)return null;
    const count=await sql`SELECT count(*)::integer AS count FROM club_reminder_mail WHERE attempt_day=${day}::date`;
    if(count[0].count>=config.dailyLimit)return null;
@@ -55,11 +61,12 @@ export async function runReminders(now=new Date(),deadline=Date.now()+240000){
     const token=pref?.token||randomBytes(32).toString('hex');
     await sql`INSERT INTO club_reminder_preferences(member_number,token) VALUES(${number},${token}) ON CONFLICT DO NOTHING`;
     const id=randomUUID();await sql`INSERT INTO club_reminder_mail(id,member_number,target_year,attempt_day,status) VALUES(${id},${number},${target},${day}::date,'sending')`;
-    return {id,number,member,token};
+    return {id,number,member,token,target};
    }
    return null;
   });
   if(!claim)break;
+  const sendYear=claim.target;
   let status='unknown';
   try{
    status=await db().begin(async sql=>{
@@ -67,11 +74,12 @@ export async function runReminders(now=new Date(),deadline=Date.now()+240000){
     const setting=await sql`SELECT paused,start_date::text,config FROM club_reminder_settings WHERE id=1 FOR SHARE`;
     const pref=await sql`SELECT opt_out,undeliverable FROM club_reminder_preferences WHERE member_number=${claim.number} FOR UPDATE`;
     const rows=await sql`SELECT member_number,membership_year,payload,identity_hash,active FROM club_member_roster WHERE member_number=${claim.number} ORDER BY membership_year DESC`;
-    const pending=await sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${target}`;
-    const member=eligible(rows,claim.number,target,pending);
+    const pending=await sql`SELECT identity_hash,payload,renewal_year FROM club_renewals WHERE review_status IN ('pending','approved') AND renewal_year=${sendYear}`;
+    const member=eligible(rows,claim.number,sendYear,pending);
     if(setting[0].paused||day<setting[0].start_date||pref[0]?.opt_out||pref[0]?.undeliverable||!member)return 'skipped';
     const config=reminderConfig(setting[0].config);
-    const raw=enrolmentMessage(member.email,reminderText(config.subject,member.name,target).replace(/[\r\n]/g,' '),`${reminderText(config.message,member.name,target)}\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
+    if(scheduledReminderYear(day,config)!==sendYear)return 'skipped';
+    const raw=enrolmentMessage(member.email,reminderText(config.subject,member.name,sendYear).replace(/[\r\n]/g,' '),`${reminderText(config.message,member.name,sendYear)}\n\nRenew / Perbaharui: https://kpkmm-club-hub.vercel.app/renew\n\nStop renewal reminders (membership is unaffected) / Hentikan peringatan (keahlian tidak terjejas):\nhttps://kpkmm-club-hub.vercel.app/reminder-preferences/${claim.token}`);
     return (await sendClubMessage(raw)).state;
    });
   }catch{}

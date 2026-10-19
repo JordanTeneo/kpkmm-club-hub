@@ -1,4 +1,5 @@
 export const defaultReminderSettings = {
+  targetYear: null as number|null,
   dailyLimit: 20,
   intervalMonths: 1,
   subject: 'KPKMM — membership renewal reminder',
@@ -7,19 +8,23 @@ export const defaultReminderSettings = {
 export function reminderConfig(value:unknown){
   const v=(value&&typeof value==='object'?value:{}) as Partial<typeof defaultReminderSettings>;
   return {...defaultReminderSettings,...v,
+    targetYear:Number.isInteger(v.targetYear)&&v.targetYear!>=2026&&v.targetYear!<=9999?v.targetYear!:null,
     dailyLimit:Number.isInteger(v.dailyLimit)&&v.dailyLimit!>=1&&v.dailyLimit!<=20?v.dailyLimit!:20,
     intervalMonths:Number.isInteger(v.intervalMonths)&&v.intervalMonths!>=1&&v.intervalMonths!<=12?v.intervalMonths!:1,
     subject:typeof v.subject==='string'&&v.subject.trim()?v.subject:defaultReminderSettings.subject,
     message:typeof v.message==='string'&&v.message.trim()?v.message.replace('The annual fee is RM150.','Please check the renewal page for the current fee and any discount before paying.'):defaultReminderSettings.message};
 }
-export function validateReminderSettings(form:FormData){
+export function validateReminderSettings(form:FormData,now=new Date()){
   const startDate=String(form.get('startDate')||''),dailyLimit=Number(form.get('dailyLimit')),intervalMonths=Number(form.get('intervalMonths'));
   const subject=String(form.get('subject')||'').trim(),message=String(form.get('message')||'').trim();
+  const yearValue=String(form.get('targetYear')||'automatic'),targetYear=yearValue==='automatic'?null:Number(yearValue);
+  const currentYear=Number(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric'}).format(now));
+  if(targetYear!==null&&(!/^\d{4}$/.test(yearValue)||!Number.isInteger(targetYear)||targetYear<currentYear||targetYear>currentYear+1))throw Error('year');
   if(!/^\d{4}-\d{2}-\d{2}$/.test(startDate)||!Number.isFinite(Date.parse(startDate))||new Date(startDate).toISOString().slice(0,10)!==startDate)throw Error('date');
   if(!Number.isInteger(dailyLimit)||dailyLimit<1||dailyLimit>20||!Number.isInteger(intervalMonths)||intervalMonths<1||intervalMonths>12)throw Error('limits');
   if(!subject||subject.length>150||/[\r\n]/.test(subject)||!message||message.length>5000)throw Error('message');
   if(/\{(?!name\}|year\})[^}]*\}/.test(subject+' '+message))throw Error('placeholder');
-  return {startDate,config:{dailyLimit,intervalMonths,subject,message}};
+  return {startDate,config:{targetYear,dailyLimit,intervalMonths,subject,message}};
 }
 export function reminderText(template:string,name:string,year:number){
   return template.replace(/\{(name|year)\}/g,(_,key)=>key==='name'?name:String(year));
