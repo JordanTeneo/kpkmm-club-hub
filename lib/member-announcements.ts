@@ -1,12 +1,12 @@
 import {randomUUID,randomBytes,createHash} from 'node:crypto';
-import {db,isAdmin,uuid,readImage} from './shop';
+import {db,isAdmin,uuid} from './shop';
 import {paymentActor} from './membership-payments';
 import {sealRenewal,openRenewal,sendClubMessage} from './renewals';
 import {enrolmentMessage} from './enrolment';
 import {remindersReady,malaysiaDay} from './renewal-reminders';
 import {reminderConfig,reminderText,validateReminderSettings} from './reminder-settings';
 
-import {ecardMessage,type ECard} from './announcement-email';
+import {ecardMessage,readECard,type ECard} from './announcement-email';
 
 export type AnnouncementRecipient={number:string;name:string;email:string};
 export function campaignYear(value:unknown,now=new Date()){
@@ -44,7 +44,7 @@ export async function draftAnnouncement(form:FormData){
  const year=campaignYear(form.get('year')),day=malaysiaDay(),audience=String(form.get('audience')||'');
  if(!['all','active'].includes(audience))throw Error('Choose audience');
  const upload=form.get('ecard');let card:ECard|undefined;
- if(upload&&typeof upload!=='string'&&upload.size){const image=await readImage(upload);card={type:image.type,data:image.bytes.toString('base64')};}
+ if(upload&&typeof upload!=='string'&&upload.size)card=await readECard(upload);
  const supplied=String(form.get('message')||'').trim();
  const validation=new FormData();for(const [key,value] of Object.entries({startDate:day,dailyLimit:'20',intervalMonths:'1',subject:String(form.get('subject')||''),message:supplied||(card?'Greetings from KPKMM.':'')}))validation.set(key,value);
  const {subject,message}=validateReminderSettings(validation).config;
