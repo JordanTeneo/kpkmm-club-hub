@@ -1,7 +1,7 @@
-export async function compressPoster(file:File):Promise<File>{
+export async function compressPoster(file:File,maxBytes=750*1024):Promise<File>{
  if(!/^image\/(jpeg|png|webp)$/.test(file.type)||!file.size)throw Error('file');
  if(file.size>40*1024*1024)throw Error('size');
- if(file.size<=750*1024)return file;
+ if(file.size<=maxBytes)return file;
  const bitmap=await createImageBitmap(file);
  try{
   const canvas=document.createElement('canvas'),context=canvas.getContext('2d');
@@ -13,7 +13,7 @@ export async function compressPoster(file:File):Promise<File>{
    context.drawImage(bitmap,0,0,canvas.width,canvas.height);
    for(const quality of [0.9,0.8,0.68,0.5]){
     const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
-    if(blob&&blob.size<=750*1024)return new File([blob],'notice-poster.jpg',{type:'image/jpeg'});
+    if(blob&&blob.size<=maxBytes)return new File([blob],'notice-poster.jpg',{type:'image/jpeg'});
    }
   }
   throw Error('compress');
