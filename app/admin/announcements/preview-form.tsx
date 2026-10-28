@@ -1,10 +1,9 @@
 'use client';
 import {useRef,useState,type ReactNode,type FormEvent} from 'react';
-import {useRouter} from 'next/navigation';
 import {prepareECard} from '../../../lib/prepare-ecard';
 
 export default function PreviewForm({children,bm,action}:{children:ReactNode;bm:boolean;action:(form:FormData)=>Promise<{id?:string;error?:string}>}){
- const router=useRouter(),locked=useRef(false),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+ const locked=useRef(false),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  const t=(en:string,ms:string)=>bm?ms:en;
  async function submit(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(locked.current)return;
@@ -14,7 +13,7 @@ export default function PreviewForm({children,bm,action}:{children:ReactNode;bm:
    if(file instanceof File&&file.size)form.set('ecard',await prepareECard(file));
    const result=await action(form);
    if(result.error||!result.id)throw Error(result.error||'preview');
-   router.push('/admin/announcements?id='+encodeURIComponent(result.id));router.refresh();
+   window.location.assign('/admin/announcements?id='+encodeURIComponent(result.id)+'#announcement-preview');
    setMessage(t('Preview saved. No emails have been sent.','Pratonton disimpan. Tiada e-mel dihantar.'));
   }catch(error){
    const code=error instanceof Error?error.message:'';
